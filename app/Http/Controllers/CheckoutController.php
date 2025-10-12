@@ -95,15 +95,32 @@ class CheckoutController extends Controller
             return back()->withErrors(['payment' => 'Payment gateway not configured. Set PAYSTACK_SECRET_KEY in your .env.']);
         }
 
-        $callback = route('paystack.callback');
+        // If the amount is zero (free), bypass gateway and mark as paid immediately
+        if ($amountKobo <= 0) {
+            $this->finalizeZeroCostOrder($order);
+            return redirect()->route('orders.public', $reference);
+        }
+
+        $callback = config('services.paystack.callback_url') ?: route('paystack.callback');
         $response = Http::withToken($secret)->post('https://api.paystack.co/transaction/initialize', [
             'email' => $order->buyer_email,
             'amount' => $amountKobo,
             'reference' => $reference,
             'callback_url' => $callback,
+            'currency' => 'NGN',
         ]);
 
         if (! $response->ok() || ! data_get($response->json(), 'status')) {
+            // Log full context so we can diagnose production failures
+            try {
+                \Log::error('paystack-init-failed', [
+                    'http_status' => $response->status(),
+                    'body' => $response->body(),
+                    'amount_kobo' => $amountKobo,
+                    'reference' => $reference,
+                    'email' => $order->buyer_email,
+                ]);
+            } catch (\Throwable $e) { /* ignore logging errors */ }
             $order->update(['status' => 'failed']);
             return back()->withErrors(['payment' => 'Unable to initialize payment. Please try again.']);
         }
@@ -187,6 +204,29 @@ class CheckoutController extends Controller
         }
 
         return true;
+    }
+
+    protected function finalizeZeroCostOrder(Order $order): void
+    {
+        try {
+            DB::transaction(function () use ($order) {
+                $event = $order->event()->lockForUpdate()->first();
+                if ($event && ! is_null($event->capacity)) {
+                    $needed = (int) $order->quantity;
+                    $current = (int) $event->capacity;
+                    if ($current < $needed) {
+                        throw new \RuntimeException('Sold out');
+                    }
+                    $event->update(['capacity' => $current - $needed]);
+                }
+                if ($order->coupon_code) {
+                    \App\Models\Coupon::where('code', $order->coupon_code)->increment('uses');
+                }
+                $order->update(['status' => 'paid']);
+            });
+        } catch (\Throwable $e) {
+            $order->update(['status' => 'failed']);
+        }
     }
 
     public function downloadPdf(string $reference)
