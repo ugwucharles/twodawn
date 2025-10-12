@@ -6,6 +6,7 @@
     <div class="mb-6 flex items-center justify-between print:hidden">
       <a href="{{ url('/') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-100 transition">Home</a>
       <div class="flex items-center gap-2">
+        <a href="{{ route('orders.pdf', $order->paystack_reference) }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white/10 ring-1 ring-white/15 text-white text-sm hover:bg-white/15 transition">Download PDF</a>
         <button type="button" onclick="downloadTicketsAsPng()" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-100 transition">Download PNG</button>
       </div>
     </div>
@@ -29,29 +30,27 @@
     <style>
       /* Mobile tuning for ticket size and typography */
       @media (max-width: 640px) {
-        .ticket { border-radius: 12px; max-width: 280px; margin-left:auto; margin-right:auto; }
-        /* Harmonize column widths for better flyer fit */
-        .ticket-table td:nth-child(1) { width: 59% !important; }
-        .ticket-table td:nth-child(2) { width: 28% !important; }
-        .ticket-table td:nth-child(3) { width: 13% !important; }
+        .ticket { border-radius: 12px; max-width: 320px; margin-left:auto; margin-right:auto; }
+        /* Column widths optimized for small screens */
+        .ticket-table td:nth-child(1) { width: 68% !important; }
+        .ticket-table td:nth-child(2) { width: 24% !important; }
+        .ticket-table td:nth-child(3) { width: 8% !important; }
         /* Reduce overall height */
-        .brand-panel, .qr-panel { height: 64pt; }
+        .brand-panel, .qr-panel { height: 80pt; }
         .flyer-img { height: 100% !important; width: 100% !important; object-fit: contain !important; }
         .brand-inner { padding: 2pt 5pt 0 8pt; }
-        .brand-name { font-size: 10pt; letter-spacing: .25pt; }
-        .amp-line { font-size: 6pt; padding-left: 8pt; letter-spacing: .4pt; }
+        .brand-name { font-size: 11pt; letter-spacing: .3pt; }
+        .amp-line { font-size: 7pt; padding-left: 8pt; letter-spacing: .4pt; }
         /* Center block narrower and slightly higher */
-        .invite-center { left: 14%; right: 14%; width: 72%; top: 51%; }
+        .invite-center { left: 12%; right: 12%; width: 76%; top: 50%; }
         /* Override inline font-sizes inside the invite center */
-        .invite-center div:nth-child(1) { font-size: 8pt !important; line-height: 1.1 !important; padding-left: 1pt !important; }
-        .invite-center div:nth-child(2) { font-size: 6pt !important; letter-spacing: .4pt !important; line-height: 1 !important; }
-        .invite-center div:nth-child(3) { font-size: 8pt !important; line-height: 1.1 !important; padding-right: 1pt !important; }
-        /* Flyer shows fully without cropping */
-        .flyer-img { object-fit: contain; }
-        /* QR adjustments */
-        .qr-mini { width: 24pt; height: 24pt; top: 3pt; right: 3pt; }
-        .qr-vert { right: 0; }
-        .qr-vert svg { height: 50pt !important; width: auto !important; }
+        .invite-center div:nth-child(1) { font-size: 9pt !important; line-height: 1.1 !important; padding-left: 1pt !important; }
+        .invite-center div:nth-child(2) { font-size: 6.5pt !important; letter-spacing: .4pt !important; line-height: 1 !important; }
+        .invite-center div:nth-child(3) { font-size: 9pt !important; line-height: 1.1 !important; padding-right: 1pt !important; }
+        /* QR adjustments - minimize white bar */
+        .qr-panel { background:#0b0b0b !important; }
+        .qr-mini { display:none; }
+        .qr-vert { display:none; }
       }
     </style>
 
@@ -94,7 +93,7 @@
                 </td>
                 <td class="qr-panel" style="width:13%;">
                   @if ($t->qr_path)
-                    <img class=\"qr-mini\" src=\"{{ Storage::url($t->qr_path) }}\" alt=\"QR small {{ $t->code }}\" />
+                    <img class="qr-mini" src="{{ Storage::url($t->qr_path) }}" alt="QR small {{ $t->code }}" />
                   @else
                     <div class="qr-mini"></div>
                   @endif
