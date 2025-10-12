@@ -40,8 +40,8 @@
         /* Section heights */
         .brand-panel, .qr-panel { height: 100% !important; }
         /* Flyer column must be filled by image on mobile */
-        .flyer-cell { position: relative; overflow: hidden; display: block; }
-        .flyer-img { height: 100% !important; width: 100% !important; object-fit: cover !important; background:#0b0b0b; display:block; }
+        .flyer-cell { position: relative; overflow: hidden; }
+        .flyer-img { position:absolute; top:0; left:0; right:0; bottom:0; width: 100% !important; height: 100% !important; object-fit: cover !important; background:#0b0b0b; display:block; }
         /* Invitation text sizing (ensure visibility) */
         .brand-inner { padding: 2px 5px 0 8px; position: relative; z-index: 1; }
         .brand-name { font-size: 12px; letter-spacing: .2px; }
