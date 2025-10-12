@@ -7,7 +7,7 @@
 
     <div>
         <x-input-label for="description" :value="__('Description')" />
-        <textarea id="description" name="description" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description', $event->description) }}</textarea>
+        <textarea id="description" name="description" class="mt-1 block w-full rounded-md shadow-sm border-white/20 bg-zinc-900/70 text-white placeholder-zinc-400 focus:border-indigo-400 focus:ring-indigo-400/30">{{ old('description', $event->description) }}</textarea>
         <x-input-error :messages="$errors->get('description')" class="mt-2" />
     </div>
 
@@ -57,8 +57,8 @@
     </div>
 
     <div class="flex items-center">
-        <input id="is_published" name="is_published" type="checkbox" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked(old('is_published', $event->is_published)) />
-        <label for="is_published" class="ms-2 text-sm text-gray-700">{{ __('Published') }}</label>
+        <input id="is_published" name="is_published" type="checkbox" value="1" class="rounded border-white/20 text-indigo-500 shadow-sm focus:ring-indigo-400/30" @checked(old('is_published', $event->is_published)) />
+        <label for="is_published" class="ms-2 text-sm text-zinc-300">{{ __('Published') }}</label>
         <x-input-error :messages="$errors->get('is_published')" class="mt-2" />
     </div>
 </div>
@@ -66,7 +66,7 @@
 <div>
     <x-input-label for="image" :value="__('Flyer')" />
     <input id="image" name="image" type="file" accept="image/*"
-           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+           class="mt-1 block w-full rounded-md shadow-sm border-white/20 bg-zinc-900/70 text-white file:text-white file:bg-zinc-800 file:border-0 focus:border-indigo-400 focus:ring-indigo-400/30" />
     <x-input-error :messages="$errors->get('image')" class="mt-2" />
     @if (!empty($event->image_path))
         <div class="mt-2">

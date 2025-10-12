@@ -14,30 +14,30 @@
             </div>
 
             <div class="bg-white/5 ring-1 ring-white/10 rounded-2xl">
-                <div class="p-6">
+                <div class="p-4 sm:p-6">
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-white/10">
+                        <table class="min-w-full divide-y divide-white/10 text-sm">
                             <thead>
-                                <tr class="text-zinc-400 text-xs uppercase tracking-wider">
-                                    <th class="px-3 py-2 text-left">Title</th>
-                                    <th class="px-3 py-2 text-left">Starts</th>
-                                    <th class="px-3 py-2 text-left">Published</th>
-                                    <th class="px-3 py-2 text-left">Actions</th>
+                                <tr class="text-zinc-400 text-[11px] sm:text-xs uppercase tracking-wider">
+                                    <th class="px-2 sm:px-3 py-2 text-left">Title</th>
+                                    <th class="px-2 sm:px-3 py-2 text-left">Starts</th>
+                                    <th class="px-2 sm:px-3 py-2 text-left hidden xs:table-cell">Published</th>
+                                    <th class="px-2 sm:px-3 py-2 text-left">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-white/10">
                                 @forelse ($events as $event)
-                                    <tr>
-                                        <td class="px-3 py-2">{{ $event->title }}</td>
-                                        <td class="px-3 py-2">{{ optional($event->starts_at)->format('Y-m-d H:i') }}</td>
-                                        <td class="px-3 py-2">
+                                    <tr class="align-middle">
+                                        <td class="px-2 sm:px-3 py-2 whitespace-nowrap">{{ $event->title }}</td>
+                                        <td class="px-2 sm:px-3 py-2 whitespace-nowrap">{{ optional($event->starts_at)->format('Y-m-d H:i') }}</td>
+                                        <td class="px-2 sm:px-3 py-2 hidden xs:table-cell">
                                             @if($event->is_published)
-                                                <span id="published-badge-{{ $event->id }}" class="px-2 py-1 text-xs bg-green-500/20 text-green-300 rounded">Yes</span>
+                                                <span id="published-badge-{{ $event->id }}" class="px-2 py-1 text-[10px] sm:text-xs bg-green-500/20 text-green-300 rounded">Yes</span>
                                             @else
-                                                <span id="published-badge-{{ $event->id }}" class="px-2 py-1 text-xs bg-zinc-500/20 text-zinc-300 rounded">No</span>
+                                                <span id="published-badge-{{ $event->id }}" class="px-2 py-1 text-[10px] sm:text-xs bg-zinc-500/20 text-zinc-300 rounded">No</span>
                                             @endif
                                         </td>
-                                        <td class="px-3 py-2 text-right space-x-2">
+                                        <td class="px-2 sm:px-3 py-2 text-right space-x-2">
                                             <button data-toggle-publish data-id="{{ $event->id }}" data-url="{{ route('admin.events.toggle.json', $event) }}" class="text-sm {{ $event->is_published ? 'text-yellow-300' : 'text-green-300' }} hover:underline">
                                                 {{ $event->is_published ? 'Unpublish' : 'Publish' }}
                                             </button>

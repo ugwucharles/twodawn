@@ -1,6 +1,6 @@
-<header class="fixed top-6 left-0 right-0 z-50">
+<header class="fixed top-3 left-0 right-0 z-50">
   <div class="mx-auto max-w-7xl px-4 sm:px-6">
-    <div x-data="{ open:false }" class="relative mx-auto w-full sm:w-[90%] md:w-[70%] rounded-full bg-white ring-1 ring-zinc-200 px-4 py-3 text-black">
+    <div x-data="{ open:false }" class="relative mx-auto w-full sm:w-[92%] md:w-[75%] rounded-full bg-white/95 backdrop-blur-sm ring-1 ring-zinc-200 px-3 py-2 text-black shadow">
       <div class="flex items-center justify-between">
         <a href="{{ route('admin.dashboard') }}" class="text-lg font-extrabold tracking-tight">2<span class="text-purple-600">DAWN</span> <span class="text-zinc-600">Admin</span></a>
         <button class="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-zinc-700 hover:bg-zinc-100" @click="open=!open" aria-label="Toggle menu">
