@@ -63,7 +63,7 @@
       $bf = trim((string)($order->buyer_name ?? 'Guest'));
       $parts = preg_split('/\s+/', $bf, -1, PREG_SPLIT_NO_EMPTY);
       if (count($parts) >= 2) { $guest = $parts[0] . ' ' . mb_strtoupper(mb_substr($parts[1], 0, 1)) . '.'; } else { $guest = $bf; }
-      $flyerUrl = $event && $event->image_path ? asset('storage/'.$event->image_path) : null;
+      $flyerUrl = $event && $event->image_path ? Storage::url($event->image_path) : null;
     @endphp
 
     @if ($order->tickets && $order->tickets->count())
@@ -94,7 +94,7 @@
                 </td>
                 <td class="qr-panel" style="width:13%;">
                   @if ($t->qr_path)
-                    <img class="qr-mini" src="{{ asset('storage/'.$t->qr_path) }}" alt="QR small {{ $t->code }}" />
+                    <img class=\"qr-mini\" src=\"{{ Storage::url($t->qr_path) }}\" alt=\"QR small {{ $t->code }}\" />
                   @else
                     <div class="qr-mini"></div>
                   @endif

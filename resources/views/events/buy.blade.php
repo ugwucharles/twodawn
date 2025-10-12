@@ -6,7 +6,7 @@
     <div class="space-y-4">
       <div class="aspect-[16/10] overflow-hidden rounded-2xl ring-1 ring-white/10 bg-white/5">
         @if($event->image_path)
-          <img src="{{ asset('storage/'.$event->image_path) }}" alt="{{ $event->title }}" class="h-full w-full object-cover"/>
+          <img src="{{ Storage::url($event->image_path) }}" alt="{{ $event->title }}" class="h-full w-full object-cover"/>
         @else
           <div class="h-full w-full bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-rose-500"></div>
         @endif

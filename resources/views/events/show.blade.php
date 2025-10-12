@@ -12,7 +12,7 @@
       <div>
         <div class="relative rounded-3xl overflow-hidden ring-1 ring-white/10 bg-white/5 mx-auto" style="width:min(380px,100%); aspect-ratio: 10/13;">
           @if($event->image_path)
-            <img src="{{ asset('storage/'.$event->image_path) }}" alt="{{ $event->title }}" class="absolute inset-0 w-full h-full object-cover"/>
+            <img src="{{ Storage::url($event->image_path) }}" alt="{{ $event->title }}" class="absolute inset-0 w-full h-full object-cover"/>
           @else
             <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-rose-500"></div>
           @endif

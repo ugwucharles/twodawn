@@ -166,7 +166,7 @@ class CheckoutController extends Controller
                 $renderer = new ImageRenderer(new RendererStyle(300), new SvgImageBackEnd());
                 $writer = new Writer($renderer);
                 $svgData = $writer->writeString($code);
-                Storage::disk('public')->put($path, $svgData);
+Storage::put($path, $svgData, 'public');
 
                 \App\Models\Ticket::create([
                     'order_id' => $order->id,
@@ -193,9 +193,9 @@ class CheckoutController extends Controller
         $flyerDataUri = null;
         if ($order->event && $order->event->image_path) {
             try {
-                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($order->event->image_path)) {
-                    $bin = \Illuminate\Support\Facades\Storage::disk('public')->get($order->event->image_path);
-                    $mime = \Illuminate\Support\Facades\Storage::disk('public')->mimeType($order->event->image_path) ?? 'image/jpeg';
+if (\\Illuminate\\Support\\Facades\\Storage::exists($order->event->image_path)) {
+$bin = \\Illuminate\\Support\\Facades\\Storage::get($order->event->image_path);
+$mime = \\Illuminate\\Support\\Facades\\Storage::mimeType($order->event->image_path) ?? 'image/jpeg';
                     $flyerDataUri = 'data:' . $mime . ';base64,' . base64_encode($bin);
                 }
             } catch (\Throwable $e) {
@@ -208,8 +208,8 @@ class CheckoutController extends Controller
         foreach ($order->tickets as $t) {
             if ($t->qr_path) {
                 try {
-                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($t->qr_path)) {
-                        $svg = \Illuminate\Support\Facades\Storage::disk('public')->get($t->qr_path);
+if (\\Illuminate\\Support\\Facades\\Storage::exists($t->qr_path)) {
+$svg = \\Illuminate\\Support\\Facades\\Storage::get($t->qr_path);
                         $qrMap[$t->code] = 'data:image/svg+xml;base64,' . base64_encode($svg);
                     }
                 } catch (\Throwable $e) {

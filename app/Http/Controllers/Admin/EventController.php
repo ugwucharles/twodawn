@@ -63,8 +63,8 @@ class EventController extends Controller
         $data = $this->validated($request);
         $data['is_published'] = $request->boolean('is_published');
 
-        if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('events', 'public');
+if ($request->hasFile('image')) {
+            $data['image_path'] = $request->file('image')->storePublicly('events');
         }
 
         Event::create($data);
@@ -95,10 +95,10 @@ class EventController extends Controller
         $data = $this->validated($request);
         $data['is_published'] = $request->boolean('is_published');
 
-        if ($request->hasFile('image')) {
+if ($request->hasFile('image')) {
             // Optionally delete old image
-            // if ($event->image_path) Storage::disk('public')->delete($event->image_path);
-            $data['image_path'] = $request->file('image')->store('events', 'public');
+            // if ($event->image_path) Storage::delete($event->image_path);
+            $data['image_path'] = $request->file('image')->storePublicly('events');
         }
 
         $event->update($data);
