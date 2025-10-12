@@ -39,16 +39,16 @@
         .ticket-table td:nth-child(3) { width: 10% !important; }
         /* Section heights */
         .brand-panel, .qr-panel { height: 100% !important; }
-        /* Flyer MUST fill its column */
-        .flyer-img { height: 100% !important; width: 100% !important; object-fit: cover !important; }
-        /* Invitation text sizing */
-        .brand-inner { padding: 2px 5px 0 8px; }
-        .brand-name { font-size: 11px; letter-spacing: .2px; }
-        .amp-line { font-size: 7px; padding-left: 6px; letter-spacing: .3px; }
-        .invite-center { left: 12%; right: 12%; width: 76%; top: 50%; }
-        .invite-center div:nth-child(1) { font-size: 10px !important; line-height: 1.05 !important; padding-left: 1px !important; }
-        .invite-center div:nth-child(2) { font-size: 7px !important; letter-spacing: .35px !important; line-height: 1 !important; }
-        .invite-center div:nth-child(3) { font-size: 10px !important; line-height: 1.05 !important; padding-right: 1px !important; }
+        /* Flyer MUST show fully within its column */
+        .flyer-img { height: 100% !important; width: 100% !important; object-fit: contain !important; background:#0b0b0b; }
+        /* Invitation text sizing (ensure visibility) */
+        .brand-inner { padding: 2px 5px 0 8px; position: relative; z-index: 1; }
+        .brand-name { font-size: 12px; letter-spacing: .2px; }
+        .amp-line { font-size: 8px; padding-left: 6px; letter-spacing: .3px; }
+        .invite-center { left: 12%; right: 12%; width: 76%; top: 50%; z-index: 2; }
+        .invite-center div:nth-child(1) { font-size: 12px !important; line-height: 1.1 !important; padding-left: 1px !important; }
+        .invite-center div:nth-child(2) { font-size: 8px !important; letter-spacing: .4px !important; line-height: 1 !important; }
+        .invite-center div:nth-child(3) { font-size: 12px !important; line-height: 1.1 !important; padding-right: 1px !important; }
         /* Section 3 stays white, shows QR and vertical code */
         .qr-panel { background:#FAFAFA !important; }
         .qr-mini { display:block; width: 16px; height: 16px; top: 4px; right: 4px; }
