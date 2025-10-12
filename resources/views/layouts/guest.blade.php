@@ -34,6 +34,11 @@
         @if($jsSrc)
             <script type="module" src="{{ $jsSrc }}"></script>
         @endif
+        <style>
+            /* Prevent horizontal dragging/scroll on mobile */
+            html,body{ width:100%; max-width:100vw; overflow-x:hidden; }
+            body{ overscroll-behavior-x:none; touch-action: pan-y; }
+        </style>
     </head>
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">

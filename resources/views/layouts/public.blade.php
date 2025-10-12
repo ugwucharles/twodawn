@@ -40,6 +40,9 @@
     <style>
       :root{ --font-ui: 'Manrope', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }
       body{ font-family: var(--font-ui); }
+      /* Prevent horizontal dragging/scroll on mobile */
+      html,body{ width:100%; max-width:100vw; overflow-x:hidden; }
+      body{ overscroll-behavior-x:none; touch-action: pan-y; }
     </style>
   </head>
   <body class="antialiased bg-black text-white min-h-screen flex flex-col">
