@@ -4,7 +4,7 @@
     <!-- Hero: full screen, minimal -->
     <section class="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
         <!-- Header inside hero -->
-        </div>
+        @include('partials.public-header')
         <div class="absolute inset-0 -z-10">
             <div class="absolute -top-48 -left-32 h-[40rem] w-[40rem] rounded-full blur-3xl opacity-30 bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-rose-500"></div>
             <div class="absolute -bottom-48 -right-32 h-[40rem] w-[40rem] rounded-full blur-3xl opacity-20 bg-gradient-to-tr from-sky-500 to-emerald-400"></div>

@@ -43,11 +43,7 @@
     </style>
   </head>
   <body class="antialiased bg-black text-white min-h-screen flex flex-col">
-    @php $showPublicHeader = request()->routeIs('home'); @endphp
-    @if ($showPublicHeader)
-      @include('partials.public-header')
-    @endif
-    <main class="flex-1 {{ $showPublicHeader ? 'pt-20' : '' }}">
+    <main class="flex-1">
       @yield('content')
     </main>
     @include('partials.footer')

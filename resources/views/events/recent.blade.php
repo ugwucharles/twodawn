@@ -23,9 +23,6 @@
         <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">Recent Events</h1>
         <p class="mt-2 text-zinc-400">Events from the past 30 days</p>
       </div>
-      <div>
-        <a href="{{ route('events.index') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-100 transition">Back to All Events</a>
-      </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
