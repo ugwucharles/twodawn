@@ -6,7 +6,6 @@
     <div class="mb-6 flex items-center justify-between print:hidden">
       <a href="{{ url('/') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-100 transition">Home</a>
       <div class="flex items-center gap-2">
-        <a href="{{ route('orders.pdf', $order->paystack_reference) }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white/10 ring-1 ring-white/15 text-white text-sm hover:bg-white/15 transition">Download PDF</a>
         <button type="button" onclick="downloadTicketsAsPng()" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-100 transition">Download PNG</button>
       </div>
     </div>
@@ -51,10 +50,10 @@
         .invite-center div:nth-child(2) { font-size: 8px !important; letter-spacing: .4px !important; line-height: 1 !important; }
         .invite-center div:nth-child(3) { font-size: 12px !important; line-height: 1.1 !important; padding-right: 1px !important; }
         /* Section 3 stays white, shows QR and vertical code */
-        .qr-panel { background:#FAFAFA !important; }
-        .qr-mini { display:block; width: 16px; height: 16px; top: 4px; right: 4px; }
-        .qr-vert { display:block; right: 2px; }
-        .qr-vert svg { height: 38px !important; width: auto !important; }
+        .qr-panel { background:#FAFAFA !important; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
+        .qr-mini { position:static; display:block; width: 24px; height: 24px; }
+        .qr-code-text { font-size: 9px; font-weight: 800; color:#0a0a0a; max-width: 90%; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; text-align:center; }
+        .qr-vert { display:none; }
       }
     </style>
 
@@ -101,6 +100,7 @@
                   @else
                     <div class="qr-mini"></div>
                   @endif
+                  <div class="qr-code-text">{{ $t->code }}</div>
                   <div class="qr-vert">
 <svg xmlns="http://www.w3.org/2000/svg" width="26pt" height="170pt" viewBox="0 0 38 190">
                       <g transform="rotate(-90 19 175)">
@@ -158,9 +158,19 @@
     return h2iReady;
   }
 
+  async function ensureDomToImage(){
+    if (window.domtoimage) return window.domtoimage;
+    return await new Promise((resolve,reject)=>{
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/dom-to-image-more@3.3.0/dist/dom-to-image-more.min.js';
+      s.onload=()=>resolve(window.domtoimage); s.onerror=reject; document.head.appendChild(s);
+    });
+  }
+
   async function downloadTicketsAsPng(){
     try{
       const h2i = await ensureHtmlToImage();
+      try { await (document.fonts && document.fonts.ready); } catch(_){}
       // Wait for all images inside tickets to finish loading to avoid blank areas
       const imgEls = Array.from(document.querySelectorAll('.ticket img'));
       await Promise.all(imgEls.map(img => img.complete ? Promise.resolve() : new Promise(r => { img.onload = img.onerror = r; })));
@@ -173,15 +183,21 @@
           const a = document.createElement('a');
           a.href = dataUrl; a.download = code + '.png';
           document.body.appendChild(a); a.click(); a.remove();
-          await new Promise(r => setTimeout(r, 200));
-        } catch (e) {
-          console.error('PNG export failed', e);
-          alert('Could not generate PNG for ' + code + '.');
+          await new Promise(r => setTimeout(r, 150));
+        } catch (e1) {
+          try {
+            const dom2img = await ensureDomToImage();
+            const dataUrl = await dom2img.toPng(el, { cacheBust: true, bgcolor: 'transparent' });
+            const a = document.createElement('a'); a.href = dataUrl; a.download = code + '.png'; document.body.appendChild(a); a.click(); a.remove();
+          } catch (e2) {
+            console.error('PNG export failed', e1, e2);
+            alert('Could not generate PNG for ' + code + '.');
+          }
         }
       }
     } catch (e) {
       console.error(e);
-      alert('Could not load image library. If you are offline, try Download PDF instead.');
+      alert('Could not load image library.');
     }
   }
 </script>
