@@ -30,27 +30,29 @@
     <style>
       /* Mobile tuning for ticket size and typography */
       @media (max-width: 640px) {
-        .ticket { border-radius: 12px; max-width: 320px; margin-left:auto; margin-right:auto; }
-        /* Column widths optimized for small screens */
-        .ticket-table td:nth-child(1) { width: 68% !important; }
-        .ticket-table td:nth-child(2) { width: 24% !important; }
-        .ticket-table td:nth-child(3) { width: 8% !important; }
-        /* Reduce overall height */
-        .brand-panel, .qr-panel { height: 80pt; }
-        .flyer-img { height: 100% !important; width: 100% !important; object-fit: contain !important; }
+        /* Keep EXACTLY three sections visible on mobile */
+        .ticket { border-radius: 12px; max-width: 360px; margin-left:auto; margin-right:auto; }
+        /* Section widths: 1) invitation, 2) flyer fill, 3) QR+code */
+        .ticket-table td:nth-child(1) { width: 64% !important; }
+        .ticket-table td:nth-child(2) { width: 26% !important; }
+        .ticket-table td:nth-child(3) { width: 10% !important; }
+        /* Section heights */
+        .brand-panel, .qr-panel { height: 90pt; }
+        /* Flyer MUST fill its column */
+        .flyer-img { height: 100% !important; width: 100% !important; object-fit: cover !important; }
+        /* Invitation text sizing */
         .brand-inner { padding: 2pt 5pt 0 8pt; }
-        .brand-name { font-size: 11pt; letter-spacing: .3pt; }
+        .brand-name { font-size: 12pt; letter-spacing: .3pt; }
         .amp-line { font-size: 7pt; padding-left: 8pt; letter-spacing: .4pt; }
-        /* Center block narrower and slightly higher */
         .invite-center { left: 12%; right: 12%; width: 76%; top: 50%; }
-        /* Override inline font-sizes inside the invite center */
-        .invite-center div:nth-child(1) { font-size: 9pt !important; line-height: 1.1 !important; padding-left: 1pt !important; }
-        .invite-center div:nth-child(2) { font-size: 6.5pt !important; letter-spacing: .4pt !important; line-height: 1 !important; }
-        .invite-center div:nth-child(3) { font-size: 9pt !important; line-height: 1.1 !important; padding-right: 1pt !important; }
-        /* QR adjustments - minimize white bar */
-        .qr-panel { background:#0b0b0b !important; }
-        .qr-mini { display:none; }
-        .qr-vert { display:none; }
+        .invite-center div:nth-child(1) { font-size: 9.5pt !important; line-height: 1.1 !important; padding-left: 1pt !important; }
+        .invite-center div:nth-child(2) { font-size: 6.8pt !important; letter-spacing: .45pt !important; line-height: 1 !important; }
+        .invite-center div:nth-child(3) { font-size: 9.5pt !important; line-height: 1.1 !important; padding-right: 1pt !important; }
+        /* Section 3 stays white, shows QR and vertical code */
+        .qr-panel { background:#FAFAFA !important; }
+        .qr-mini { display:block; width: 28pt; height: 28pt; top: 4pt; right: 4pt; }
+        .qr-vert { display:block; right: 2pt; }
+        .qr-vert svg { height: 60pt !important; width: auto !important; }
       }
     </style>
 
