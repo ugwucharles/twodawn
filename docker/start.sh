@@ -9,6 +9,23 @@ mkdir -p /app/storage/framework/cache /app/storage/framework/sessions /app/stora
 # Pre-create log file to prevent "failed to open stream" warnings
 touch /app/storage/logs/laravel.log || true
 
+# Tune PHP-FPM concurrency via env (safe defaults). This increases how many requests
+# can be processed in parallel and helps during bursts.
+cat > /usr/local/etc/php-fpm.d/zzz-overrides.conf <<EOF
+[www]
+; Process manager and workers
+pm = dynamic
+pm.max_children = ${PHP_FPM_MAX_CHILDREN:-20}
+pm.start_servers = ${PHP_FPM_START_SERVERS:-4}
+pm.min_spare_servers = ${PHP_FPM_MIN_SPARE_SERVERS:-4}
+pm.max_spare_servers = ${PHP_FPM_MAX_SPARE_SERVERS:-10}
+pm.max_requests = ${PHP_FPM_MAX_REQUESTS:-500}
+request_terminate_timeout = ${PHP_FPM_REQUEST_TIMEOUT:-120s}
+listen.backlog = ${PHP_FPM_LISTEN_BACKLOG:-1024}
+catch_workers_output = yes
+decorate_workers_output = no
+EOF
+
 # Ensure writable dirs (also covers mounted disk)
 chown -R www-data:www-data /app/storage /app/bootstrap/cache || true
 chmod -R 775 /app/storage /app/bootstrap/cache || true
