@@ -13,6 +13,7 @@
           <a href="{{ url('/') }}" class="hover:text-white">Home</a>
           <a href="{{ route('events.index') }}" class="hover:text-white">Events</a>
           <a href="{{ route('events.recent') }}" class="hover:text-white">Recent</a>
+          <a href="{{ route('about') }}" class="hover:text-white">About us</a>
           @auth
             @if (Auth::user()->is_admin)
               <a href="{{ route('admin.events.index') }}" class="hover:text-white">Admin</a>
