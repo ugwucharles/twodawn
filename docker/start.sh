@@ -26,6 +26,12 @@ fi
 php artisan storage:link || true
 php artisan migrate --force || true
 
+# Optionally seed an admin user from env (run only if ADMIN_EMAIL and ADMIN_PASSWORD are set)
+if [ -n "${ADMIN_EMAIL:-}" ] && [ -n "${ADMIN_PASSWORD:-}" ]; then
+  echo "Seeding admin user from env..."
+  php artisan db:seed --class="Database\\Seeders\\AdminFromEnvSeeder" || true
+fi
+
 # Optionally run a queue worker inside the web service (saves a separate Render Worker)
 if [ "${ENABLE_QUEUE_WORKER:-0}" = "1" ] || [ "${ENABLE_QUEUE_WORKER:-}" = "true" ]; then
   echo "Starting Laravel queue worker..."
