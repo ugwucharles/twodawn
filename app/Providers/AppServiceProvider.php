@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Force HTTPS URLs in production (and when APP_URL uses https)
+        $appUrl = (string) env('APP_URL', '');
+        if ($this->app->environment('production') && (env('FORCE_HTTPS', false) || str_starts_with($appUrl, 'https://'))) {
+            URL::forceScheme('https');
+        }
     }
 }
