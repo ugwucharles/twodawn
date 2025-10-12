@@ -253,7 +253,7 @@
                         </div>
                     @endif
 
-                    <div class="mt-6 flex justify-center">
+                    <div class="mt-6 -mb-[3px] flex justify-center">
 <img src="/images/Group%202.png" alt="Host with us" loading="lazy" decoding="async" width="1200" height="800" class="w-full max-w-md h-auto max-h-80 object-contain rounded-2xl" />
                     </div>
                 </div>
