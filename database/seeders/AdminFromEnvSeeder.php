@@ -30,5 +30,8 @@ class AdminFromEnvSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        // Log what we did (email only)
+        $this->command?->info("Admin seeded/updated for: {$email}");
     }
 }
