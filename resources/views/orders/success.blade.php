@@ -32,12 +32,13 @@
       @media (max-width: 640px) {
         /* Keep EXACTLY three sections visible on mobile */
         .ticket { border-radius: 12px; max-width: 360px; margin-left:auto; margin-right:auto; }
+        .ticket-row { height: 40pt !important; }
         /* Section widths: 1) invitation, 2) flyer fill, 3) QR+code */
         .ticket-table td:nth-child(1) { width: 64% !important; }
         .ticket-table td:nth-child(2) { width: 26% !important; }
         .ticket-table td:nth-child(3) { width: 10% !important; }
         /* Section heights */
-        .brand-panel, .qr-panel { height: 40pt; }
+        .brand-panel, .qr-panel { height: 100% !important; }
         /* Flyer MUST fill its column */
         .flyer-img { height: 100% !important; width: 100% !important; object-fit: cover !important; }
         /* Invitation text sizing */
@@ -72,7 +73,7 @@
         @foreach ($order->tickets as $t)
           <div class="ticket" id="ticket-{{ $t->code }}" data-code="{{ $t->code }}">
             <table class="ticket-table">
-              <tr>
+              <tr class="ticket-row">
                 <td class="brand-panel" style="width:65%;">
                   <div class="brand-inner">
                     <div>
