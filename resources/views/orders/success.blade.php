@@ -39,9 +39,9 @@
         .ticket-table td:nth-child(3) { width: 10% !important; }
         /* Section heights */
         .brand-panel, .qr-panel { height: 100% !important; }
-        /* Flyer MUST show fully within its column (iOS-safe) */
-        .flyer-cell { display:flex; align-items:center; justify-content:center; }
-        .flyer-img { max-height: 100% !important; max-width: 100% !important; height: auto !important; width: auto !important; object-fit: contain !important; background:#0b0b0b; display:block; }
+        /* Flyer column must be filled by image on mobile */
+        .flyer-cell { position: relative; overflow: hidden; display: block; }
+        .flyer-img { height: 100% !important; width: 100% !important; object-fit: cover !important; background:#0b0b0b; display:block; }
         /* Invitation text sizing (ensure visibility) */
         .brand-inner { padding: 2px 5px 0 8px; position: relative; z-index: 1; }
         .brand-name { font-size: 12px; letter-spacing: .2px; }
