@@ -37,22 +37,22 @@
         .ticket-table td:nth-child(2) { width: 26% !important; }
         .ticket-table td:nth-child(3) { width: 10% !important; }
         /* Section heights */
-        .brand-panel, .qr-panel { height: 72pt; }
+        .brand-panel, .qr-panel { height: 40pt; }
         /* Flyer MUST fill its column */
         .flyer-img { height: 100% !important; width: 100% !important; object-fit: cover !important; }
         /* Invitation text sizing */
         .brand-inner { padding: 2pt 5pt 0 8pt; }
-        .brand-name { font-size: 10.5pt; letter-spacing: .25pt; }
-        .amp-line { font-size: 6.2pt; padding-left: 8pt; letter-spacing: .35pt; }
+        .brand-name { font-size: 8.5pt; letter-spacing: .2pt; }
+        .amp-line { font-size: 5pt; padding-left: 6pt; letter-spacing: .3pt; }
         .invite-center { left: 12%; right: 12%; width: 76%; top: 50%; }
-        .invite-center div:nth-child(1) { font-size: 8.5pt !important; line-height: 1.05 !important; padding-left: 1pt !important; }
-        .invite-center div:nth-child(2) { font-size: 6.2pt !important; letter-spacing: .4pt !important; line-height: 1 !important; }
-        .invite-center div:nth-child(3) { font-size: 8.5pt !important; line-height: 1.05 !important; padding-right: 1pt !important; }
+        .invite-center div:nth-child(1) { font-size: 7.5pt !important; line-height: 1.05 !important; padding-left: 1pt !important; }
+        .invite-center div:nth-child(2) { font-size: 5.2pt !important; letter-spacing: .35pt !important; line-height: 1 !important; }
+        .invite-center div:nth-child(3) { font-size: 7.5pt !important; line-height: 1.05 !important; padding-right: 1pt !important; }
         /* Section 3 stays white, shows QR and vertical code */
         .qr-panel { background:#FAFAFA !important; }
-        .qr-mini { display:block; width: 24pt; height: 24pt; top: 4pt; right: 4pt; }
+        .qr-mini { display:block; width: 18pt; height: 18pt; top: 3pt; right: 3pt; }
         .qr-vert { display:block; right: 2pt; }
-        .qr-vert svg { height: 48pt !important; width: auto !important; }
+        .qr-vert svg { height: 32pt !important; width: auto !important; }
       }
     </style>
 
