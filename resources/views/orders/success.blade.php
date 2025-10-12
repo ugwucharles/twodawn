@@ -114,6 +114,9 @@
           </div>
         @endforeach
       </div>
+    @else
+      <div class="mt-6 p-3 bg-emerald-500/10 text-emerald-300 rounded ring-1 ring-emerald-500/30">Payment successful. Generating your tickets... this page will refresh automatically.</div>
+      <script>setTimeout(() => location.reload(), 3000);</script>
     @endif
     </div>
   </div>

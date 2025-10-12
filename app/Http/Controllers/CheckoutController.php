@@ -13,6 +13,7 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
+use App\Jobs\GenerateTickets;
 
 class CheckoutController extends Controller
 {
@@ -118,8 +119,11 @@ class CheckoutController extends Controller
             return view('orders.failed', ['message' => 'Missing payment reference.']);
         }
 
-        // Finalize then show public receipt URL so buyers never end up in admin context
-        $this->finalizePayment($reference);
+        // Finalize payment. If it fails (sold out or gateway error), show a friendly message.
+        $ok = $this->finalizePayment($reference);
+        if (! $ok) {
+            return view('orders.failed', ['message' => 'Payment failed or tickets sold out.']);
+        }
         return redirect()->route('orders.public', $reference);
     }
 
@@ -136,7 +140,7 @@ class CheckoutController extends Controller
     {
         $order = Order::where('paystack_reference', $reference)->first();
         if (! $order) {
-            return view('orders.failed', ['message' => 'Order not found.']);
+            return false;
         }
 
         $secret = config('services.paystack.secret');
@@ -144,42 +148,45 @@ class CheckoutController extends Controller
 
         if (! $verify->ok() || data_get($verify->json(), 'data.status') !== 'success') {
             $order->update(['status' => 'failed']);
-            return view('orders.failed', ['message' => 'Payment not successful.']);
+            return false;
         }
 
-        // Mark paid and generate tickets
-        DB::transaction(function () use ($order) {
-            $order->update(['status' => 'paid']);
-            $event = $order->event()->lockForUpdate()->first();
-            if (! is_null($event->capacity)) {
-                $remaining = max(0, (int)$event->capacity - (int)$order->quantity);
-                $event->update(['capacity' => $remaining]);
-            }
+        // Safely mark paid and reduce capacity without overselling
+        try {
+            DB::transaction(function () use ($order) {
+                $event = $order->event()->lockForUpdate()->first();
+                if (! $event) {
+                    throw new \RuntimeException('Event missing');
+                }
+                if (! is_null($event->capacity)) {
+                    $needed = (int) $order->quantity;
+                    $current = (int) $event->capacity;
+                    if ($current < $needed) {
+                        // Not enough tickets left; fail this order
+                        $order->update(['status' => 'failed']);
+                        throw new \RuntimeException('Sold out');
+                    }
+                    $event->update(['capacity' => $current - $needed]);
+                }
 
-            if ($order->coupon_code) {
-                \App\Models\Coupon::where('code', $order->coupon_code)->increment('uses');
-            }
+                if ($order->coupon_code) {
+                    \App\Models\Coupon::where('code', $order->coupon_code)->increment('uses');
+                }
 
-            for ($i = 0; $i < $order->quantity; $i++) {
-                $code = 'T-'.Str::upper(Str::random(10));
-                $path = 'tickets/'.$code.'.svg';
-                $renderer = new ImageRenderer(new RendererStyle(300), new SvgImageBackEnd());
-                $writer = new Writer($renderer);
-                $svgData = $writer->writeString($code);
-Storage::put($path, $svgData, 'public');
+                $order->update(['status' => 'paid']);
+            });
+        } catch (\Throwable $e) {
+            return false;
+        }
 
-                \App\Models\Ticket::create([
-                    'order_id' => $order->id,
-                    'event_id' => $event->id,
-                    'code' => $code,
-                    'qr_path' => $path,
-                ]);
-            }
-        });
+        // Defer QR generation to the queue so the callback returns fast
+        try {
+            GenerateTickets::dispatch($order->id);
+        } catch (\Throwable $e) {
+            // If queue fails to dispatch, tickets will be missing until manual retry
+        }
 
-        $order->load(['event', 'tickets' => function($q){ $q->orderBy('id'); }]);
-        // Return success view (used by /orders/{reference})
-        return view('orders.success', ['order' => $order]);
+        return true;
     }
 
     public function downloadPdf(string $reference)
