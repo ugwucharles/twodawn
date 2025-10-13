@@ -24,6 +24,9 @@
 .qr-panel{ background:#ffffff; height:160pt; position:relative; overflow:hidden; }
       .qr-mini{ position:absolute; top:8pt; right:8pt; width:54pt; height:54pt; background:#fff; border:1px solid #e5e7eb; border-radius:6pt; object-fit:contain; }
 .qr-vert{ position:absolute; top:50%; right:4pt; transform:translateY(-50%); }
+      /* iOS Safari table-cell background workaround: paint a white layer inside */
+      .qr-bg{ position:absolute; inset:0; background:#ffffff; z-index:0; pointer-events:none; }
+      .qr-panel .qr-mini, .qr-panel .qr-code-text, .qr-panel .qr-vert { position:relative; z-index:1; }
     </style>
 
     <style>
@@ -95,6 +98,7 @@
                   @endif
                 </td>
                 <td class="qr-panel" style="width:13%;">
+                  <div class="qr-bg" aria-hidden="true"></div>
                   @if ($t->qr_path)
                     <img class="qr-mini" src="{{ Storage::url($t->qr_path) }}" alt="QR small {{ $t->code }}" />
                   @else
