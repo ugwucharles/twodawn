@@ -153,6 +153,30 @@ class CheckoutController extends Controller
         return view('orders.success', ['order' => $order]);
     }
 
+    public function updateOrder(Request $request, string $reference)
+    {
+        $order = Order::with('tickets')->where('paystack_reference', $reference)->first();
+        if (! $order) {
+            abort(404);
+        }
+        if ($order->status !== 'paid') {
+            return redirect()->route('orders.public', $reference)->withErrors(['update' => 'Only paid orders can be edited.']);
+        }
+        $hasRedeemed = $order->tickets()->whereNotNull('redeemed_at')->exists();
+        if ($hasRedeemed) {
+            return redirect()->route('orders.public', $reference)->withErrors(['update' => 'This order has redeemed ticket(s); editing is disabled.']);
+        }
+        $data = $request->validate([
+            'buyer_name' => ['required','string','max:255'],
+            'buyer_phone' => ['nullable','string','max:50'],
+        ]);
+        $order->update([
+            'buyer_name' => $data['buyer_name'],
+            'buyer_phone' => $data['buyer_phone'] ?? $order->buyer_phone,
+        ]);
+        return redirect()->route('orders.public', $reference)->with('status', 'Ticket updated.');
+    }
+
     protected function finalizePayment(string $reference)
     {
         $order = Order::where('paystack_reference', $reference)->first();

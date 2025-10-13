@@ -67,6 +67,7 @@ Route::post('/events/{event}/orders', [CheckoutController::class, 'create'])->na
 Route::get('/paystack/callback', [CheckoutController::class, 'callback'])->name('paystack.callback');
 Route::get('/orders/{reference}', [CheckoutController::class, 'showByReference'])->name('orders.public');
 Route::get('/orders/{reference}/download', [CheckoutController::class, 'downloadPdf'])->name('orders.pdf');
+Route::patch('/orders/{reference}', [CheckoutController::class, 'updateOrder'])->name('orders.update');
 
 
 // Host with us (contact) form

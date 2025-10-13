@@ -10,6 +10,41 @@
       </div>
     </div>
 
+    @if (session('status'))
+      <div class="mb-4 p-3 bg-emerald-500/10 text-emerald-300 rounded ring-1 ring-emerald-500/30 print:hidden">{{ session('status') }}</div>
+    @endif
+    @if ($errors->any())
+      <div class="mb-4 p-3 bg-red-500/10 text-red-300 rounded ring-1 ring-red-500/30 print:hidden">
+        <ul class="list-disc list-inside">
+          @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+          @endforeach
+        </ul>
+      </div>
+    @endif
+
+    @if ($order->status === 'paid')
+      <div class="print:hidden sm:hidden mb-5">
+        <button type="button" onclick="toggleEditName()" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-100 transition">Edit name on ticket</button>
+        <form id="edit-name-form" method="POST" action="{{ route('orders.update', $order->paystack_reference) }}" class="mt-3 hidden space-y-3">
+          @csrf
+          @method('PATCH')
+          <div>
+            <label for="buyer_name" class="block text-sm text-zinc-300">Display name</label>
+            <input id="buyer_name" name="buyer_name" type="text" value="{{ old('buyer_name', $order->buyer_name) }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" required />
+          </div>
+          <div>
+            <label for="buyer_phone" class="block text-sm text-zinc-300">Phone (optional)</label>
+            <input id="buyer_phone" name="buyer_phone" type="text" value="{{ old('buyer_phone', $order->buyer_phone) }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
+          </div>
+          <div class="flex items-center gap-3">
+            <button class="inline-flex items-center px-4 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:bg-zinc-100">Save</button>
+            <span class="text-xs text-zinc-400">Edits update the display on these tickets.</span>
+          </div>
+        </form>
+      </div>
+    @endif
+
     <style>
       .ticket{ border:1px solid rgba(255,255,255,0.12); border-radius:16px; overflow:hidden; }
 .ticket-table{ width:100%; border-collapse:collapse; border-spacing:0; table-layout:fixed; }
@@ -49,10 +84,10 @@
         .invite-center div:nth-child(1) { font-size: 12px !important; line-height: 1.1 !important; padding-left: 1px !important; }
         .invite-center div:nth-child(2) { font-size: 8px !important; letter-spacing: .4px !important; line-height: 1 !important; }
         .invite-center div:nth-child(3) { font-size: 12px !important; line-height: 1.1 !important; padding-right: 1px !important; }
-        /* Section 3 stays white, shows QR and vertical code */
-        .qr-panel { background:#FAFAFA !important; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
-        .qr-mini { position:static; display:block; width: 24px; height: 24px; }
-        .qr-code-text { font-size: 9px; font-weight: 800; color:#0a0a0a; max-width: 90%; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; text-align:center; }
+        /* Section 3: full white background, split into two halves (QR top, code bottom) */
+        .qr-panel { background:#ffffff !important; height: 100% !important; display:grid; grid-template-rows: 1fr 1fr; align-items:center; justify-items:center; gap:4px; padding:4px; }
+        .qr-mini { position:static; display:block; width: 32px; height: 32px; background:#ffffff; border:1px solid #e5e7eb; border-radius:6px; object-fit:contain; }
+        .qr-code-text { font-size: 9px; font-weight: 800; color:#0a0a0a; max-width: 95%; text-align:center; line-height: 1.1; word-break: break-all; white-space: normal; }
         .qr-vert { display:none; }
       }
     </style>
@@ -134,6 +169,7 @@
 
 <script src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.min.js" defer></script>
 <script>
+  function toggleEditName(){ const f=document.getElementById('edit-name-form'); if(f){ f.classList.toggle('hidden'); }}
   // Ensure the html-to-image library is available, with CDN fallbacks
   let h2iReady;
   function ensureHtmlToImage(){
