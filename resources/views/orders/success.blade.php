@@ -36,14 +36,15 @@
         .ticket { border-radius: 12px; max-width: 340px; margin-left:auto; margin-right:auto; height: 120px; overflow: hidden; }
         .ticket-table, .ticket-table tr, .ticket-table td { height: 100% !important; }
         /* Section widths: 1) invitation, 2) flyer fill, 3) QR+code */
-        .ticket-table td:nth-child(1) { width: 64% !important; }
-        .ticket-table td:nth-child(2) { width: 26% !important; }
-        .ticket-table td:nth-child(3) { width: 10% !important; }
+        /* Use fixed pixel widths on mobile to avoid subpixel seams on iOS */
+        .ticket-table td:nth-child(2) { width: 90px !important; }
+        .ticket-table td:nth-child(3) { width: 40px !important; }
+        .ticket-table td:nth-child(1) { width: calc(100% - 130px) !important; }
         /* Section heights */
         .brand-panel, .qr-panel { height: 100% !important; }
         /* Flyer column must be filled by image on mobile */
         .flyer-cell { position: relative; overflow: hidden; }
-        .flyer-img { position:absolute; top:0; left:0; right:0; bottom:0; width: 100% !important; height: 100% !important; object-fit: cover !important; background:#0b0b0b; display:block; }
+        .flyer-img { position:absolute; top:0; left:0; right:0; bottom:0; width: 100% !important; height: 100% !important; object-fit: cover !important; background:#0b0b0b; display:block; transform: translateZ(0); }
         /* Invitation text sizing (ensure visibility) */
         .brand-inner { padding: 2px 5px 0 8px; position: relative; z-index: 1; }
         .brand-name { font-size: 12px; letter-spacing: .2px; }
@@ -54,6 +55,7 @@
         .invite-center div:nth-child(3) { font-size: 12px !important; line-height: 1.1 !important; padding-right: 1px !important; }
         /* Section 3 stays white, shows QR and vertical code */
         .qr-panel { background:#ffffff !important; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
+        .qr-bg { transform: translateZ(0); }
         .qr-mini { position:static; display:block; width: 24px; height: 24px; }
         .qr-code-text { font-size: 9px; font-weight: 800; color:#0a0a0a; max-width: 90%; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; text-align:center; }
         .qr-vert { display:none; }
