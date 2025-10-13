@@ -51,11 +51,12 @@
         .invite-center div:nth-child(1) { font-size: 12px !important; line-height: 1.1 !important; padding-left: 1px !important; }
         .invite-center div:nth-child(2) { font-size: 8px !important; letter-spacing: .4px !important; line-height: 1 !important; }
         .invite-center div:nth-child(3) { font-size: 12px !important; line-height: 1.1 !important; padding-right: 1px !important; }
-        /* Section 3 stays white, shows QR and vertical code */
-        .qr-panel { background:#ffffff !important; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
-        .qr-bg { transform: translateZ(0); }
-        .qr-mini { position:static; display:block; width: 24px; height: 24px; }
-        .qr-code-text { font-size: 9px; font-weight: 800; color:#0a0a0a; max-width: 90%; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; text-align:center; }
+        /* Section 3 stays white, split into two equal halves on mobile */
+        .qr-panel { background:#ffffff !important; display:grid; grid-template-rows: 1fr 1fr; align-items:center; justify-items:center; gap:2px; padding:4px; }
+        .qr-mini { position:static; display:block; width: 24px; height: 24px; grid-row: 1; }
+        .qr-code-text { display:none !important; }
+        .qr-vert { grid-row: 2; position: static !important; right:auto; top:auto; transform:none; display:flex; align-items:center; justify-content:center; width:100%; height:100%; }
+        .qr-vert svg { width: 28px; height: 56px; }
         .qr-vert { display:none; }
       }
     </style>
