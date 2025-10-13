@@ -21,7 +21,7 @@
 .amp-line{ margin-top:3pt; padding-left:27px; font-weight:800; font-size:14pt; color:rgba(255,255,255,0.9); letter-spacing:1pt; }
 .flyer-cell{ background:#0b0b0b; text-align:left; overflow:hidden; }
 .flyer-img{ display:block; width:100%; max-width:none; height:160pt; object-fit:cover; object-position:center center; transform:none; background:#0b0b0b; }
-.qr-panel{ background:#FAFAFA; height:160pt; position:relative; overflow:hidden; }
+.qr-panel{ background:#ffffff; height:160pt; position:relative; overflow:hidden; }
       .qr-mini{ position:absolute; top:8pt; right:8pt; width:54pt; height:54pt; background:#fff; border:1px solid #e5e7eb; border-radius:6pt; object-fit:contain; }
 .qr-vert{ position:absolute; top:50%; right:4pt; transform:translateY(-50%); }
     </style>
@@ -50,7 +50,7 @@
         .invite-center div:nth-child(2) { font-size: 8px !important; letter-spacing: .4px !important; line-height: 1 !important; }
         .invite-center div:nth-child(3) { font-size: 12px !important; line-height: 1.1 !important; padding-right: 1px !important; }
         /* Section 3 stays white, shows QR and vertical code */
-        .qr-panel { background:#FAFAFA !important; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
+        .qr-panel { background:#ffffff !important; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
         .qr-mini { position:static; display:block; width: 24px; height: 24px; }
         .qr-code-text { font-size: 9px; font-weight: 800; color:#0a0a0a; max-width: 90%; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; text-align:center; }
         .qr-vert { display:none; }
