@@ -55,8 +55,8 @@
         .qr-panel { background:#ffffff !important; display:grid; grid-template-rows: 1fr 1fr; align-items:center; justify-items:center; gap:2px; padding:4px; }
         .qr-mini { position:static; display:block; width: 24px; height: 24px; grid-row: 1; top:auto; right:auto; justify-self:center; align-self:center; }
         .qr-code-text { display:none !important; }
-        .qr-vert { grid-row: 2; position: static !important; right:auto; top:auto; transform:none; display:flex !important; align-items:center; justify-content:center; width:100%; height:100%; padding: 0 2px; }
-        .qr-vert svg { width: 32px; height: 64px; }
+        .qr-vert { grid-row: 2; position: static !important; right:auto; top:auto; transform:none; display:flex !important; align-items:center; justify-content:center; width:100%; height:100%; padding: 0 0 0 18px; }
+        .qr-vert svg { width: 22px; height: 64px; }
         .qr-vert svg text { font-size: 11px !important; }
       }
     </style>
@@ -69,7 +69,17 @@
       $bf = trim((string)($order->buyer_name ?? 'Guest'));
       $parts = preg_split('/\s+/', $bf, -1, PREG_SPLIT_NO_EMPTY);
       if (count($parts) >= 2) { $guest = $parts[0] . ' ' . mb_strtoupper(mb_substr($parts[1], 0, 1)) . '.'; } else { $guest = $bf; }
-      $flyerUrl = $event && $event->image_path ? Storage::url($event->image_path) : null;
+      $flyerDataUri = null; $flyerUrl = null;
+      if ($event && $event->image_path) {
+        try {
+          if (Storage::exists($event->image_path)) {
+            $flyerUrl = Storage::url($event->image_path);
+            $bin = Storage::get($event->image_path);
+            $mime = Storage::mimeType($event->image_path) ?? 'image/jpeg';
+            $flyerDataUri = 'data:' . $mime . ';base64,' . base64_encode($bin);
+          }
+        } catch (\Throwable $e) { /* ignore */ }
+      }
     @endphp
 
     @if ($order->tickets && $order->tickets->count())
@@ -93,7 +103,9 @@
                 </td>
                 <td class="flyer-cell" style="width:22%;">
                   @php $fallbackBg = 'linear-gradient(90deg,#7C3AED,#EF4444)'; @endphp
-                  @if ($flyerUrl)
+                  @if ($flyerDataUri)
+                    <div class="flyer-img" style="background-image: url('{{ $flyerDataUri }}'); background-size: cover; background-position: center center; background-repeat: no-repeat;"></div>
+                  @elseif ($flyerUrl)
                     <div class="flyer-img" style="background-image: url('{{ $flyerUrl }}'), {{ $fallbackBg }}; background-size: cover; background-position: center center; background-repeat: no-repeat;"></div>
                   @else
                     <div class="flyer-img" style="background: {{ $fallbackBg }};"></div>
