@@ -35,11 +35,9 @@
         /* Keep EXACTLY three sections visible on mobile */
         .ticket { border-radius: 12px; max-width: 340px; margin-left:auto; margin-right:auto; height: 120px; overflow: hidden; }
         .ticket-table, .ticket-table tr, .ticket-table td { height: 100% !important; }
-        /* Section widths: 1) invitation, 2) flyer fill, 3) QR+code */
-        /* Use fixed pixel widths on mobile to avoid subpixel seams on iOS */
-        .ticket-table td:nth-child(2) { width: 90px !important; }
-        .ticket-table td:nth-child(3) { width: 40px !important; }
-        .ticket-table td:nth-child(1) { width: calc(100% - 130px) !important; }
+        /* Three-column layout in grid to eliminate rounding gaps */
+        .ticket-row { display:grid; grid-template-columns: 1fr 90px 40px; gap:0; }
+        .ticket-table td { width:auto !important; }
         /* Section heights */
         .brand-panel, .qr-panel { height: 100% !important; }
         /* Flyer column must be filled by image on mobile */
