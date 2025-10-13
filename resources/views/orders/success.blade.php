@@ -55,9 +55,9 @@
         .qr-panel { background:#ffffff !important; display:grid; grid-template-rows: 1fr 1fr; align-items:center; justify-items:center; gap:2px; padding:4px; }
         .qr-mini { position:static; display:block; width: 24px; height: 24px; grid-row: 1; top:auto; right:auto; justify-self:center; align-self:center; }
         .qr-code-text { display:none !important; }
-        .qr-vert { grid-row: 2; position: static !important; right:auto; top:auto; transform:none; display:flex !important; align-items:center; justify-content:center; width:100%; height:100%; padding: 0 0 0 24px; margin-top: -2px; }
-        .qr-vert svg { width: 16px; height: 56px; }
-        .qr-vert svg text { font-size: 10px !important; }
+        .qr-vert { grid-row: 2; position: static !important; right:auto; top:auto; transform:none; display:flex !important; align-items:center; justify-content:center; width:100%; height:100%; padding: 0 0 0 28px; margin-top: -2px; }
+        .qr-vert svg { width: 10px; height: 56px; }
+        .qr-vert svg text { font-size: 9px !important; }
       }
     </style>
 
