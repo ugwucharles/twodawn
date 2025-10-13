@@ -91,10 +91,11 @@
                   </div>
                 </td>
                 <td class="flyer-cell" style="width:22%;">
+                  @php $fallbackBg = 'linear-gradient(90deg,#7C3AED,#EF4444)'; @endphp
                   @if ($flyerUrl)
-                    <img class="flyer-img" src="{{ $flyerUrl }}" alt="Flyer">
+                    <div class="flyer-img" style="background-image: url('{{ $flyerUrl }}'), {{ $fallbackBg }}; background-size: cover; background-position: center center; background-repeat: no-repeat;"></div>
                   @else
-                    <div class="flyer-img" style="background:linear-gradient(90deg,#7C3AED,#EF4444);"></div>
+                    <div class="flyer-img" style="background: {{ $fallbackBg }};"></div>
                   @endif
                 </td>
                 <td class="qr-panel" style="width:13%;">
