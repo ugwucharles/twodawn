@@ -43,6 +43,9 @@
       /* Prevent horizontal dragging/scroll on mobile */
       html,body{ width:100%; max-width:100vw; overflow-x:hidden; }
       body{ overscroll-behavior-x:none; touch-action: pan-y; }
+      /* Hide scrollbars for mood scroller */
+      .no-scrollbar::-webkit-scrollbar{ display:none; }
+      .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
     </style>
   </head>
   <body class="antialiased bg-black text-white min-h-screen flex flex-col">
