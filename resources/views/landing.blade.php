@@ -27,6 +27,30 @@
         </div>
     </section>
 
+    <!-- Mood scroller: what are you looking for? -->
+    <section class="relative py-10">
+      <div class="max-w-7xl mx-auto px-6">
+        <h2 class="text-center text-4xl sm:text-5xl md:text-6xl font-extrabold mb-8 sm:mb-10">What are you looking for?</h2>
+        <div class="fade-x overflow-x-auto no-scrollbar">
+          <ul class="flex items-center justify-center gap-3 sm:gap-4 min-w-max text-zinc-300 text-xl sm:text-2xl tracking-wider">
+            @php $items = ($moods ?? collect()); @endphp
+            @if(($items instanceof \Illuminate\Support\Collection ? $items->count() : count($items)) === 0)
+              @php $items = collect(['Rave','Romantic','Amapiano','Afrobeats','Hip‑Hop','House','Live Band','Jazz','Techno','Gospel','Comedy','Networking']); @endphp
+            @endif
+            @foreach($items as $i => $mood)
+              <li class="flex items-center">
+                <a href="{{ route('events.index', ['mood' => $mood]) }}" class="px-2 sm:px-3 py-1 uppercase hover:text-white whitespace-nowrap">{{ $mood }}</a>
+                @if($i < (($items instanceof \Illuminate\Support\Collection ? $items->count() : count($items)) - 1))
+                  <span aria-hidden class="mx-1 sm:mx-2 opacity-40">|</span>
+                @endif
+              </li>
+            @endforeach
+          </ul>
+        </div>
+        <p class="mt-8 sm:mt-10 text-center text-zinc-400 text-base sm:text-lg">We've got you</p>
+      </div>
+    </section>
+
     <!-- Upcoming Events: sleek glass cards -->
     <section id="upcoming" class="relative py-16 sm:py-20">
         <div class="max-w-7xl mx-auto px-6">
@@ -50,8 +74,16 @@
                             <span class="sr-only">Open {{ $event->title }}</span>
                         </a>
                         <div class="relative aspect-[10/13]">
-                            @if($event->image_path)
-                                <img src="{{ Storage::url($event->image_path) }}" alt="{{ $event->title }}" class="absolute inset-0 h-full w-full object-cover group-hover:scale-105 duration-500 ease-out"/>
+                            @php
+                                $imgSrc = null;
+                                try {
+                                    if ($event->image_path && Storage::disk('public')->exists($event->image_path)) {
+                                        $imgSrc = Storage::url($event->image_path);
+                                    }
+                                } catch (\Throwable $e) { $imgSrc = null; }
+                            @endphp
+                            @if($imgSrc)
+                                <img src="{{ $imgSrc }}" alt="{{ $event->title }}" class="absolute inset-0 h-full w-full object-cover group-hover:scale-105 duration-500 ease-out"/>
                             @else
                                 <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-rose-500"></div>
                             @endif
@@ -133,7 +165,7 @@
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <!-- Step 1 -->
-                <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-6">
+                <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-8">
                     <div class="flex items-center gap-3">
                         <div class="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white flex items-center justify-center font-extrabold">1</div>
                         <h3 class="text-lg font-semibold">Pick an event</h3>
@@ -142,7 +174,7 @@
                     <div class="mt-4 text-zinc-400 text-xs">No account required.</div>
                 </div>
                 <!-- Step 2 -->
-                <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-6">
+                <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-8">
                     <div class="flex items-center gap-3">
                         <div class="h-9 w-9 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-white flex items-center justify-center font-extrabold">2</div>
                         <h3 class="text-lg font-semibold">Checkout securely</h3>
@@ -154,7 +186,7 @@
                     </ul>
                 </div>
                 <!-- Step 3 -->
-                <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-6">
+                <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-8">
                     <div class="flex items-center gap-3">
                         <div class="h-9 w-9 rounded-full bg-gradient-to-br from-rose-500 to-orange-500 text-white flex items-center justify-center font-extrabold">3</div>
                         <h3 class="text-lg font-semibold">Get your ticket</h3>
@@ -216,129 +248,84 @@
     </section>
 
     <!-- Host with us -->
-    <section id="host" class="py-20">
-        <div class="max-w-7xl mx-auto px-6">
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-start">
-                <!-- Left: Pitch card -->
-<div class="relative">
-<div class="absolute -inset-[10px] rounded-[1.7rem] bg-gradient-to-r from-purple-500/40 via-fuchsia-500/30 to-purple-400/40 blur-lg -z-10 pointer-events-none"></div>
-    <div class="rounded-[1.6rem] p-[3px] bg-gradient-to-r from-purple-600 via-fuchsia-500 to-purple-400">
-        <div class="rounded-[1.55rem] bg-white/5" style="padding: 15px 15px 0 15px;">
-                    <h3 class="text-3xl sm:text-4xl font-extrabold">Host with us</h3>
-                    <p class="mt-3 text-zinc-300">Plan the vibe, we’ll handle ticketing, payments, and guest experience.</p>
-                    <ul class="mt-6 space-y-3 text-sm text-zinc-300">
-                        <li class="flex items-start gap-3">
-                            <svg class="h-5 w-5 text-emerald-300" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-7 9a.75.75 0 01-1.127.07l-3-3a.75.75 0 011.06-1.06l2.39 2.39 6.473-8.317a.75.75 0 011.06-.135z" clip-rule="evenodd"/></svg>
-                            Instant payouts and Paystack checkout
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg class="h-5 w-5 text-emerald-300" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-7 9a.75.75 0 01-1.127.07l-3-3a.75.75 0 011.06-1.06l2.39 2.39 6.473-8.317a.75.75 0 011.06-.135z" clip-rule="evenodd"/></svg>
-                            QR-code tickets and capacity protection
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg class="h-5 w-5 text-emerald-300" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-7 9a.75.75 0 01-1.127.07l-3-3a.75.75 0 011.06-1.06l2.39 2.39 6.473-8.317a.75.75 0 011.06-.135z" clip-rule="evenodd"/></svg>
-                            Coupons, early-bird pricing, CSV exports
-                        </li>
-                    </ul>
-                    @if (session('status'))
-                        <div class="mt-6 p-3 rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/30 text-emerald-300">{{ session('status') }}</div>
-                    @endif
-                    @if ($errors->any())
-                        <div class="mt-4 p-3 rounded-lg bg-red-500/10 ring-1 ring-red-500/30 text-red-300">
-                            <ul class="list-disc list-inside">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+    <section id="host" class="py-16 sm:py-20">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+          <!-- Minimal left card -->
+          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-10">
+            <h3 class="text-3xl sm:text-4xl font-bold">Host with us</h3>
+            <p class="mt-2 text-zinc-300">Plan the vibe, we’ll handle ticketing, payments, and check‑ins.</p>
+            <ul class="mt-6 space-y-2 text-sm text-zinc-300">
+              <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Instant payouts with Paystack</li>
+              <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>QR tickets and capacity protection</li>
+              <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Coupons, early‑bird, CSV exports</li>
+            </ul>
+            @if (session('status'))
+              <div class="mt-6 rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-300 px-3 py-2">{{ session('status') }}</div>
+            @endif
+            @if ($errors->any())
+              <div class="mt-4 rounded-lg bg-red-500/10 ring-1 ring-red-500/20 text-red-300 px-3 py-2">
+                <ul class="list-disc list-inside">
+                  @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                  @endforeach
+                </ul>
+              </div>
+            @endif
+          </div>
 
-                    <div class="mt-6 -mb-[3px] flex justify-center">
-<img src="/images/Group%202.png" alt="Host with us" loading="lazy" decoding="async" width="1200" height="800" class="w-full max-w-md h-auto max-h-80 object-contain rounded-2xl" />
-                    </div>
-                </div>
+          <!-- Minimal form card -->
+          <div>
+            <form method="POST" action="{{ route('host.request.store') }}" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-8 sm:p-10 lg:p-12 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              @csrf
+              <div>
+                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="name">Your name</label>
+                <input id="name" name="name" type="text" required value="{{ old('name') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
+              </div>
+              <div>
+                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="email">Email</label>
+                <input id="email" name="email" type="email" required value="{{ old('email') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
+              </div>
+              <div>
+                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="phone">Phone</label>
+                <input id="phone" name="phone" type="text" value="{{ old('phone') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
+              </div>
+              <div>
+                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="event_title">Event name</label>
+                <input id="event_title" name="event_title" type="text" required value="{{ old('event_title') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
+              </div>
+              <div>
+                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="event_date">Event date</label>
+                <input id="event_date" name="event_date" type="datetime-local" min="{{ now()->format('Y-m-d\\TH:i') }}" value="{{ old('event_date') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
+              </div>
+              <div>
+                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="venue">Venue / City</label>
+                <input id="venue" name="venue" type="text" value="{{ old('venue') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
+              </div>
+              <div>
+                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="expected_attendees">Expected attendees</label>
+                <input id="expected_attendees" name="expected_attendees" type="number" min="1" value="{{ old('expected_attendees') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
+              </div>
+              <div>
+                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="budget">Budget (₦)</label>
+                <input id="budget" name="budget" type="number" step="0.01" min="0" value="{{ old('budget') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="message">Tell us about the event</label>
+                <textarea id="message" name="message" rows="5" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0">{{ old('message') }}</textarea>
+              </div>
+              <div class="sm:col-span-2">
+                <button class="mx-auto inline-flex items-center justify-center px-7 py-3 rounded-full bg-white text-black font-semibold hover:bg-zinc-100">Submit request</button>
+              </div>
+            </form>
+          </div>
         </div>
-</div>
-
-                <!-- Right: Modern form card -->
-                <div class="relative">
-                    <div class="rounded-[1.6rem] border-2 border-white p-[2px] bg-transparent shadow-none">
-<form method="POST" action="{{ route('host.request.store') }}" class="host-form rounded-[1.55rem] bg-white/5 border border-white/30 grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 w-full md:max-w-2xl mx-auto" style="padding:15px;">
-                        @csrf
-                        <div class="sm:col-span-1">
-                            <label class="block text-xs uppercase tracking-widest text-zinc-400" for="name">Your name</label>
-<input id="name" name="name" type="text" required value="{{ old('name') }}" class="mt-2 block w-full px-0 py-3" />
-                        </div>
-                        <div class="sm:col-span-1">
-                            <label class="block text-xs uppercase tracking-widest text-zinc-400" for="email">Email</label>
-<input id="email" name="email" type="email" required value="{{ old('email') }}" class="mt-2 block w-full px-0 py-3" />
-                        </div>
-                        <div class="sm:col-span-1">
-                            <label class="block text-xs uppercase tracking-widest text-zinc-400" for="phone">Phone</label>
-<input id="phone" name="phone" type="text" value="{{ old('phone') }}" class="mt-2 block w-full px-0 py-3" />
-                        </div>
-                        <div class="sm:col-span-1">
-                            <label class="block text-xs uppercase tracking-widest text-zinc-400" for="event_title">Event name</label>
-<input id="event_title" name="event_title" type="text" required value="{{ old('event_title') }}" class="mt-2 block w-full px-0 py-3" />
-                        </div>
-                        <div class="sm:col-span-1">
-                            <label class="block text-xs uppercase tracking-widest text-zinc-400" for="event_date">Event date</label>
-<input id="event_date" name="event_date" type="datetime-local" min="{{ now()->format('Y-m-d\\TH:i') }}" value="{{ old('event_date') }}" class="mt-2 block w-full px-0 py-3" />
-                        </div>
-                        <div class="sm:col-span-1">
-                            <label class="block text-xs uppercase tracking-widest text-zinc-400" for="venue">Venue / City</label>
-<input id="venue" name="venue" type="text" value="{{ old('venue') }}" class="mt-2 block w-full px-0 py-3" />
-                        </div>
-                        <div class="sm:col-span-1">
-                            <label class="block text-xs uppercase tracking-widest text-zinc-400" for="expected_attendees">Expected attendees</label>
-<input id="expected_attendees" name="expected_attendees" type="number" min="1" value="{{ old('expected_attendees') }}" class="mt-2 block w-full px-0 py-3" />
-                        </div>
-                        <div class="sm:col-span-1">
-                            <label class="block text-xs uppercase tracking-widest text-zinc-400" for="budget">Budget (₦)</label>
-<input id="budget" name="budget" type="number" step="0.01" min="0" value="{{ old('budget') }}" class="mt-2 block w-full px-0 py-3" />
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs uppercase tracking-widest text-zinc-400" for="message">Tell us about the event</label>
-<textarea id="message" name="message" rows="5" class="mt-2 block w-full px-0 py-3">{{ old('message') }}</textarea>
-                        </div>
-                        <div class="sm:col-span-2">
-<button class="mx-auto inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-white text-black font-semibold hover:bg-zinc-100 transition">Submit request</button>
-                        </div>
-                    </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </section>
 
     <!-- Flatpickr (modern date/time picker) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <style>
-      /* Host with us form: line inputs */
-      .host-form input[type="text"],
-      .host-form input[type="email"],
-      .host-form input[type="number"],
-      .host-form input[type="datetime-local"],
-      .host-form textarea {
-        -webkit-tap-highlight-color: transparent;
-        background: transparent !important;
-        border: none !important;
-        border-bottom: 1px solid #FFFFFF !important;
-        opacity: 0.9;
-        border-radius: 0 !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        box-shadow: none !important;
-      }
-      .host-form input:focus,
-      .host-form textarea:focus {
-        outline: none !important;
-        border-bottom-color: #FFFFFF !important;
-        opacity: 1;
-      }
-      .host-form ::placeholder { color: rgba(255,255,255,0.5); }
-    </style>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         const el = document.getElementById('event_date');
