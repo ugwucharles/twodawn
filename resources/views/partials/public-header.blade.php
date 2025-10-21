@@ -1,4 +1,4 @@
-<header class="absolute inset-x-0 top-3 z-50" x-data="{ open:false }" @keydown.window.escape="open=false">
+<header class="absolute inset-x-0 top-3 z-50" x-data="{ open:false }" x-init="window.addEventListener('pageshow', () => open = false); window.addEventListener('popstate', () => open = false);" @keydown.window.escape="open=false">
   <div class="mx-auto max-w-7xl px-6">
     <div class="h-14 grid grid-cols-3 items-center">
       <!-- Brand -->
@@ -25,10 +25,10 @@
   </div>
 
   <!-- Overlay -->
-  <div x-show="open" x-transition.opacity class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden" @click="open=false" aria-hidden="true"></div>
+  <div x-show="open" x-transition.opacity class="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 md:hidden" @click="open=false" aria-hidden="true"></div>
 
   <!-- Right drawer -->
-  <aside x-show="open" x-transition:enter="transition transform ease-out duration-150" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition transform ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" class="fixed inset-y-0 right-0 w-72 max-w-[85vw] bg-zinc-950/95 border-l border-white/10 z-50 p-6 md:hidden">
+  <aside x-show="open" x-transition:enter="transition transform ease-out duration-150" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition transform ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" class="fixed inset-y-0 right-0 w-72 max-w-[85vw] bg-zinc-950/95 border-l border-white/10 z-70 p-6 md:hidden">
     <div class="flex items-center justify-between">
       <span class="text-base font-extrabold text-white">Menu</span>
       <button type="button" class="text-zinc-300 hover:text-white" aria-label="Close menu" @click="open=false">
@@ -36,10 +36,10 @@
       </button>
     </div>
     <nav class="mt-6 grid gap-2 text-sm text-zinc-200">
-      <a href="{{ route('events.index') }}" class="rounded px-3 py-2 hover:bg-white/5">Events</a>
-      <a href="{{ route('events.recent') }}" class="rounded px-3 py-2 hover:bg-white/5">Recent</a>
-      <a href="{{ url('/#how-to-buy') }}" class="rounded px-3 py-2 hover:bg-white/5">How it works</a>
-      <a href="{{ url('/#host') }}" class="rounded px-3 py-2 hover:bg-white/5">Host</a>
+      <a href="{{ route('events.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Events</a>
+      <a href="{{ route('events.recent') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Recent</a>
+      <a href="{{ url('/#how-to-buy') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">How it works</a>
+      <a href="{{ url('/#host') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Host</a>
     </nav>
   </aside>
 </header>
