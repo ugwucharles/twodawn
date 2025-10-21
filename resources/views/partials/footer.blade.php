@@ -6,13 +6,16 @@
         <span class="hidden md:inline text-zinc-700">•</span>
         <span class="text-sm">© {{ date('Y') }} All rights reserved.</span>
       </div>
-      <nav class="order-1 md:order-2 flex items-center md:justify-end justify-center gap-6 text-sm text-zinc-300">
-        <a href="{{ url('/') }}" class="hover:text-white">Home</a>
-        <a href="{{ route('events.index') }}" class="hover:text-white">Events</a>
-        <a href="{{ route('events.recent') }}" class="hover:text-white">Recent</a>
-        <a href="{{ url('/#how-to-buy') }}" class="hover:text-white">How it works</a>
-        <a href="{{ url('/#host') }}" class="hover:text-white">Host</a>
-      </nav>
+      <div class="order-1 md:order-2 flex flex-col items-center">
+        <nav class="flex items-center justify-center gap-6 text-sm text-zinc-300">
+          <a href="{{ url('/') }}" class="hover:text-white">Home</a>
+          <a href="{{ route('events.index') }}" class="hover:text-white">Events</a>
+          <a href="{{ route('events.recent') }}" class="hover:text-white">Recent</a>
+          <a href="{{ url('/#how-to-buy') }}" class="hover:text-white">How it works</a>
+          <a href="{{ url('/#host') }}" class="hover:text-white">Host</a>
+        </nav>
+        <div class="mt-2 text-xs text-zinc-400">2DAWN • © 2025 All rights reserved.</div>
+      </div>
     </div>
   </div>
 </footer>

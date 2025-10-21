@@ -89,53 +89,6 @@
     </div>
 
     <div class="mt-10">{{ $events->links() }}</div>
-
-    <!-- Recent events (past 30 days) -->
-    <section id="recent" class="mt-16">
-      <div class="mb-6 w-full flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <h2 class="text-2xl sm:text-3xl font-bold">Recent Events</h2>
-        <div class="flex items-center justify-between sm:justify-start sm:gap-4 text-xs sm:text-sm text-zinc-300">
-          <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-white/5 ring-1 ring-white/10">Past 30 days</span>
-          <a href="{{ route('events.recent') }}" class="hover:text-white">View all recent →</a>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        @forelse ($recentEvents as $recent)
-          @php
-            $year = optional($recent->starts_at)?->format('Y');
-            $minutes = ($recent->starts_at && $recent->ends_at) ? $recent->starts_at->diffInMinutes($recent->ends_at) : null;
-            $duration = $minutes ? (int) floor($minutes/60).'h '.($minutes%60).'m' : null;
-          @endphp
-          <div class="group relative rounded-3xl overflow-hidden ring-1 ring-white/10 hover:ring-white/20 transition ticket-notch" data-tilt data-tilt-max="6">
-            <a href="{{ route('events.show', $recent) }}" class="absolute inset-0 z-10">
-              <span class="sr-only">Open {{ $recent->title }}</span>
-            </a>
-          <div class="card-aspect">
-              @if($recent->image_path)
-                <img src="{{ Storage::url($recent->image_path) }}" alt="{{ $recent->title }}" class="absolute inset-0 h-full w-full object-cover group-hover:scale-105 duration-500 ease-out"/>
-              @else
-                <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-rose-500"></div>
-              @endif
-              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-              <div class="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                <div class="flex items-center justify-between">
-                  <h3 class="text-white font-semibold truncate">{{ $recent->title }}</h3>
-                  <span class="px-2 py-0.5 rounded-full text-xs bg-white/10 ring-1 ring-white/15">Ended</span>
-                </div>
-                <div class="mt-1 text-zinc-300 text-xs sm:text-sm truncate">
-                  {{ $year ?? '—' }}@if($recent->venue) • {{ $recent->venue }}@endif @if($duration) • {{ $duration }}@endif
-                </div>
-                <div class="mt-3 flex items-center justify-between">
-                  <a href="{{ route('events.show', $recent) }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-xs sm:text-sm font-medium hover:bg-zinc-100 transition">View</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        @empty
-          <div class="col-span-full text-center text-zinc-400 py-10">No recent events.</div>
-        @endforelse
-      </div>
-    </section>
   </div>
 
 <script>

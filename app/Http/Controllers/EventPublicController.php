@@ -44,22 +44,8 @@ class EventPublicController extends Controller
             $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
         })->orderBy('starts_at')->paginate(12);
 
-        $recentEvents = Event::query()->where('is_published', true)
-            ->where(function($q){
-                $q->where(function($q2){
-                    $q2->whereNotNull('ends_at')
-                       ->whereBetween('ends_at', [now()->subMonth(), now()]);
-                })->orWhere(function($q3){
-                    $q3->whereNull('ends_at')
-                       ->whereBetween('starts_at', [now()->subMonth(), now()]);
-                });
-            })
-            ->orderByDesc('starts_at')
-            ->take(9)
-            ->get();
-
-        return view('events.index', compact('events','recentEvents'));
-}
+        return view('events.index', compact('events'));
+    }
 
     public function recent()
     {
