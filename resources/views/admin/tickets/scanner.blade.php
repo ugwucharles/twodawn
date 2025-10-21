@@ -114,6 +114,7 @@
 
     // Camera scanner
     let scanner = null; let running = false; let lastText = '';
+    let preferredCameraId = null;
     const camSelect = document.getElementById('camera-select');
 
     async function listCamerasHtml5(){
@@ -186,37 +187,31 @@
       if (running) return;
       clearError();
       try {
-        await preflight();
-        // Try html5-qrcode first
         await ensureHtml5Qrcode();
-        if (!scanner) scanner = new Html5Qrcode('qr-reader');
-        await listCamerasHtml5();
-        let camId = camSelect.value || null;
-        if (!camId) {
-          try {
-            const cams = await Html5Qrcode.getCameras();
-            camId = cams.find(c => /back|rear|environment/i.test(c.label))?.id || (cams[0]?.id) || null;
-          } catch(e) { /* ignore */ }
+        scanner = new Html5Qrcode('qr-reader');
+        const devices = await Html5Qrcode.getCameras();
+        if (!devices || !devices.length) throw new Error('No camera');
+        // populate selector (optional)
+        if (camSelect) {
+          camSelect.innerHTML = '';
+          devices.forEach(d => { const o=document.createElement('option'); o.value=d.id; o.textContent=d.label||'Camera'; camSelect.appendChild(o); });
         }
-        const config = {
-          fps: 12,
-          qrbox: 400,
-          rememberLastUsedCamera: true,
-          aspectRatio: 1.0,
-          formatsToSupport: window.Html5QrcodeSupportedFormats ? [Html5QrcodeSupportedFormats.QR_CODE] : undefined,
-          disableFlip: false,
-          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-          videoConstraints: { facingMode: 'environment', width: { ideal: 1280 }, focusMode: 'continuous', advanced: [{ torch: true }] }
-        };
-        const onSuccess = async (decodedText) => { if (!decodedText || decodedText === lastText) return; lastText = decodedText; await verify(decodedText); };
-        const onErr = (_) => {};
-        if (camId) { await scanner.start(camId, config, onSuccess, onErr); }
-        else { await scanner.start({ facingMode: { exact: 'environment' } }, config, onSuccess, onErr).catch(() => scanner.start({ facingMode: 'environment' }, config, onSuccess, onErr)); }
+        // prefer back camera if label hints, else index 1, else 0
+        let cameraId = preferredCameraId
+          || (devices.find(d => /back|rear|environment/i.test(d.label||''))?.id)
+          || (devices.length>1 ? devices[1].id : devices[0].id);
+        await scanner.start(
+          cameraId,
+          { fps: 10, qrbox: 250 },
+          async (qrText) => { await verify(qrText); },
+          (_) => {}
+        );
         running = true;
-      } catch (e1) {
-        // Fallback to native detector
-        try { await startNative(); }
-        catch(e2){ showError('Camera permission blocked or unsupported. Click Retry after allowing in the address bar.'); retryBtn?.classList.remove('hidden'); retryBtn?.addEventListener('click', async () => { retryBtn.classList.add('hidden'); await stop(); start(); }, { once: true }); }
+        retryBtn?.classList.add('hidden');
+      } catch (err) {
+        showError('Camera access denied. Please reload and allow camera, then click Retry.');
+        retryBtn?.classList.remove('hidden');
+        retryBtn?.onclick = async () => { retryBtn.classList.add('hidden'); await stop(); start(); };
       }
     }
     async function stop(){
@@ -226,7 +221,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => { start(); });
-    camSelect?.addEventListener('change', async () => { await stop(); start(); });
+    camSelect?.addEventListener('change', async () => { preferredCameraId = camSelect.value; await stop(); start(); });
     window.addEventListener('visibilitychange', async () => { if (document.hidden) { await stop(); } else { start(); } });
   </script>
 </x-app-layout>
