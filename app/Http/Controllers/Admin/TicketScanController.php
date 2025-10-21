@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
+use App\Models\Order;
 
 class TicketScanController extends Controller
 {
@@ -20,36 +21,46 @@ class TicketScanController extends Controller
         ]);
         $code = trim($data['code']);
 
-        $ticket = Ticket::with(['event','order'])->where('code', $code)->first();
-        if (! $ticket) {
+        // Handle ticket code (T-...) or order reference (PA_...)
+        if (str_starts_with($code, 'T-')) {
+            $ticket = Ticket::with(['event','order'])->where('code', $code)->first();
+            if (! $ticket) {
+                return response()->json([
+                    'ok' => false,
+                    'status' => 'not_found',
+                    'message' => 'Ticket not found',
+                ], 404);
+            }
+            $already = !is_null($ticket->redeemed_at);
+            if (! $already) { $ticket->redeemed_at = now(); $ticket->save(); }
+            return response()->json([
+                'ok' => true,
+                'kind' => 'ticket',
+                'status' => $already ? 'already_redeemed' : 'redeemed',
+                'code' => $ticket->code,
+                'redeemed_at' => optional($ticket->redeemed_at)->toIso8601String(),
+                'event' => [ 'id' => $ticket->event?->id, 'title' => $ticket->event?->title ],
+                'buyer' => [ 'name' => $ticket->order?->buyer_name, 'email' => $ticket->order?->buyer_email ],
+            ]);
+        }
+
+        // Otherwise treat as order reference
+        $order = Order::with('event')->where('paystack_reference', $code)->first();
+        if (! $order) {
             return response()->json([
                 'ok' => false,
                 'status' => 'not_found',
-                'message' => 'Ticket not found',
+                'message' => 'Order not found',
             ], 404);
         }
-
-        $already = !is_null($ticket->redeemed_at);
-        if (! $already) {
-            $ticket->redeemed_at = now();
-            $ticket->save();
-        }
-
         return response()->json([
             'ok' => true,
-            'status' => $already ? 'already_redeemed' : 'redeemed',
-            'code' => $ticket->code,
-            'redeemed_at' => optional($ticket->redeemed_at)->toIso8601String(),
-            'event' => [
-                'id' => $ticket->event?->id,
-                'title' => $ticket->event?->title,
-                'starts_at' => optional($ticket->event?->starts_at)->toIso8601String(),
-            ],
-            'order' => [
-                'id' => $ticket->order?->id,
-                'buyer_name' => $ticket->order?->buyer_name,
-                'buyer_email' => $ticket->order?->buyer_email,
-            ],
+            'kind' => 'order',
+            'status' => $order->status,
+            'reference' => $order->paystack_reference,
+            'event' => [ 'id' => $order->event?->id, 'title' => $order->event?->title ],
+            'buyer' => [ 'name' => $order->buyer_name, 'email' => $order->buyer_email ],
+            'quantity' => $order->quantity,
         ]);
     }
 }

@@ -146,7 +146,7 @@ class CheckoutController extends Controller
 
     public function showByReference(string $reference)
     {
-        $order = Order::with(['event','tickets'])->where('paystack_reference', $reference)->first();
+        $order = Order::with(['event'])->where('paystack_reference', $reference)->first();
         if (! $order) {
             abort(404);
         }
@@ -196,13 +196,7 @@ class CheckoutController extends Controller
             return false;
         }
 
-        // Defer QR generation to the queue so the callback returns fast
-        try {
-            GenerateTickets::dispatch($order->id);
-        } catch (\Throwable $e) {
-            // If queue fails to dispatch, tickets will be missing until manual retry
-        }
-
+        // No ticket generation; we use order-level QR (reference) for check-in
         return true;
     }
 

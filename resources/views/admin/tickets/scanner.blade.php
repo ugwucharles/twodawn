@@ -11,7 +11,7 @@
         <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
           <div class="flex items-center justify-between mb-3">
             <div class="text-sm text-zinc-300">Camera scan</div>
-            <button id="btn-toggle" class="text-xs px-2 py-1 rounded bg-white/10 ring-1 ring-white/10 hover:bg-white/20">Start</button>
+            <div class="text-xs text-zinc-400">Auto-start</div>
           </div>
           <div id="qr-reader" class="rounded-xl overflow-hidden bg-black min-h-[320px] relative">
             <div id="scan-error" class="absolute inset-0 hidden items-center justify-center text-center text-sm text-red-300"></div>
@@ -61,7 +61,7 @@
       if (kind === 'ok') statusBadge.classList.add('bg-emerald-500/20','text-emerald-300','ring-1','ring-emerald-500/30');
       else if (kind === 'warn') statusBadge.classList.add('bg-yellow-500/20','text-yellow-300','ring-1','ring-yellow-500/30');
       else statusBadge.classList.add('bg-red-500/20','text-red-300','ring-1','ring-red-500/30');
-      statusBadge.textContent = (kind==='ok' ? 'Redeemed' : (kind==='warn' ? 'Already used' : 'Not found'));
+      statusBadge.textContent = (kind==='ok' ? 'OK' : (kind==='warn' ? 'Already used' : 'Not found'));
       resultText.textContent = text;
     }
 
@@ -73,15 +73,14 @@
           body: JSON.stringify({ code })
         });
         const data = await res.json();
-        if (!res.ok || !data.ok) {
-          showResult('err', 'Ticket not found');
-          return;
-        }
+        if (!res.ok || !data.ok) { showResult('err', 'Not found'); return; }
         const ev = data.event?.title || 'Event';
-        if (data.status === 'already_redeemed') {
-          showResult('warn', `${data.code} was already redeemed • ${ev}`);
+        if (data.kind === 'order') {
+          const buyer = data.buyer?.name || ''; const email = data.buyer?.email || '';
+          showResult('ok', `${ev} • ${buyer} (${email}) • Ref ${data.reference || ''}`);
         } else {
-          showResult('ok', `${data.code} redeemed • ${ev}`);
+          if (data.status === 'already_redeemed') showResult('warn', `${data.code} already used • ${ev}`);
+          else showResult('ok', `${data.code} redeemed • ${ev}`);
         }
       } catch (e) {
         showResult('err', 'Network error');
@@ -96,7 +95,6 @@
 
     // Camera scanner
     let scanner = null; let running = false; let lastText = '';
-    const btn = document.getElementById('btn-toggle');
     const camSelect = document.getElementById('camera-select');
 
     async function listCameras() {
@@ -144,15 +142,17 @@
           await scanner.start({ facingMode: { exact: 'environment' } }, config, onSuccess, onErr)
             .catch(() => scanner.start({ facingMode: 'environment' }, config, onSuccess, onErr));
         }
-        running = true; btn.textContent = 'Stop';
+        running = true;
       } catch (e) {
         showError('Cannot access camera. Please allow permission in the address bar settings and refresh (' + (e && e.message ? e.message : 'unknown error') + ').');
       }
     }
     async function stop(){
       try { if (!scanner || !running) return; await scanner.stop(); await scanner.clear(); } catch (e) { /* ignore */ }
-      running = false; btn.textContent = 'Start';
+      running = false;
     }
-    btn.addEventListener('click', () => running ? stop() : start());
+
+    document.addEventListener('DOMContentLoaded', () => { start(); });
+    camSelect?.addEventListener('change', async () => { await stop(); start(); });
   </script>
 </x-app-layout>
