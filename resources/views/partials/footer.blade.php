@@ -6,8 +6,8 @@
         <span class="hidden md:inline text-zinc-700">•</span>
         <span class="text-sm">© {{ date('Y') }} All rights reserved.</span>
       </div>
-      <div class="order-1 md:order-2 flex flex-col items-center">
-        <nav class="flex items-center justify-center gap-6 text-sm text-zinc-300">
+      <div class="order-1 md:order-2 flex flex-col items-center md:items-end">
+        <nav class="flex flex-wrap items-center justify-center md:justify-end gap-x-4 gap-y-2 text-sm text-zinc-300">
           <a href="{{ url('/') }}" class="hover:text-white">Home</a>
           <a href="{{ route('events.index') }}" class="hover:text-white">Events</a>
           <a href="{{ route('events.recent') }}" class="hover:text-white">Recent</a>
