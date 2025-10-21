@@ -116,17 +116,25 @@
     let scanner = null; let running = false; let lastText = '';
     const camSelect = document.getElementById('camera-select');
 
-    async function listCameras() {
+    async function listCamerasHtml5(){
+      const cams = await Html5Qrcode.getCameras();
+      camSelect.innerHTML = '';
+      if (!cams.length) { camSelect.innerHTML = '<option value="">No camera found</option>'; return; }
+      for (const c of cams) {
+        const opt = document.createElement('option'); opt.value = c.id; opt.textContent = c.label || 'Camera'; camSelect.appendChild(opt);
+      }
+    }
+
+    async function listCamerasNative(){
       try {
-        const cams = await Html5Qrcode.getCameras();
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cams = devices.filter(d => d.kind === 'videoinput');
         camSelect.innerHTML = '';
         if (!cams.length) { camSelect.innerHTML = '<option value="">No camera found</option>'; return; }
         for (const c of cams) {
-          const opt = document.createElement('option'); opt.value = c.id; opt.textContent = c.label || 'Camera'; camSelect.appendChild(opt);
+          const opt = document.createElement('option'); opt.value = c.deviceId; opt.textContent = c.label || 'Camera'; camSelect.appendChild(opt);
         }
-      } catch (e) {
-        camSelect.innerHTML = '<option value="">Select camera</option>';
-      }
+      } catch(e) { camSelect.innerHTML = '<option value="">Select camera</option>'; }
     }
 
     async function preflight() {
@@ -136,14 +144,53 @@
       } catch (e) { /* ignore; html5-qrcode will handle */ }
     }
 
+    // Native BarcodeDetector fallback
+    let nativeStream = null; let nativeDetector = null; let rafId = null; let videoEl = null;
+    async function startNative(){
+      try {
+        if (!('BarcodeDetector' in window)) throw new Error('BarcodeDetector not supported');
+        const supported = (typeof BarcodeDetector.getSupportedFormats === 'function') ? await BarcodeDetector.getSupportedFormats() : ['qr_code'];
+        if (supported && !supported.includes('qr_code')) throw new Error('QR format not supported');
+        await listCamerasNative();
+        const deviceId = camSelect.value || undefined;
+        const constraints = deviceId ? { video: { deviceId: { exact: deviceId } } } : { video: { facingMode: 'environment' } };
+        nativeStream = await navigator.mediaDevices.getUserMedia(constraints);
+        // Create video element
+        const host = document.getElementById('qr-reader');
+        host.innerHTML = '<video id="qr-video" playsinline style="width:100%;height:auto;object-fit:cover"></video>';
+        videoEl = document.getElementById('qr-video');
+        videoEl.srcObject = nativeStream; await videoEl.play();
+        nativeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+        const tick = async () => {
+          if (!videoEl || videoEl.readyState < 2) { rafId = requestAnimationFrame(tick); return; }
+          try {
+            const codes = await nativeDetector.detect(videoEl);
+            if (codes && codes.length) {
+              const text = codes[0].rawValue; if (text && text !== lastText) { lastText = text; redeem(text); setTimeout(()=>{ lastText=''; }, 1200); }
+            }
+          } catch(_){}
+          rafId = requestAnimationFrame(tick);
+        };
+        rafId = requestAnimationFrame(tick);
+        running = true;
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    async function stopNative(){
+      try { if (rafId) cancelAnimationFrame(rafId); rafId = null; if (videoEl) { videoEl.pause?.(); videoEl.srcObject = null; videoEl = null; } if (nativeStream) { nativeStream.getTracks().forEach(t=>t.stop()); nativeStream=null; } } catch(_){}
+    }
+
     async function start(){
       if (running) return;
       clearError();
       try {
         await preflight();
+        // Try html5-qrcode first
         await ensureHtml5Qrcode();
         if (!scanner) scanner = new Html5Qrcode('qr-reader');
-        await listCameras();
+        await listCamerasHtml5();
         let camId = camSelect.value || null;
         if (!camId) {
           try {
@@ -152,27 +199,25 @@
           } catch(e) { /* ignore */ }
         }
         const config = { fps: 12, qrbox: { width: 260, height: 260 }, rememberLastUsedCamera: true, aspectRatio: 1.7778 };
-        const onSuccess = (decodedText) => {
-          if (!decodedText || decodedText === lastText) return; lastText = decodedText; redeem(decodedText); setTimeout(() => { lastText=''; }, 1200);
-        };
-        const onErr = (err) => { /* noop */ };
-        if (camId) {
-          await scanner.start(camId, config, onSuccess, onErr);
-        } else {
-          await scanner.start({ facingMode: { exact: 'environment' } }, config, onSuccess, onErr)
-            .catch(() => scanner.start({ facingMode: 'environment' }, config, onSuccess, onErr));
-        }
+        const onSuccess = (decodedText) => { if (!decodedText || decodedText === lastText) return; lastText = decodedText; redeem(decodedText); setTimeout(() => { lastText=''; }, 1200); };
+        const onErr = (_) => {};
+        if (camId) { await scanner.start(camId, config, onSuccess, onErr); }
+        else { await scanner.start({ facingMode: { exact: 'environment' } }, config, onSuccess, onErr).catch(() => scanner.start({ facingMode: 'environment' }, config, onSuccess, onErr)); }
         running = true;
-      } catch (e) {
-        showError('Cannot access camera. Please allow permission in the address bar settings and refresh (' + (e && e.message ? e.message : 'unknown error') + ').');
+      } catch (e1) {
+        // Fallback to native detector
+        try { await startNative(); }
+        catch(e2){ showError('Cannot access camera (' + (e2 && e2.message ? e2.message : 'unknown') + ').'); }
       }
     }
     async function stop(){
-      try { if (!scanner || !running) return; await scanner.stop(); await scanner.clear(); } catch (e) { /* ignore */ }
+      try { if (scanner && running) { await scanner.stop(); await scanner.clear(); } } catch (e) { /* ignore */ }
+      await stopNative();
       running = false;
     }
 
     document.addEventListener('DOMContentLoaded', () => { start(); });
     camSelect?.addEventListener('change', async () => { await stop(); start(); });
+    window.addEventListener('visibilitychange', async () => { if (document.hidden) { await stop(); } else { start(); } });
   </script>
 </x-app-layout>
