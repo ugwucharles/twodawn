@@ -17,11 +17,9 @@
             <div id="scan-error" class="absolute inset-0 hidden items-center justify-center text-center text-sm text-red-300"></div>
           </div>
           <div class="mt-3 text-xs text-zinc-400">Grant camera permission. On desktop, prefer a USB/HD cam; on mobile, use the rear camera.</div>
-          <div class="mt-3">
-            <label class="inline-flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
-              <input id="file-input" type="file" accept="image/*" class="hidden">
-              <span class="px-2 py-1 rounded bg-white/10 ring-1 ring-white/10 hover:bg-white/20">Scan from image…</span>
-            </label>
+          <div class="mt-3 flex items-center gap-2 text-xs">
+            <label for="camera-select" class="text-zinc-300">Camera:</label>
+            <select id="camera-select" class="rounded bg-black/30 border border-white/10 px-2 py-1 text-zinc-200 min-w-[10rem]"></select>
           </div>
         </div>
 
@@ -96,51 +94,59 @@
       if (v) redeem(v);
     });
 
-    // Optional: scan from image file
-    const fileInput = document.getElementById('file-input');
-    if (fileInput) {
-      fileInput.addEventListener('change', async (e) => {
-        const file = e.target.files?.[0]; if (!file) return;
-        try {
-          if (!scanner) scanner = new Html5Qrcode('qr-reader');
-          const text = await scanner.scanFile(file, true);
-          if (text) redeem(text);
-        } catch (err) { showError('Could not read QR from image'); }
-      });
-      // Clicking the label triggers the input
-      fileInput.previousElementSibling?.addEventListener('click', () => fileInput.click());
-    }
-
     // Camera scanner
     let scanner = null; let running = false; let lastText = '';
     const btn = document.getElementById('btn-toggle');
+    const camSelect = document.getElementById('camera-select');
+
+    async function listCameras() {
+      try {
+        const cams = await Html5Qrcode.getCameras();
+        camSelect.innerHTML = '';
+        if (!cams.length) { camSelect.innerHTML = '<option value="">No camera found</option>'; return; }
+        for (const c of cams) {
+          const opt = document.createElement('option'); opt.value = c.id; opt.textContent = c.label || 'Camera'; camSelect.appendChild(opt);
+        }
+      } catch (e) {
+        camSelect.innerHTML = '<option value="">Select camera</option>';
+      }
+    }
+
+    async function preflight() {
+      try {
+        const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        s.getTracks().forEach(t => t.stop());
+      } catch (e) { /* ignore; html5-qrcode will handle */ }
+    }
+
     async function start(){
       if (running) return;
       clearError();
       try {
+        await preflight();
         if (!scanner) scanner = new Html5Qrcode('qr-reader');
-        // Try deviceId first
-        let camId = null; try {
-          const cameras = await Html5Qrcode.getCameras();
-          camId = cameras.find(c => /back|rear|environment/i.test(c.label))?.id || (cameras[0]?.id) || null;
-        } catch (e) { /* ignore */ }
-        const config = { fps: 12, qrbox: { width: 260, height: 260 }, rememberLastUsedCamera: true, aspectRatio: 1.7778 }; 
+        await listCameras();
+        let camId = camSelect.value || null;
+        if (!camId) {
+          try {
+            const cams = await Html5Qrcode.getCameras();
+            camId = cams.find(c => /back|rear|environment/i.test(c.label))?.id || (cams[0]?.id) || null;
+          } catch(e) { /* ignore */ }
+        }
+        const config = { fps: 12, qrbox: { width: 260, height: 260 }, rememberLastUsedCamera: true, aspectRatio: 1.7778 };
         const onSuccess = (decodedText) => {
-          if (!decodedText || decodedText === lastText) return; lastText = decodedText;
-          redeem(decodedText);
-          setTimeout(() => { lastText = ''; }, 1200);
+          if (!decodedText || decodedText === lastText) return; lastText = decodedText; redeem(decodedText); setTimeout(() => { lastText=''; }, 1200);
         };
         const onErr = (err) => { /* noop */ };
         if (camId) {
           await scanner.start(camId, config, onSuccess, onErr);
         } else {
-          // Fallback: facingMode
           await scanner.start({ facingMode: { exact: 'environment' } }, config, onSuccess, onErr)
             .catch(() => scanner.start({ facingMode: 'environment' }, config, onSuccess, onErr));
         }
         running = true; btn.textContent = 'Stop';
       } catch (e) {
-        showError('Cannot access camera. Allow permission or use "Scan from image".');
+        showError('Cannot access camera. Please allow permission in the address bar settings and refresh (' + (e && e.message ? e.message : 'unknown error') + ').');
       }
     }
     async function stop(){
