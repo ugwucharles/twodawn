@@ -1,39 +1,51 @@
-<header class="fixed top-3 left-0 right-0 z-50">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6">
-    <div x-data="{ open:false }" class="relative mx-auto w-full sm:w-[92%] md:w-[75%] rounded-full bg-white/95 backdrop-blur-sm ring-1 ring-zinc-200 px-3 py-2 text-black shadow">
-      <div class="flex items-center justify-between">
-        <a href="{{ route('admin.dashboard') }}" class="text-lg font-extrabold tracking-tight">2<span class="text-purple-600">DAWN</span> <span class="text-zinc-600">Admin</span></a>
-        <button class="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-zinc-700 hover:bg-zinc-100" @click="open=!open" aria-label="Toggle menu">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+<header class="absolute inset-x-0 top-3 z-50" x-data="{ open:false }" x-init="window.addEventListener('pageshow', () => open = false); window.addEventListener('popstate', () => open = false);" @keydown.window.escape="open=false">
+  <div class="mx-auto max-w-7xl px-6">
+    <div class="h-14 grid grid-cols-3 items-center">
+      <!-- Brand -->
+      <a href="{{ route('admin.dashboard') }}" class="justify-self-start inline-flex items-center h-14 leading-none text-lg font-extrabold tracking-tight text-white">2<span class="text-indigo-400">DAWN</span> <span class="hidden sm:inline text-zinc-300">Admin</span></a>
+
+      <!-- Center nav (hidden on small) -->
+      <nav class="justify-self-center hidden md:flex h-14 items-center justify-center gap-6 text-sm text-zinc-200">
+        <a href="{{ route('admin.dashboard') }}" class="hover:text-white {{ request()->routeIs('admin.dashboard') ? 'text-white font-semibold' : '' }}">Dashboard</a>
+        <a href="{{ route('admin.events.index') }}" class="hover:text-white {{ request()->routeIs('admin.events.*') ? 'text-white font-semibold' : '' }}">Events</a>
+        <a href="{{ route('admin.orders.index') }}" class="hover:text-white {{ request()->routeIs('admin.orders.*') ? 'text-white font-semibold' : '' }}">Orders</a>
+        <a href="{{ route('admin.host-requests.index') }}" class="hover:text-white {{ request()->routeIs('admin.host-requests.*') ? 'text-white font-semibold' : '' }}">Host Requests</a>
+        <a href="{{ route('admin.comments.index') }}" class="hover:text-white {{ request()->routeIs('admin.comments.*') ? 'text-white font-semibold' : '' }}">Comments</a>
+        <a href="{{ route('admin.events.create') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black hover:bg-zinc-100 transition">New Event</a>
+      </nav>
+
+      <!-- Right: hamburger on mobile (no search) -->
+      <div class="col-start-3 justify-self-end flex items-center h-14 gap-4" :class="{ 'invisible pointer-events-none': open }">
+        <button type="button" class="md:hidden text-zinc-200 hover:text-white" aria-label="Open menu" @click="open=true">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 align-middle" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
-        <nav class="hidden sm:flex items-center gap-4 text-sm">
-          <a href="{{ route('admin.dashboard') }}" class="px-1 {{ request()->routeIs('admin.dashboard') ? 'text-black font-semibold' : 'text-zinc-700 hover:text-black' }}">Dashboard</a>
-          <a href="{{ route('admin.events.index') }}" class="px-1 {{ request()->routeIs('admin.events.*') ? 'text-black font-semibold' : 'text-zinc-700 hover:text-black' }}">Events</a>
-          <a href="{{ route('admin.orders.index') }}" class="px-1 {{ request()->routeIs('admin.orders.*') ? 'text-black font-semibold' : 'text-zinc-700 hover:text-black' }}">Orders</a>
-          <a href="{{ route('admin.host-requests.index') }}" class="px-1 {{ request()->routeIs('admin.host-requests.*') ? 'text-black font-semibold' : 'text-zinc-700 hover:text-black' }}">Requests</a>
-          <a href="{{ route('admin.comments.index') }}" class="px-1 {{ request()->routeIs('admin.comments.*') ? 'text-black font-semibold' : 'text-zinc-700 hover:text-black' }}">Comments</a>
-          <a href="{{ route('admin.events.create') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-black text-white hover:opacity-90 transition">New Event</a>
-          <form method="POST" action="{{ route('logout') }}" class="inline">
-            @csrf
-            <button type="submit" class="text-zinc-700 hover:text-black">Logout</button>
-          </form>
-        </nav>
-      </div>
-      <!-- Mobile menu -->
-      <div x-show="open" x-transition class="sm:hidden absolute left-0 right-0 top-full mt-2">
-        <div class="mx-auto w-[96%] rounded-2xl bg-white ring-1 ring-zinc-200 p-4 space-y-2 text-sm">
-          <a href="{{ route('admin.dashboard') }}" class="block {{ request()->routeIs('admin.dashboard') ? 'text-black font-semibold' : 'text-zinc-700 hover:text-black' }}">Dashboard</a>
-          <a href="{{ route('admin.events.index') }}" class="block {{ request()->routeIs('admin.events.*') ? 'text-black font-semibold' : 'text-zinc-700 hover:text-black' }}">Events</a>
-          <a href="{{ route('admin.orders.index') }}" class="block {{ request()->routeIs('admin.orders.*') ? 'text-black font-semibold' : 'text-zinc-700 hover:text-black' }}">Orders</a>
-          <a href="{{ route('admin.host-requests.index') }}" class="block {{ request()->routeIs('admin.host-requests.*') ? 'text-black font-semibold' : 'text-zinc-700 hover:text-black' }}">Requests</a>
-          <a href="{{ route('admin.comments.index') }}" class="block {{ request()->routeIs('admin.comments.*') ? 'text-black font-semibold' : 'text-zinc-700 hover:text-black' }}">Comments</a>
-          <a href="{{ route('admin.events.create') }}" class="block text-center px-4 py-2 rounded-full bg-black text-white">New Event</a>
-          <form method="POST" action="{{ route('logout') }}" class="block pt-2">
-            @csrf
-            <button type="submit" class="w-full text-left text-zinc-700 hover:text-black">Logout</button>
-          </form>
-        </div>
       </div>
     </div>
   </div>
+
+  <!-- Overlay -->
+  <div x-show="open" x-transition.opacity class="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 md:hidden" @click="open=false" aria-hidden="true"></div>
+
+  <!-- Right drawer -->
+  <aside x-show="open" x-transition:enter="transition transform ease-out duration-150" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition transform ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" class="fixed inset-y-0 right-0 w-72 max-w-[85vw] bg-zinc-950/95 border-l border-white/10 z-70 p-6 md:hidden">
+    <div class="flex items-center justify-between">
+      <span class="text-base font-extrabold text-white">Menu</span>
+      <button type="button" class="text-zinc-300 hover:text-white" aria-label="Close menu" @click="open=false">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
+    </div>
+    <nav class="mt-6 grid gap-2 text-sm text-zinc-200">
+      <a href="{{ route('admin.dashboard') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Dashboard</a>
+      <a href="{{ route('admin.events.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Events</a>
+      <a href="{{ route('admin.orders.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Orders</a>
+      <a href="{{ route('admin.host-requests.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Host Requests</a>
+      <a href="{{ route('admin.comments.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Comments</a>
+      <a href="{{ route('admin.events.create') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">New Event</a>
+      <a href="{{ route('profile.edit') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Profile</a>
+      <form method="POST" action="{{ route('logout') }}" class="pt-2">
+        @csrf
+        <button type="submit" class="w-full text-left rounded px-3 py-2 hover:bg-white/5">Logout</button>
+      </form>
+    </nav>
+  </aside>
 </header>
