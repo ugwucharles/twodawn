@@ -2,10 +2,10 @@
   <div class="mx-auto max-w-7xl px-6">
     <div class="h-14 grid grid-cols-3 items-center">
       <!-- Brand -->
-      <a href="{{ url('/') }}" class="justify-self-start text-lg font-extrabold tracking-tight text-white">2<span class="text-indigo-400">DAWN</span></a>
+      <a href="{{ url('/') }}" class="justify-self-start inline-flex items-center h-14 leading-none text-lg font-extrabold tracking-tight text-white">2<span class="text-indigo-400">DAWN</span></a>
 
       <!-- Center nav (hidden on small) -->
-      <nav class="justify-self-center hidden md:flex items-center justify-center gap-6 text-sm text-zinc-200">
+      <nav class="justify-self-center hidden md:flex h-14 items-center justify-center gap-6 text-sm text-zinc-200">
         <a href="{{ route('events.index') }}" class="hover:text-white">Events</a>
         <a href="{{ route('events.recent') }}" class="hover:text-white">Recent</a>
         <a href="{{ url('/#how-to-buy') }}" class="hover:text-white">How it works</a>
@@ -13,12 +13,12 @@
       </nav>
 
       <!-- Right: search + hamburger on mobile -->
-      <div class="fixed right-4 top-4 z-[60] md:static md:justify-self-end flex items-center gap-4">
+      <div class="md:justify-self-end flex items-center h-14 gap-4">
         <a href="{{ route('events.index') }}" aria-label="Search" class="text-zinc-200 hover:text-white">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 align-middle" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/></svg>
         </a>
         <button type="button" class="md:hidden text-zinc-200 hover:text-white" aria-label="Open menu" @click="open=true">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 align-middle" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
       </div>
     </div>
