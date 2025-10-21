@@ -2,7 +2,7 @@
   <div class="mx-auto max-w-7xl px-6">
     <div class="h-14 grid grid-cols-3 items-center">
       <a href="{{ url('/') }}" class="justify-self-start text-lg font-extrabold tracking-tight text-white">2<span class="text-indigo-400">DAWN</span></a>
-      <nav class="justify-self-center flex items-center gap-6 text-sm text-zinc-200">
+<nav class="justify-self-center flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-zinc-200">
         <a href="{{ route('events.index') }}" class="hover:text-white">Events</a>
         <a href="{{ route('events.recent') }}" class="hover:text-white">Recent</a>
         <a href="{{ url('/#how-to-buy') }}" class="hover:text-white">How it works</a>

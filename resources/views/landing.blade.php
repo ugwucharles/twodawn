@@ -10,10 +10,10 @@
             <div class="absolute -bottom-48 -right-32 h-[40rem] w-[40rem] rounded-full blur-3xl opacity-20 bg-gradient-to-tr from-sky-500 to-emerald-400"></div>
         </div>
         <div class="max-w-5xl mx-auto px-6 text-center">
-            <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight">
+<h1 class="fluid-title font-extrabold tracking-tight">
                 Find the Night.
             </h1>
-            <p class="mt-5 text-zinc-300 text-lg sm:text-xl">
+<p class="mt-5 text-zinc-300 fluid-subtitle">
                 Curated events. Seamless tickets. No accounts, just vibes.
             </p>
             <div class="mt-8 flex items-center justify-center gap-3">
