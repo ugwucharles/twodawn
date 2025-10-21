@@ -90,6 +90,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('scanner', [\App\Http\Controllers\Admin\TicketScanController::class, 'index'])->name('scanner.index');
     Route::post('scanner/redeem', [\App\Http\Controllers\Admin\TicketScanController::class, 'redeem'])->name('scanner.redeem');
 
+    // Admin assets proxy (bypass CSP/CDN blocks)
+    Route::get('assets/html5-qrcode.js', [\App\Http\Controllers\Admin\AssetsController::class, 'html5qrcode'])->name('assets.h5qrcode');
+
     // Host requests
     Route::resource('host-requests', AdminHostRequestController::class)->only(['index','show','update']);
 

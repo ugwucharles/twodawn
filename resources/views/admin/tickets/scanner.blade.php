@@ -50,6 +50,7 @@
       if (window.Html5Qrcode) return true;
       if (h5qReady) return h5qReady;
       const urls = [
+        @json(route('admin.assets.h5qrcode')),
         'https://unpkg.com/html5-qrcode@2.3.10/minified/html5-qrcode.min.js',
         'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.10/minified/html5-qrcode.min.js',
         'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.10/html5-qrcode.min.js'
