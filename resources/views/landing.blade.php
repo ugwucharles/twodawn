@@ -16,9 +16,9 @@
 <p class="mt-5 text-zinc-300 fluid-subtitle">
                 Curated events. Seamless tickets. No accounts, just vibes.
             </p>
-            <div class="mt-8 flex items-center justify-center gap-2 sm:gap-3">
-                <a href="{{ route('events.index') }}" class="inline-flex items-center rounded-full bg-white text-black font-semibold transition px-4 py-2 text-sm sm:px-6 sm:py-3 sm:text-base hover:bg-zinc-100">Browse Events</a>
-                <a href="#upcoming" class="inline-flex items-center rounded-full bg-white/10 ring-1 ring-white/15 transition px-4 py-2 text-sm sm:px-6 sm:py-3 sm:text-base hover:bg-white/15">Upcoming ▼</a>
+            <div class="mt-8 flex items-center justify-center gap-1 sm:gap-3">
+                <a href="{{ route('events.index') }}" class="inline-flex items-center rounded-full bg-white text-black font-semibold transition px-3 py-1.5 text-xs sm:px-6 sm:py-3 sm:text-base hover:bg-zinc-100">Browse Events</a>
+                <a href="#upcoming" class="inline-flex items-center rounded-full bg-white/10 ring-1 ring-white/15 transition px-3 py-1.5 text-xs sm:px-6 sm:py-3 sm:text-base hover:bg-white/15">Upcoming ▼</a>
             </div>
             <div class="mt-10 flex items-center justify-center gap-8 text-zinc-400 text-sm">
                 <div><span class="text-white font-semibold text-xl">{{ number_format($stats['events_count']) }}</span> events</div>
