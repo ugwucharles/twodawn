@@ -13,7 +13,7 @@
       </nav>
 
       <!-- Right: search + hamburger on mobile -->
-      <div class="md:justify-self-end flex items-center h-14 gap-4">
+      <div class="md:justify-self-end flex items-center h-14 gap-4" :class="{ 'invisible pointer-events-none': open }">
         <a href="{{ route('events.index') }}" aria-label="Search" class="text-zinc-200 hover:text-white">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 align-middle" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/></svg>
         </a>
