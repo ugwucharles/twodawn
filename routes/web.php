@@ -86,6 +86,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
     Route::resource('orders', AdminOrderController::class)->only(['index','show']);
 
+    // Ticket scanner
+    Route::get('scanner', [\App\Http\Controllers\Admin\TicketScanController::class, 'index'])->name('scanner.index');
+    Route::post('scanner/redeem', [\App\Http\Controllers\Admin\TicketScanController::class, 'redeem'])->name('scanner.redeem');
+
     // Host requests
     Route::resource('host-requests', AdminHostRequestController::class)->only(['index','show','update']);
 

@@ -9,6 +9,7 @@
         <a href="{{ route('admin.dashboard') }}" class="hover:text-white {{ request()->routeIs('admin.dashboard') ? 'text-white font-semibold' : '' }}">Dashboard</a>
         <a href="{{ route('admin.events.index') }}" class="hover:text-white {{ request()->routeIs('admin.events.*') ? 'text-white font-semibold' : '' }}">Events</a>
         <a href="{{ route('admin.orders.index') }}" class="hover:text-white {{ request()->routeIs('admin.orders.*') ? 'text-white font-semibold' : '' }}">Orders</a>
+        <a href="{{ route('admin.scanner.index') }}" class="hover:text-white {{ request()->routeIs('admin.scanner.*') ? 'text-white font-semibold' : '' }}">Scanner</a>
         <a href="{{ route('admin.host-requests.index') }}" class="hover:text-white {{ request()->routeIs('admin.host-requests.*') ? 'text-white font-semibold' : '' }}">Host Requests</a>
         <a href="{{ route('admin.comments.index') }}" class="hover:text-white {{ request()->routeIs('admin.comments.*') ? 'text-white font-semibold' : '' }}">Comments</a>
         <a href="{{ route('admin.events.create') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black hover:bg-zinc-100 transition">New Event</a>
@@ -38,6 +39,7 @@
       <a href="{{ route('admin.dashboard') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Dashboard</a>
       <a href="{{ route('admin.events.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Events</a>
       <a href="{{ route('admin.orders.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Orders</a>
+      <a href="{{ route('admin.scanner.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Scanner</a>
       <a href="{{ route('admin.host-requests.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Host Requests</a>
       <a href="{{ route('admin.comments.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Comments</a>
       <a href="{{ route('admin.events.create') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">New Event</a>
