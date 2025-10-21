@@ -27,7 +27,7 @@
         <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
           <div class="text-sm text-zinc-300 mb-2">Enter code manually</div>
           <form id="manual-form" class="flex gap-2" onsubmit="return false;">
-            <input id="manual-code" type="text" placeholder="T-XXXXXXXXXX" class="flex-1 rounded-md bg-black/30 border border-white/10 px-3 py-2 focus:border-white/30 focus:ring-0" />
+            <input id="manual-code" type="text" placeholder="Order ref (PA_...) or Ticket code (T-...)" class="flex-1 rounded-md bg-black/30 border border-white/10 px-3 py-2 focus:border-white/30 focus:ring-0" />
             <button id="manual-submit" class="rounded-md px-4 py-2 bg-white text-black text-sm hover:bg-zinc-100">Redeem</button>
           </form>
 
@@ -44,7 +44,7 @@
     // Robust loader for html5-qrcode with CDN fallbacks
     let h5qReady;
     function loadScript(url){
-      return new Promise((res, rej) => { const s=document.createElement('script'); s.src=url; s.async=true; s.crossOrigin='anonymous'; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
+      return new Promise((res, rej) => { const s=document.createElement('script'); s.src=url; s.async=true; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
     }
     async function ensureHtml5Qrcode(){
       if (window.Html5Qrcode) return true;
