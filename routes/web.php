@@ -102,4 +102,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('comments/{comment}', [AdminCommentController::class, 'destroy'])->name('comments.destroy');
 });
 
+// Ticket verification endpoint (admin-only)
+Route::post('/verify-ticket', [\App\Http\Controllers\Admin\TicketScanController::class, 'verify'])
+    ->middleware(['auth','admin'])
+    ->name('tickets.verify');
+
 require __DIR__.'/auth.php';

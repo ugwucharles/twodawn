@@ -14,6 +14,52 @@ class TicketScanController extends Controller
         return view('admin.tickets.scanner');
     }
 
+    // New: verify only (no mutation)
+    public function verify(Request $request)
+    {
+        $text = (string) $request->input('text', '');
+        $text = trim($text);
+        $code = null;
+        if (preg_match('/(T\-[A-Z0-9]{6,})/i', $text, $m)) { $code = strtoupper($m[1]); }
+        elseif (preg_match('/(PA_[A-Za-z0-9]{6,})/', $text, $m)) { $code = $m[1]; }
+        else { $code = $text; }
+
+        if (str_starts_with($code, 'T-')) {
+            $ticket = Ticket::with(['event','order'])->where('code', $code)->first();
+            if (! $ticket) {
+                return response()->json(['ok'=>false,'valid'=>false,'type'=>'ticket','message'=>'Ticket not found'], 404);
+            }
+            $order = $ticket->order;
+            $valid = $order && $order->status === 'paid';
+            return response()->json([
+                'ok' => true,
+                'valid' => $valid,
+                'type' => 'ticket',
+                'code' => $ticket->code,
+                'redeemed_at' => optional($ticket->redeemed_at)->toIso8601String(),
+                'buyer' => [ 'name' => $order?->buyer_name, 'email' => $order?->buyer_email ],
+                'event' => [ 'id' => $ticket->event?->id, 'title' => $ticket->event?->title ],
+                'status' => $order?->status,
+            ]);
+        }
+
+        $order = Order::with('event')->where('paystack_reference', $code)->first();
+        if (! $order) {
+            return response()->json(['ok'=>false,'valid'=>false,'type'=>'order','message'=>'Order not found'], 404);
+        }
+        $valid = $order->status === 'paid';
+        return response()->json([
+            'ok' => true,
+            'valid' => $valid,
+            'type' => 'order',
+            'reference' => $order->paystack_reference,
+            'buyer' => [ 'name' => $order->buyer_name, 'email' => $order->buyer_email ],
+            'event' => [ 'id' => $order->event?->id, 'title' => $order->event?->title ],
+            'status' => $order->status,
+            'quantity' => $order->quantity,
+        ]);
+    }
+
     public function redeem(Request $request)
     {
         $data = $request->validate([

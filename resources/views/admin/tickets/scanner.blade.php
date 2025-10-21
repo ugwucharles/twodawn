@@ -13,13 +13,14 @@
             <div class="text-sm text-zinc-300">Camera scan</div>
             <div class="text-xs text-zinc-400">Auto-start</div>
           </div>
-          <div id="qr-reader" class="rounded-xl overflow-hidden bg-black min-h-[320px] relative">
-            <div id="scan-error" class="absolute inset-0 hidden items-center justify-center text-center text-sm text-red-300"></div>
+<div id="qr-reader" class="rounded-xl overflow-hidden bg-black relative" style="width:400px; height:400px; max-width:100%">
+            <div id="scan-error" class="absolute inset-0 hidden items-center justify-center text-center text-sm text-red-300 px-4"></div>
           </div>
           <div class="mt-3 text-xs text-zinc-400">Grant camera permission. On desktop, prefer a USB/HD cam; on mobile, use the rear camera.</div>
           <div class="mt-3 flex items-center gap-2 text-xs">
             <label for="camera-select" class="text-zinc-300">Camera:</label>
             <select id="camera-select" class="rounded bg-black/30 border border-white/10 px-2 py-1 text-zinc-200 min-w-[10rem]"></select>
+            <button id="retry-btn" class="hidden px-2 py-1 rounded bg-white/10 ring-1 ring-white/10 hover:bg-white/20">Retry</button>
           </div>
         </div>
 
@@ -63,12 +64,13 @@
     }
 
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    const redeemUrl = @json(route('admin.scanner.redeem'));
+    const verifyUrl = @json(url('/verify-ticket'));
 
     const resultEl = document.getElementById('result');
     const statusBadge = document.getElementById('status-badge');
     const resultText = document.getElementById('result-text');
     const errBox = document.getElementById('scan-error');
+    const retryBtn = document.getElementById('retry-btn');
 
     function showError(msg){
       if (!errBox) return; errBox.textContent = msg; errBox.classList.remove('hidden'); errBox.classList.add('flex');
@@ -85,32 +87,29 @@
       resultText.textContent = text;
     }
 
-    async function redeem(code){
+    async function verify(text){
       try {
-        const res = await fetch(redeemUrl, {
+        const res = await fetch(verifyUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
-          body: JSON.stringify({ code })
+          body: JSON.stringify({ text })
         });
         const data = await res.json();
-        if (!res.ok || !data.ok) { showResult('err', 'Not found'); return; }
+        if (!res.ok || !data.ok) { showResult('err', 'Invalid ticket'); await stop(); return; }
         const ev = data.event?.title || 'Event';
-        if (data.kind === 'order') {
-          const buyer = data.buyer?.name || ''; const email = data.buyer?.email || '';
-          showResult('ok', `${ev} • ${buyer} (${email}) • Ref ${data.reference || ''}`);
-        } else {
-          if (data.status === 'already_redeemed') showResult('warn', `${data.code} already used • ${ev}`);
-          else showResult('ok', `${data.code} redeemed • ${ev}`);
-        }
+        const buyer = data.buyer?.name || ''; const email = data.buyer?.email || '';
+        const status = data.valid ? 'Valid ticket' : 'Invalid ticket';
+        showResult(data.valid ? 'ok' : 'err', `${status} • ${ev} • ${buyer} (${email})`);
+        await stop();
       } catch (e) {
-        showResult('err', 'Network error');
+        showError('Network error while verifying ticket.');
       }
     }
 
     // Manual form
     document.getElementById('manual-submit').addEventListener('click', () => {
       const v = document.getElementById('manual-code').value.trim();
-      if (v) redeem(v);
+      if (v) verify(v);
     });
 
     // Camera scanner
@@ -199,8 +198,17 @@
             camId = cams.find(c => /back|rear|environment/i.test(c.label))?.id || (cams[0]?.id) || null;
           } catch(e) { /* ignore */ }
         }
-        const config = { fps: 12, qrbox: { width: 260, height: 260 }, rememberLastUsedCamera: true, aspectRatio: 1.7778 };
-        const onSuccess = (decodedText) => { if (!decodedText || decodedText === lastText) return; lastText = decodedText; redeem(decodedText); setTimeout(() => { lastText=''; }, 1200); };
+        const config = {
+          fps: 12,
+          qrbox: 400,
+          rememberLastUsedCamera: true,
+          aspectRatio: 1.0,
+          formatsToSupport: window.Html5QrcodeSupportedFormats ? [Html5QrcodeSupportedFormats.QR_CODE] : undefined,
+          disableFlip: false,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+          videoConstraints: { facingMode: 'environment', width: { ideal: 1280 }, focusMode: 'continuous', advanced: [{ torch: true }] }
+        };
+        const onSuccess = async (decodedText) => { if (!decodedText || decodedText === lastText) return; lastText = decodedText; await verify(decodedText); };
         const onErr = (_) => {};
         if (camId) { await scanner.start(camId, config, onSuccess, onErr); }
         else { await scanner.start({ facingMode: { exact: 'environment' } }, config, onSuccess, onErr).catch(() => scanner.start({ facingMode: 'environment' }, config, onSuccess, onErr)); }
@@ -208,7 +216,7 @@
       } catch (e1) {
         // Fallback to native detector
         try { await startNative(); }
-        catch(e2){ showError('Cannot access camera (' + (e2 && e2.message ? e2.message : 'unknown') + ').'); }
+        catch(e2){ showError('Camera permission blocked or unsupported. Click Retry after allowing in the address bar.'); retryBtn?.classList.remove('hidden'); retryBtn?.addEventListener('click', async () => { retryBtn.classList.add('hidden'); await stop(); start(); }, { once: true }); }
       }
     }
     async function stop(){
