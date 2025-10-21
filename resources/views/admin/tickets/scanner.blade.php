@@ -13,8 +13,16 @@
             <div class="text-sm text-zinc-300">Camera scan</div>
             <button id="btn-toggle" class="text-xs px-2 py-1 rounded bg-white/10 ring-1 ring-white/10 hover:bg-white/20">Start</button>
           </div>
-          <div id="qr-reader" class="rounded-xl overflow-hidden bg-black min-h-[320px]"></div>
+          <div id="qr-reader" class="rounded-xl overflow-hidden bg-black min-h-[320px] relative">
+            <div id="scan-error" class="absolute inset-0 hidden items-center justify-center text-center text-sm text-red-300"></div>
+          </div>
           <div class="mt-3 text-xs text-zinc-400">Grant camera permission. On desktop, prefer a USB/HD cam; on mobile, use the rear camera.</div>
+          <div class="mt-3">
+            <label class="inline-flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+              <input id="file-input" type="file" accept="image/*" class="hidden">
+              <span class="px-2 py-1 rounded bg-white/10 ring-1 ring-white/10 hover:bg-white/20">Scan from image…</span>
+            </label>
+          </div>
         </div>
 
         <!-- Manual entry -->
@@ -42,6 +50,12 @@
     const resultEl = document.getElementById('result');
     const statusBadge = document.getElementById('status-badge');
     const resultText = document.getElementById('result-text');
+    const errBox = document.getElementById('scan-error');
+
+    function showError(msg){
+      if (!errBox) return; errBox.textContent = msg; errBox.classList.remove('hidden'); errBox.classList.add('flex');
+    }
+    function clearError(){ if (!errBox) return; errBox.classList.add('hidden'); errBox.classList.remove('flex'); errBox.textContent=''; }
 
     function showResult(kind, text){
       resultEl.classList.remove('hidden');
@@ -82,27 +96,57 @@
       if (v) redeem(v);
     });
 
+    // Optional: scan from image file
+    const fileInput = document.getElementById('file-input');
+    if (fileInput) {
+      fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0]; if (!file) return;
+        try {
+          if (!scanner) scanner = new Html5Qrcode('qr-reader');
+          const text = await scanner.scanFile(file, true);
+          if (text) redeem(text);
+        } catch (err) { showError('Could not read QR from image'); }
+      });
+      // Clicking the label triggers the input
+      fileInput.previousElementSibling?.addEventListener('click', () => fileInput.click());
+    }
+
     // Camera scanner
-    let scanner = null; let running = false;
+    let scanner = null; let running = false; let lastText = '';
     const btn = document.getElementById('btn-toggle');
     async function start(){
       if (running) return;
-      if (!scanner) scanner = new Html5Qrcode('qr-reader');
-      const cameras = await Html5Qrcode.getCameras();
-      const camId = cameras.find(c => /back|rear|environment/i.test(c.label))?.id || (cameras[0]?.id);
-      await scanner.start(
-        camId,
-        { fps: 12, qrbox: { width: 240, height: 240 } },
-        (decodedText) => {
-          // Debounce quick duplicates
-          if (!decodedText) return;
+      clearError();
+      try {
+        if (!scanner) scanner = new Html5Qrcode('qr-reader');
+        // Try deviceId first
+        let camId = null; try {
+          const cameras = await Html5Qrcode.getCameras();
+          camId = cameras.find(c => /back|rear|environment/i.test(c.label))?.id || (cameras[0]?.id) || null;
+        } catch (e) { /* ignore */ }
+        const config = { fps: 12, qrbox: { width: 260, height: 260 }, rememberLastUsedCamera: true, aspectRatio: 1.7778 }; 
+        const onSuccess = (decodedText) => {
+          if (!decodedText || decodedText === lastText) return; lastText = decodedText;
           redeem(decodedText);
-        },
-        (err) => {}
-      );
-      running = true; btn.textContent = 'Stop';
+          setTimeout(() => { lastText = ''; }, 1200);
+        };
+        const onErr = (err) => { /* noop */ };
+        if (camId) {
+          await scanner.start(camId, config, onSuccess, onErr);
+        } else {
+          // Fallback: facingMode
+          await scanner.start({ facingMode: { exact: 'environment' } }, config, onSuccess, onErr)
+            .catch(() => scanner.start({ facingMode: 'environment' }, config, onSuccess, onErr));
+        }
+        running = true; btn.textContent = 'Stop';
+      } catch (e) {
+        showError('Cannot access camera. Allow permission or use "Scan from image".');
+      }
     }
-    async function stop(){ if (!scanner || !running) return; await scanner.stop(); running = false; btn.textContent = 'Start'; }
+    async function stop(){
+      try { if (!scanner || !running) return; await scanner.stop(); await scanner.clear(); } catch (e) { /* ignore */ }
+      running = false; btn.textContent = 'Start';
+    }
     btn.addEventListener('click', () => running ? stop() : start());
   </script>
 </x-app-layout>
