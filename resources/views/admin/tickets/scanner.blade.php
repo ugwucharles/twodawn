@@ -40,8 +40,27 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/html5-qrcode@2.3.10/minified/html5-qrcode.min.js"></script>
   <script>
+    // Robust loader for html5-qrcode with CDN fallbacks
+    let h5qReady;
+    function loadScript(url){
+      return new Promise((res, rej) => { const s=document.createElement('script'); s.src=url; s.async=true; s.crossOrigin='anonymous'; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
+    }
+    async function ensureHtml5Qrcode(){
+      if (window.Html5Qrcode) return true;
+      if (h5qReady) return h5qReady;
+      const urls = [
+        'https://unpkg.com/html5-qrcode@2.3.10/minified/html5-qrcode.min.js',
+        'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.10/minified/html5-qrcode.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.10/html5-qrcode.min.js'
+      ];
+      h5qReady = (async () => {
+        for (const u of urls) { try { await loadScript(u); if (window.Html5Qrcode) return true; } catch(_){} }
+        throw new Error('Html5Qrcode failed to load');
+      })();
+      return h5qReady;
+    }
+
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const redeemUrl = @json(route('admin.scanner.redeem'));
 
@@ -122,6 +141,7 @@
       clearError();
       try {
         await preflight();
+        await ensureHtml5Qrcode();
         if (!scanner) scanner = new Html5Qrcode('qr-reader');
         await listCameras();
         let camId = camSelect.value || null;
