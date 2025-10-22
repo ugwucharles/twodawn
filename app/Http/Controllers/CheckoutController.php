@@ -13,7 +13,6 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
-use App\Jobs\GenerateTickets;
 
 class CheckoutController extends Controller
 {
@@ -160,10 +159,19 @@ class CheckoutController extends Controller
             return false;
         }
 
+        // Idempotency: if already paid, return
+        if ($order->status === 'paid') {
+            return true;
+        }
+
         $secret = config('services.paystack.secret');
         $verify = Http::withToken($secret)->get('https://api.paystack.co/transaction/verify/'.$reference);
+        $body = $verify->json();
+        $status = (string) data_get($body, 'data.status');
+        $amount = (int) data_get($body, 'data.amount');
+        $currency = (string) data_get($body, 'data.currency');
 
-        if (! $verify->ok() || data_get($verify->json(), 'data.status') !== 'success') {
+        if (! $verify->ok() || $status !== 'success' || $amount !== (int) $order->amount || $currency !== 'NGN') {
             $order->update(['status' => 'failed']);
             return false;
         }
@@ -196,7 +204,7 @@ class CheckoutController extends Controller
             return false;
         }
 
-        // No ticket generation; we use order-level QR (reference) for check-in
+        // Ticket generation removed: order-level QR is used
         return true;
     }
 
@@ -225,7 +233,7 @@ class CheckoutController extends Controller
 
     public function downloadPdf(string $reference)
     {
-        $order = Order::with(['event','tickets'])->where('paystack_reference', $reference)->firstOrFail();
+        $order = Order::with(['event'])->where('paystack_reference', $reference)->firstOrFail();
 
         $brandName = config('app.name', '2DAWN');
         $brandColor = '#818CF8';
@@ -244,19 +252,14 @@ class CheckoutController extends Controller
             }
         }
 
-        // Prepare QR images (SVG) as data URIs keyed by ticket code
-        $qrMap = [];
-        foreach ($order->tickets as $t) {
-            if ($t->qr_path) {
-                try {
-                    if (Storage::exists($t->qr_path)) {
-                        $svg = Storage::get($t->qr_path);
-                        $qrMap[$t->code] = 'data:image/svg+xml;base64,' . base64_encode($svg);
-                    }
-                } catch (\Throwable $e) {
-                    // skip if cannot read
-                }
-            }
+        // Generate order-level QR as data URI
+        try {
+            $renderer = new ImageRenderer(new RendererStyle(300), new SvgImageBackEnd());
+            $writer = new Writer($renderer);
+            $svg = $writer->writeString($order->paystack_reference);
+            $orderQrData = 'data:image/svg+xml;base64,' . base64_encode($svg);
+        } catch (\Throwable $e) {
+            $orderQrData = null;
         }
 
         // Render a minimal HTML receipt (no app layout) for PDF
@@ -264,7 +267,7 @@ class CheckoutController extends Controller
             'order' => $order,
             'brandName' => $brandName,
             'flyerDataUri' => $flyerDataUri,
-'qrMap' => $qrMap,
+            'orderQrData' => $orderQrData,
             'brandColor' => $brandColor,
         ])->render();
 

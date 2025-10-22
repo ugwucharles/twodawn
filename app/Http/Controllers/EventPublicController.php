@@ -38,11 +38,21 @@ class EventPublicController extends Controller
         return view('landing', compact('featuredEvents','recentEvents','stats'));
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $events = Event::query()->where('is_published', true)->where(function($q){
-            $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
-        })->orderBy('starts_at')->paginate(12);
+        $allowed = config('moods.list', []);
+        $mood = $request->query('mood');
+
+        $events = Event::query()
+            ->where('is_published', true)
+            ->when($mood && (empty($allowed) || in_array($mood, $allowed, true)), function ($q) use ($mood) {
+                $q->where('mood', $mood);
+            })
+            ->where(function($q){
+                $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+            })
+            ->orderBy('starts_at')
+            ->paginate(12);
 
         return view('events.index', compact('events'));
     }

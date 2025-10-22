@@ -34,65 +34,61 @@
   </style>
 </head>
 <body>
-  @if ($order->tickets && $order->tickets->count())
-    @foreach ($order->tickets as $t)
-      @php $qr = $qrMap[$t->code] ?? null; @endphp
-      <div class="ticket">
-        <table class="ticket-table">
-          <tr>
-            <td class="brand-panel" style="width:65%;">
-              @php 
-                $b = (string)($brandName ?? '2DAWN'); $first = mb_substr($b,0,1); $rest = mb_substr($b,1);
-                  $event = $order->event ?? null;
-                  $host = $event?->title ?? $event?->organizer_name ?? $event?->host_name ?? $event?->organiser_name ?? $event?->organizer ?? ($brandName ?? '2DAWN');
-                  $bf = trim((string)($order->buyer_name ?? 'Guest'));
-                $parts = preg_split('/\s+/', $bf, -1, PREG_SPLIT_NO_EMPTY);
-                if (count($parts) >= 2) {
-                  $guest = $parts[0] . ' ' . mb_strtoupper(mb_substr($parts[1], 0, 1)) . '.';
-                } else {
-                  $guest = $bf;
-                }
-              @endphp
-              <div class="brand-inner">
-                <div>
-                  <div class="brand-name"><span style="color:#ffffff;">{{ $first }}</span>{{ $rest }}</div>
-                  <div class="amp-line">&amp;</div>
-                </div>
-              </div>
-              <div class="invite-center">
-                <div class="invite-host">{{ $host }}</div>
-                <div class="invite-mid">cordially invites</div>
-                <div class="invite-guest">{{ $guest }}</div>
-              </div>
-            </td>
-            <td class="flyer-cell" style="width:22%;">
-              @if (!empty($flyerDataUri))
-                <img class="flyer-img" src="{{ $flyerDataUri }}" alt="Event flyer">
-              @else
-                <div class="flyer-img" style="background:linear-gradient(90deg,#7C3AED,#EF4444);"></div>
-              @endif
-            </td>
-            <td class="qr-panel" style="width:13%;">
-              @if ($qr)
-                <img class="qr-mini" src="{{ $qr }}" alt="QR {{ $t->code }}" />
-              @else
-                <div class="qr-mini"></div>
-              @endif
-              <div class="qr-vert">
-                <svg xmlns="http://www.w3.org/2000/svg" width="26pt" height="170pt" viewBox="0 0 38 190">
-                  <g transform="rotate(-90 19 175)">
-                    <text x="0" y="165" font-size="9" fill="#0a0a0a" font-family="DejaVu Sans, Arial, sans-serif" font-weight="700">
-                      <tspan x="0" dy="0">Ticket Code</tspan>
-                      <tspan x="0" dy="16">{{ $t->code }}</tspan>
-                    </text>
-                  </g>
-                </svg>
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-    @endforeach
-  @endif
+  @php $qr = $orderQrData ?? null; @endphp
+  <div class="ticket">
+    <table class="ticket-table">
+      <tr>
+        <td class="brand-panel" style="width:65%;">
+          @php 
+            $b = (string)($brandName ?? '2DAWN'); $first = mb_substr($b,0,1); $rest = mb_substr($b,1);
+            $event = $order->event ?? null;
+            $host = $event?->title ?? $event?->organizer_name ?? $event?->host_name ?? $event?->organiser_name ?? $event?->organizer ?? ($brandName ?? '2DAWN');
+            $bf = trim((string)($order->buyer_name ?? 'Guest'));
+            $parts = preg_split('/\s+/', $bf, -1, PREG_SPLIT_NO_EMPTY);
+            if (count($parts) >= 2) {
+              $guest = $parts[0] . ' ' . mb_strtoupper(mb_substr($parts[1], 0, 1)) . '.';
+            } else {
+              $guest = $bf;
+            }
+          @endphp
+          <div class="brand-inner">
+            <div>
+              <div class="brand-name"><span style="color:#ffffff;">{{ $first }}</span>{{ $rest }}</div>
+              <div class="amp-line">&amp;</div>
+            </div>
+          </div>
+          <div class="invite-center">
+            <div class="invite-host">{{ $host }}</div>
+            <div class="invite-mid">cordially invites</div>
+            <div class="invite-guest">{{ $guest }}</div>
+          </div>
+        </td>
+        <td class="flyer-cell" style="width:22%;">
+          @if (!empty($flyerDataUri))
+            <img class="flyer-img" src="{{ $flyerDataUri }}" alt="Event flyer">
+          @else
+            <div class="flyer-img" style="background:linear-gradient(90deg,#7C3AED,#EF4444);"></div>
+          @endif
+        </td>
+        <td class="qr-panel" style="width:13%;">
+          @if ($qr)
+            <img class="qr-mini" src="{{ $qr }}" alt="Order QR" />
+          @else
+            <div class="qr-mini"></div>
+          @endif
+          <div class="qr-vert">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26pt" height="170pt" viewBox="0 0 38 190">
+              <g transform="rotate(-90 19 175)">
+                <text x="0" y="165" font-size="9" fill="#0a0a0a" font-family="DejaVu Sans, Arial, sans-serif" font-weight="700">
+                  <tspan x="0" dy="0">Order Ref</tspan>
+                  <tspan x="0" dy="16">{{ $order->paystack_reference }}</tspan>
+                </text>
+              </g>
+            </svg>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
 </body>
 </html>

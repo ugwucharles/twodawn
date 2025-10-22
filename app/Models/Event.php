@@ -17,7 +17,8 @@ class Event extends Model
         'early_bird_ends_at',
         'capacity',
         'is_published',
-        'image_path',
+'image_path',
+        'mood',
     ];
 
     protected function casts(): array

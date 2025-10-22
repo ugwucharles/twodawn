@@ -29,7 +29,7 @@
           <button class="inline-flex items-center px-4 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:bg-zinc-100">Apply</button>
           <a href="{{ route('home') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-white/10 ring-1 ring-white/10 text-white text-sm hover:bg-white/15">Home</a>
           @if ($order)
-            <a href="{{ route('orders.pdf', $order->paystack_reference) }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-white/10 ring-1 ring-white/10 text-white text-sm hover:bg-white/15">Download current PDF</a>
+            <a href="{{ URL::signedRoute('orders.pdf', ['reference' => $order->paystack_reference]) }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-white/10 ring-1 ring-white/10 text-white text-sm hover:bg-white/15">Download current PDF</a>
           @endif
         </div>
       </form>

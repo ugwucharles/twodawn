@@ -33,10 +33,7 @@
         <h2 class="text-center text-4xl sm:text-5xl md:text-6xl font-extrabold mb-8 sm:mb-10">What are you looking for?</h2>
         <div class="fade-x overflow-x-auto no-scrollbar">
           <ul class="flex items-center justify-center gap-3 sm:gap-4 min-w-max text-zinc-300 text-xl sm:text-2xl tracking-wider">
-            @php $items = ($moods ?? collect()); @endphp
-            @if(($items instanceof \Illuminate\Support\Collection ? $items->count() : count($items)) === 0)
-              @php $items = collect(['Rave','Romantic','Amapiano','Afrobeats','Hip‑Hop','House','Live Band','Jazz','Techno','Gospel','Comedy','Networking']); @endphp
-            @endif
+            @php $items = collect(config('moods.list', ['Rave','Romantic','Amapiano','Afrobeats','Hip‑Hop','House','Live Band','Jazz','Techno','Gospel','Comedy','Networking'])); @endphp
             @foreach($items as $i => $mood)
               <li class="flex items-center">
                 <a href="{{ route('events.index', ['mood' => $mood]) }}" class="px-2 sm:px-3 py-1 uppercase hover:text-white whitespace-nowrap">{{ $mood }}</a>

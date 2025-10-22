@@ -11,6 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('tickets');
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
@@ -20,13 +28,5 @@ return new class extends Migration
             $table->timestamp('redeemed_at')->nullable();
             $table->timestamps();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('tickets');
     }
 };

@@ -17,6 +17,17 @@
         <x-input-error :messages="$errors->get('venue')" class="mt-2" />
     </div>
 
+    <div>
+        <x-input-label for="mood" :value="__('Mood')" />
+        <select id="mood" name="mood" required class="mt-1 block w-full rounded-md shadow-sm border-white/20 bg-zinc-900/70 text-white focus:border-indigo-400 focus:ring-indigo-400/30">
+            <option value="" disabled {{ old('mood', $event->mood) ? '' : 'selected' }}>Select mood</option>
+            @foreach (config('moods.list', ['Rave','Romantic','Amapiano','Afrobeats','Hip‑Hop','House','Live Band','Jazz','Techno','Gospel','Comedy','Networking']) as $m)
+                <option value="{{ $m }}" @selected(old('mood', $event->mood) === $m)>{{ $m }}</option>
+            @endforeach
+        </select>
+        <x-input-error :messages="$errors->get('mood')" class="mt-2" />
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
             <x-input-label for="starts_at" :value="__('Starts At')" />

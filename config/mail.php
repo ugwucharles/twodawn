@@ -88,11 +88,33 @@ return [
             'retry_after' => 60,
         ],
 
+        'gmail1' => [
+            'transport' => 'smtp',
+            'scheme' => env('MAIL_ENCRYPTION', env('MAIL_SCHEME')),
+            'host' => env('MAIL_HOST', 'smtp.gmail.com'),
+            'port' => env('MAIL_PORT', 587),
+            'username' => env('SMTP1_USERNAME'),
+            'password' => env('SMTP1_PASSWORD'),
+            'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+        ],
+
+        'gmail2' => [
+            'transport' => 'smtp',
+            'scheme' => env('MAIL_ENCRYPTION', env('MAIL_SCHEME')),
+            'host' => env('MAIL_HOST', 'smtp.gmail.com'),
+            'port' => env('MAIL_PORT', 587),
+            'username' => env('SMTP2_USERNAME'),
+            'password' => env('SMTP2_PASSWORD'),
+            'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+        ],
+
         'roundrobin' => [
             'transport' => 'roundrobin',
             'mailers' => [
-                'ses',
-                'postmark',
+                'gmail1',
+                'gmail2',
             ],
             'retry_after' => 60,
         ],

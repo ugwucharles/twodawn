@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class EventController extends Controller
 {
@@ -27,13 +28,14 @@ class EventController extends Controller
             'title' => ['required','string','max:255'],
             'description' => ['nullable','string'],
             'venue' => ['nullable','string','max:255'],
+            'mood' => ['required','string', Rule::in(config('moods.list', ['Rave','Romantic','Amapiano','Afrobeats','Hip‑Hop','House','Live Band','Jazz','Techno','Gospel','Comedy','Networking']))],
             'starts_at' => ['required','date'],
             'ends_at' => ['nullable','date','after_or_equal:starts_at'],
             'price' => ['nullable','numeric','min:0'],
-'capacity' => ['nullable','integer','min:1'],
+            'capacity' => ['nullable','integer','min:1'],
             'early_bird_price' => ['nullable','numeric','min:0'],
             'early_bird_ends_at' => ['nullable','date'],
-'is_published' => ['sometimes','boolean'],
+            'is_published' => ['sometimes','boolean'],
             'image' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
         ]);
     }

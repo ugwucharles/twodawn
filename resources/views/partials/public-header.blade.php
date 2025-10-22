@@ -1,11 +1,11 @@
 <header class="absolute inset-x-0 top-3 z-50" x-data="{ open:false }" x-init="window.addEventListener('pageshow', () => open = false); window.addEventListener('popstate', () => open = false);" @keydown.window.escape="open=false">
   <div class="mx-auto max-w-7xl px-6">
-    <div class="h-14 grid grid-cols-3 items-center">
+    <div class="relative h-14 flex items-center justify-between">
       <!-- Brand -->
-      <a href="{{ url('/') }}" class="justify-self-start inline-flex items-center h-14 leading-none text-lg font-extrabold tracking-tight text-white">2<span class="text-indigo-400">DAWN</span></a>
+      <a href="{{ url('/') }}" class="relative z-20 inline-flex items-center h-14 leading-none text-lg font-extrabold tracking-tight text-white">2<span class="text-indigo-400">DAWN</span></a>
 
-      <!-- Center nav (hidden on small) -->
-      <nav class="justify-self-center hidden md:flex h-14 items-center justify-center gap-6 text-sm text-zinc-200">
+      <!-- Center nav (desktop only, absolutely centered) -->
+      <nav class="hidden md:flex absolute inset-0 items-center justify-center gap-6 text-sm text-zinc-200 z-10">
         <a href="{{ route('events.index') }}" class="hover:text-white">Events</a>
         <a href="{{ route('events.recent') }}" class="hover:text-white">Recent</a>
         <a href="{{ url('/#how-to-buy') }}" class="hover:text-white">How it works</a>
@@ -13,7 +13,7 @@
       </nav>
 
       <!-- Right: search + hamburger on mobile -->
-      <div class="col-start-3 justify-self-end flex items-center h-14 gap-4" :class="{ 'invisible pointer-events-none': open }">
+      <div class="relative z-20 flex items-center h-14 gap-4" :class="{ 'invisible pointer-events-none': open }">
         <a href="{{ route('events.index') }}" aria-label="Search" class="text-zinc-200 hover:text-white">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 align-middle" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/></svg>
         </a>

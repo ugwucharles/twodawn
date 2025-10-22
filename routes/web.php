@@ -63,10 +63,10 @@ Route::post('/events/{event}/comments', [CommentController::class, 'store'])
 // Guest checkout
 use App\Http\Controllers\CheckoutController;
 Route::get('/events/{event}/buy', [CheckoutController::class, 'buy'])->name('events.buy');
-Route::post('/events/{event}/orders', [CheckoutController::class, 'create'])->name('orders.create');
+Route::post('/events/{event}/orders', [CheckoutController::class, 'create'])->middleware('throttle:10,1')->name('orders.create');
 Route::get('/paystack/callback', [CheckoutController::class, 'callback'])->name('paystack.callback');
 Route::get('/orders/{reference}', [CheckoutController::class, 'showByReference'])->name('orders.public');
-Route::get('/orders/{reference}/download', [CheckoutController::class, 'downloadPdf'])->name('orders.pdf');
+Route::get('/orders/{reference}/download', [CheckoutController::class, 'downloadPdf'])->middleware('signed')->name('orders.pdf');
 
 
 // Host with us (contact) form
