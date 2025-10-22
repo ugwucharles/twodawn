@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Drop dependent table first to satisfy FK constraints in PostgreSQL/MySQL
+        if (Schema::hasTable('ticket_scans')) {
+            Schema::dropIfExists('ticket_scans');
+        }
         Schema::dropIfExists('tickets');
     }
 
