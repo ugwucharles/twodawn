@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('events', function (Blueprint $table) {
-            $table->string('mood')->nullable()->after('image_path')->index();
-        });
+        if (!Schema::hasColumn('events', 'mood')) {
+            Schema::table('events', function (Blueprint $table) {
+                $table->string('mood')->nullable()->after('image_path')->index();
+            });
+        }
     }
 
     /**
@@ -21,8 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('events', function (Blueprint $table) {
-            $table->dropColumn('mood');
-        });
+        if (Schema::hasColumn('events', 'mood')) {
+            Schema::table('events', function (Blueprint $table) {
+                $table->dropColumn('mood');
+            });
+        }
     }
 };
