@@ -18,9 +18,9 @@ RUN npm run build
 FROM php:8.2-fpm-alpine
 # System deps and PHP extensions
 RUN apk add --no-cache nginx curl bash git zip unzip icu-libs libzip libpng libjpeg-turbo freetype gettext postgresql-libs \
- && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS icu-dev libzip-dev libpng-dev libjpeg-turbo-dev freetype-dev oniguruma-dev postgresql-dev \
+ && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS icu-dev libzip-dev libpng-dev libjpeg-turbo-dev freetype-dev oniguruma-dev postgresql-dev curl-dev \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-install pdo_mysql pdo_pgsql gd zip intl bcmath opcache \
+ && docker-php-ext-install pdo_mysql pdo_pgsql gd zip intl bcmath opcache curl \
  && apk del .build-deps \
  && mkdir -p /run/nginx
 
