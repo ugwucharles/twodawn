@@ -4,7 +4,9 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --prefer-dist --no-interaction --no-scripts --no-progress
 COPY . .
-RUN composer install --no-dev --prefer-dist --no-interaction --no-progress
+# Ensure cache directories exist before Composer runs scripts that bootstrap Laravel
+RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views bootstrap/cache \
+    && composer install --no-dev --prefer-dist --no-interaction --no-progress
 
 FROM node:22-alpine AS assets
 WORKDIR /app

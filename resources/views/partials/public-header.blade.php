@@ -14,7 +14,13 @@
 
       <!-- Right: search + hamburger on mobile -->
       <div class="relative z-20 flex items-center h-14 gap-4" :class="{ 'invisible pointer-events-none': open }">
-        <a href="{{ route('events.index') }}" aria-label="Search" class="text-zinc-200 hover:text-white">
+        <form method="GET" action="{{ route('events.index') }}" class="hidden sm:flex items-center gap-2">
+          <input name="q" value="{{ request('q') }}" placeholder="Search" class="w-36 rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1.5 text-sm focus:outline-none focus:ring-white/30" />
+          <button aria-label="Search" class="text-zinc-200 hover:text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 align-middle" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/></svg>
+          </button>
+        </form>
+        <a href="{{ route('events.index') }}" aria-label="Search" class="sm:hidden text-zinc-200 hover:text-white">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 align-middle" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/></svg>
         </a>
         <button type="button" class="md:hidden text-zinc-200 hover:text-white" aria-label="Open menu" @click="open=true">

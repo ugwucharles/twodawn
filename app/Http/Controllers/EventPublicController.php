@@ -42,17 +42,27 @@ class EventPublicController extends Controller
     {
         $allowed = config('moods.list', []);
         $mood = $request->query('mood');
+        $term = trim((string) $request->query('q', ''));
 
         $events = Event::query()
             ->where('is_published', true)
             ->when($mood && (empty($allowed) || in_array($mood, $allowed, true)), function ($q) use ($mood) {
                 $q->where('mood', $mood);
             })
+            ->when($term !== '', function ($q) use ($term) {
+                $q->where(function ($qq) use ($term) {
+                    $like = '%'.str_replace(['%','_'], ['\%','\_'], $term).'%';
+                    $qq->where('title', 'like', $like)
+                       ->orWhere('venue', 'like', $like)
+                       ->orWhere('description', 'like', $like);
+                });
+            })
             ->where(function($q){
                 $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
             })
             ->orderBy('starts_at')
-            ->paginate(12);
+            ->paginate(12)
+            ->appends($request->only(['q','mood']));
 
         return view('events.index', compact('events'));
     }

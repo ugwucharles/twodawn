@@ -30,11 +30,18 @@
   </style>
   <div class="animated-gradient"></div>
   <div class="max-w-7xl mx-auto px-6">
-    <div class="mb-8 flex items-end justify-between">
+    <div class="mb-6 flex items-end justify-between gap-4 flex-wrap">
       <div>
         <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">All Events</h1>
         <p class="mt-2 text-zinc-400">Browse upcoming shows and parties</p>
       </div>
+      <form method="GET" action="{{ route('events.index') }}" class="w-full sm:w-auto flex items-center gap-2">
+        @if(request('mood'))
+          <input type="hidden" name="mood" value="{{ request('mood') }}" />
+        @endif
+        <input name="q" value="{{ request('q') }}" placeholder="Search events..." class="flex-1 sm:w-64 rounded-full bg-white/5 ring-1 ring-white/10 px-4 py-2 text-sm focus:outline-none focus:ring-white/30" />
+        <button class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-100">Search</button>
+      </form>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
