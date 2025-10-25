@@ -208,8 +208,8 @@ class CheckoutController extends Controller
 
         // Send ticket email (round-robin mailer if configured)
         try {
-            Mail::to($order->buyer_email)->send(new TicketMail($order));
-        } catch (\Throwable $e) { /* swallow mail errors */ }
+            Mail::to($order->buyer_email)->queue(new TicketMail($order));
+        } catch (\\Throwable $e) { /* swallow mail errors */ }
         return true;
     }
 
@@ -238,8 +238,8 @@ class CheckoutController extends Controller
 
         // For free orders, email the ticket as well
         try {
-            Mail::to($order->buyer_email)->send(new TicketMail($order));
-        } catch (\Throwable $e) { /* swallow mail errors */ }
+            Mail::to($order->buyer_email)->queue(new TicketMail($order));
+        } catch (\\Throwable $e) { /* swallow mail errors */ }
     }
 
     public function downloadPdf(string $reference)
