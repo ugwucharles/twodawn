@@ -4,12 +4,12 @@
       <div class="flex items-center gap-3 text-zinc-300">
         <span class="text-lg font-extrabold">2<span class="text-indigo-400">DAWN</span></span>
       </div>
-      <nav class="flex flex-wrap items-center justify-center gap-x-12 sm:gap-x-16 md:gap-x-20 gap-y-4 text-sm text-zinc-300">
-        <a href="{{ url('/') }}" class="px-3 sm:px-4 hover:text-white">Home</a>
-        <a href="{{ route('events.index') }}" class="px-3 sm:px-4 hover:text-white">Events</a>
-        <a href="{{ route('events.recent') }}" class="px-3 sm:px-4 hover:text-white">Recent</a>
-        <a href="{{ url('/#how-to-buy') }}" class="px-3 sm:px-4 hover:text-white">How it works</a>
-        <a href="{{ url('/#host') }}" class="px-3 sm:px-4 hover:text-white">Host</a>
+      <nav class="flex flex-wrap items-center justify-center gap-x-[5px] gap-y-[5px] text-sm text-zinc-300">
+        <a href="{{ url('/') }}" class="px-0 hover:text-white">Home</a>
+        <a href="{{ route('events.index') }}" class="px-0 hover:text-white">Events</a>
+        <a href="{{ route('events.recent') }}" class="px-0 hover:text-white">Recent</a>
+        <a href="{{ url('/#how-to-buy') }}" class="px-0 hover:text-white">How it works</a>
+        <a href="{{ url('/#host') }}" class="px-0 hover:text-white">Host</a>
       </nav>
       <div class="text-xs text-zinc-500">© {{ date('Y') }} All rights reserved.</div>
     </div>

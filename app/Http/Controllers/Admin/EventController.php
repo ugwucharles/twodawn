@@ -7,6 +7,7 @@ use App\Models\Event;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class EventController extends Controller
 {
@@ -66,7 +67,12 @@ class EventController extends Controller
         $data['is_published'] = $request->boolean('is_published');
 
 if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->storePublicly('events');
+            try {
+                $upload = Cloudinary::uploadFile($request->file('image')->getRealPath(), ['folder' => '2dawn/events']);
+                $data['image_path'] = $upload->getSecurePath();
+            } catch (\Throwable $e) {
+                $data['image_path'] = $request->file('image')->storePublicly('events');
+            }
         }
 
         Event::create($data);
@@ -98,9 +104,14 @@ if ($request->hasFile('image')) {
         $data['is_published'] = $request->boolean('is_published');
 
 if ($request->hasFile('image')) {
-            // Optionally delete old image
-            // if ($event->image_path) Storage::delete($event->image_path);
-            $data['image_path'] = $request->file('image')->storePublicly('events');
+            // Optionally delete old image (local)
+            // if ($event->image_path && !str_starts_with($event->image_path, 'http')) Storage::delete($event->image_path);
+            try {
+                $upload = Cloudinary::uploadFile($request->file('image')->getRealPath(), ['folder' => '2dawn/events']);
+                $data['image_path'] = $upload->getSecurePath();
+            } catch (\Throwable $e) {
+                $data['image_path'] = $request->file('image')->storePublicly('events');
+            }
         }
 
         $event->update($data);

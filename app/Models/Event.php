@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
@@ -35,5 +36,16 @@ class Event extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (empty($this->image_path)) {
+            return null;
+        }
+        if (str_starts_with($this->image_path, 'http')) {
+            return $this->image_path;
+        }
+        return Storage::url($this->image_path);
     }
 }
