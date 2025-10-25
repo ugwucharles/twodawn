@@ -6,9 +6,13 @@
       </div>
       <nav class="flex flex-wrap items-center justify-center gap-x-[5px] gap-y-[5px] text-sm text-zinc-300">
         <a href="{{ url('/') }}" class="px-0 hover:text-white">Home</a>
+        <span aria-hidden class="mx-[5px] opacity-40">|</span>
         <a href="{{ route('events.index') }}" class="px-0 hover:text-white">Events</a>
+        <span aria-hidden class="mx-[5px] opacity-40">|</span>
         <a href="{{ route('events.recent') }}" class="px-0 hover:text-white">Recent</a>
+        <span aria-hidden class="mx-[5px] opacity-40">|</span>
         <a href="{{ url('/#how-to-buy') }}" class="px-0 hover:text-white">How it works</a>
+        <span aria-hidden class="mx-[5px] opacity-40">|</span>
         <a href="{{ url('/#host') }}" class="px-0 hover:text-white">Host</a>
       </nav>
       <div class="text-xs text-zinc-500">© {{ date('Y') }} All rights reserved.</div>

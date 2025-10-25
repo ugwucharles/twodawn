@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TicketMail;
 use Illuminate\Support\Str;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
@@ -204,7 +206,10 @@ class CheckoutController extends Controller
             return false;
         }
 
-        // Ticket generation removed: order-level QR is used
+        // Send ticket email (round-robin mailer if configured)
+        try {
+            Mail::to($order->buyer_email)->send(new TicketMail($order));
+        } catch (\Throwable $e) { /* swallow mail errors */ }
         return true;
     }
 
@@ -228,7 +233,13 @@ class CheckoutController extends Controller
             });
         } catch (\Throwable $e) {
             $order->update(['status' => 'failed']);
+            return; // stop on failure
         }
+
+        // For free orders, email the ticket as well
+        try {
+            Mail::to($order->buyer_email)->send(new TicketMail($order));
+        } catch (\Throwable $e) { /* swallow mail errors */ }
     }
 
     public function downloadPdf(string $reference)
