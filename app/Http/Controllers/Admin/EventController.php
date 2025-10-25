@@ -71,6 +71,10 @@ if ($request->hasFile('image')) {
                 $upload = Cloudinary::uploadFile($request->file('image')->getRealPath(), ['folder' => '2dawn/events']);
                 $data['image_path'] = $upload->getSecurePath();
             } catch (\Throwable $e) {
+                if (app()->environment('production')) {
+                    return back()->withErrors(['image' => 'Image upload failed. Please try again.'])->withInput();
+                }
+                // Dev fallback only
                 $data['image_path'] = $request->file('image')->storePublicly('events');
             }
         }
@@ -110,6 +114,10 @@ if ($request->hasFile('image')) {
                 $upload = Cloudinary::uploadFile($request->file('image')->getRealPath(), ['folder' => '2dawn/events']);
                 $data['image_path'] = $upload->getSecurePath();
             } catch (\Throwable $e) {
+                if (app()->environment('production')) {
+                    return back()->withErrors(['image' => 'Image upload failed. Please try again.'])->withInput();
+                }
+                // Dev fallback only
                 $data['image_path'] = $request->file('image')->storePublicly('events');
             }
         }
