@@ -76,6 +76,23 @@
 
     </div>
   </div>
+  <!-- Scan result modal -->
+  <div id="scan-modal" class="fixed inset-0 z-50 hidden">
+    <style>
+      @keyframes bounceIn { 0%{transform:scale(.9);opacity:.6} 60%{transform:scale(1.05);opacity:1} 100%{transform:scale(1)} }
+      .animate-bounceIn{ animation: bounceIn .28s ease-out both; }
+    </style>
+    <div id="scan-modal-overlay" class="absolute inset-0 bg-black/60"></div>
+    <div class="relative mx-auto mt-[10vh] w-[92%] max-w-md">
+      <div id="scan-modal-card" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-5 text-center">
+        <div id="scan-modal-badge" class="mx-auto mb-2 inline-flex items-center px-3 py-1.5 rounded-full text-xs"></div>
+        <h3 id="scan-modal-title" class="text-xl font-extrabold"></h3>
+        <p id="scan-modal-sub" class="mt-1 text-zinc-300 text-sm"></p>
+        <p id="scan-modal-remaining" class="mt-2 text-zinc-400 text-xs"></p>
+        <button id="scan-modal-close" class="mt-4 px-4 py-2 rounded-md bg-white text-black text-sm">Close</button>
+      </div>
+    </div>
+  </div>
 </section>
 
 <script>
@@ -110,6 +127,36 @@ function setBadge(kind, msg){
   t.textContent = msg;
 }
 
+// Modal helpers
+const modalEl = document.getElementById('scan-modal');
+const modalCard = document.getElementById('scan-modal-card');
+const modalOverlay = document.getElementById('scan-modal-overlay');
+const modalClose = document.getElementById('scan-modal-close');
+const modalBadge = document.getElementById('scan-modal-badge');
+const modalTitle = document.getElementById('scan-modal-title');
+const modalSub = document.getElementById('scan-modal-sub');
+const modalRem = document.getElementById('scan-modal-remaining');
+let modalTimer = null;
+function closeScanModal(){ modalEl.classList.add('hidden'); if(modalTimer){ clearTimeout(modalTimer); modalTimer=null;} }
+function openScanModal(kind, opts){
+  modalBadge.className = 'mx-auto mb-2 inline-flex items-center px-3 py-1.5 rounded-full text-xs';
+  if (kind==='ok') modalBadge.classList.add('bg-emerald-500/20','text-emerald-300','ring-1','ring-emerald-500/30');
+  else if (kind==='warn') modalBadge.classList.add('bg-yellow-500/20','text-yellow-300','ring-1','ring-yellow-500/30');
+  else modalBadge.classList.add('bg-red-500/20','text-red-300','ring-1','ring-red-500/30');
+  modalBadge.textContent = (kind==='ok' ? 'Valid ticket' : kind==='warn' ? 'Already checked in' : 'Invalid ticket');
+  modalTitle.textContent = opts?.title || '';
+  modalSub.textContent = opts?.sub || '';
+  modalRem.textContent = opts?.remaining != null ? `Tickets left on this order: ${opts.remaining}` : '';
+  modalEl.classList.remove('hidden');
+  modalCard.classList.remove('animate-bounceIn'); // retrigger
+  void modalCard.offsetWidth; modalCard.classList.add('animate-bounceIn');
+  if (modalTimer) clearTimeout(modalTimer);
+  modalTimer = setTimeout(closeScanModal, 1800);
+}
+modalOverlay.addEventListener('click', closeScanModal);
+modalClose.addEventListener('click', closeScanModal);
+window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeScanModal(); });
+
 function notify(kind){
   try {
     if (navigator.vibrate) {
@@ -130,9 +177,9 @@ async function verify(text, source='camera'){
   try{
     const res = await fetch(verifyUrl, { method:'POST', headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'}, body: JSON.stringify({ text, source }) });
     const data = await res.json();
-    if (!res.ok){ setBadge('err', data?.message || 'Link expired or invalid'); notify('err'); return; }
-    if (!data.valid){ const kind = data.already?'warn':'err'; setBadge(kind, data.already?`Already checked in • ${data.event?.title} • ${data.buyer?.name}`:'Invalid ticket'); addRecent(kind, data.already?`Already • ${data.buyer?.name || ''}`:'Invalid'); notify(kind); return; }
-    setBadge('ok', `Valid • ${data.event?.title} • ${data.buyer?.name}`); notify('ok');
+if (!res.ok){ setBadge('err', data?.message || 'Link expired or invalid'); openScanModal('err',{ title:'Link issue', sub:data?.message||'' }); notify('err'); return; }
+    if (!data.valid){ const kind = data.already?'warn':'err'; setBadge(kind, data.already?`Already checked in • ${data.event?.title} • ${data.buyer?.name}`:'Invalid ticket'); openScanModal(kind,{ title: data.already? 'Already checked in' : 'Invalid ticket', sub: `${data.buyer?.name || ''} • ${data.event?.title || ''}` }); addRecent(kind, data.already?`Already • ${data.buyer?.name || ''}`:'Invalid'); notify(kind); return; }
+    setBadge('ok', `Valid • ${data.event?.title} • ${data.buyer?.name}`); openScanModal('ok',{ title:'Valid ticket', sub:`${data.buyer?.name} • ${data.event?.title}`, remaining: data.remaining }); notify('ok');
     const rem = parseInt(data.remaining || 0,10);
     statChecked.textContent = String(parseInt(statChecked.textContent||'0',10) + 1);
     statRemaining.textContent = String(rem >= 0 ? rem : 0);
