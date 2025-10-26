@@ -1,4 +1,7 @@
 @extends('layouts.public')
+@section('title', 'Recent Events | ' . config('app.name', '2DAWN'))
+@section('meta_description', 'See events from the last 30 days.')
+@section('canonical', route('events.recent'))
 
 @section('content')
 <section class="relative py-12 sm:py-16">

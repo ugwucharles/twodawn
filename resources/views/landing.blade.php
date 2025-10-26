@@ -1,4 +1,7 @@
 @extends('layouts.public')
+@section('title', 'Find the Night | ' . config('app.name', '2DAWN'))
+@section('meta_description', 'Curated events. Seamless tickets. No accounts, just vibes.')
+@section('canonical', route('home'))
 
 @section('content')
     <!-- Hero: full screen, minimal -->

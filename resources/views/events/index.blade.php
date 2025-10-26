@@ -1,4 +1,7 @@
 @extends('layouts.public')
+@section('title', 'All Events | ' . config('app.name', '2DAWN'))
+@section('meta_description', 'Browse upcoming events and buy tickets easily.')
+@section('canonical', route('events.index'))
 
 @section('content')
 <section class="relative py-12 sm:py-16">

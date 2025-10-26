@@ -14,6 +14,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\Admin\CommentController as AdminCommentController;
 use App\Models\Order;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Event;
 
 Route::get('/', [EventPublicController::class, 'landing'])->name('home');
 
@@ -108,5 +109,32 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
 Route::post('/verify-ticket', [\App\Http\Controllers\Admin\TicketScanController::class, 'verify'])
     ->middleware(['auth','admin'])
     ->name('tickets.verify');
+
+// Sitemap
+Route::get('/sitemap.xml', function () {
+    $base = rtrim(config('app.url', url('/')), '/');
+    $urls = [];
+    $push = function ($loc, $lastmod = null, $changefreq = 'weekly', $priority = '0.7') use (&$urls) {
+        $urls[] = [
+            'loc' => $loc,
+            'lastmod' => $lastmod,
+            'changefreq' => $changefreq,
+            'priority' => $priority,
+        ];
+    };
+
+    $push($base . '/', now()->toAtomString(), 'daily', '1.0');
+    $push(route('events.index'), now()->toAtomString(), 'daily', '0.8');
+    $push(route('events.recent'), now()->toAtomString(), 'daily', '0.6');
+    if (view()->exists('about')) { $push(url('/about'), now()->toAtomString(), 'monthly', '0.4'); }
+
+    Event::where('is_published', true)->orderByDesc('updated_at')->limit(1000)->get()
+        ->each(function ($event) use (&$push) {
+            $push(route('events.show', $event), optional($event->updated_at)->toAtomString(), 'weekly', '0.8');
+        });
+
+    $xml = view('sitemap.xml', ['urls' => $urls])->render();
+    return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+})->name('sitemap');
 
 require __DIR__.'/auth.php';

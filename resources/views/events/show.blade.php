@@ -1,5 +1,40 @@
 @extends('layouts.public')
 
+@section('title', $event->title . ' | ' . config('app.name', '2DAWN'))
+@section('meta_description', $event->description ? \Illuminate\Support\Str::limit(strip_tags($event->description), 160, '') : 'Buy tickets for ' . $event->title)
+@section('canonical', route('events.show', $event))
+@section('meta_image', $event->image_url ?? asset('favicon.ico'))
+@section('og:type', 'article')
+
+@php
+  $json = [
+    '@context' => 'https://schema.org',
+    '@type' => 'Event',
+    'name' => $event->title,
+    'description' => $event->description ? strip_tags($event->description) : null,
+    'image' => $event->image_url ?: null,
+    'url' => route('events.show', $event),
+    'startDate' => optional($event->starts_at)?->toAtomString(),
+    'endDate' => optional($event->ends_at)?->toAtomString(),
+    'location' => $event->venue ? [
+      '@type' => 'Place',
+      'name' => $event->venue,
+      'address' => $event->venue,
+    ] : null,
+    'eventStatus' => ($event->ends_at && $event->ends_at->isPast()) ? 'https://schema.org/EventCompleted' : 'https://schema.org/EventScheduled',
+    'offers' => [
+      '@type' => 'Offer',
+      'price' => (string) ($event->price ?? 0),
+      'priceCurrency' => 'NGN',
+      'availability' => (is_null($event->capacity) || (int)$event->capacity > 0) ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
+      'url' => route('events.buy', $event),
+    ],
+  ];
+@endphp
+@section('jsonld')
+  <script type="application/ld+json">{!! json_encode(array_filter($json, fn($v) => $v !== null), JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
+@endsection
+
 @section('content')
 <section class="py-10">
   <div class="max-w-7xl mx-auto px-6 mb-4 flex justify-between">
@@ -80,7 +115,7 @@
           @if(!($isPast || ($remaining !== null && $remaining <= 0)))
           <div class="mt-6 pt-4 border-t border-white/10">
             <h2 class="text-sm uppercase tracking-widest text-zinc-400">Or buy for a friend</h2>
-            <form method="POST" action="{{ route('orders.create', $event) }}" class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <form method="POST" action="{{ route('orders.create', $event, false) }}" class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
               @csrf
               <div class="sm:col-span-1">
                 <label class="block text-xs text-zinc-400" for="friend_name">Friend's name</label>

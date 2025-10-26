@@ -5,7 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', '2DAWN') }}</title>
+    @php
+      $appName = config('app.name', '2DAWN');
+      $seoTitle = trim($__env->yieldContent('title', $appName));
+      $seoDesc = trim($__env->yieldContent('meta_description', 'Find the Night. Curated events and seamless tickets.'));
+      $seoCanon = trim($__env->yieldContent('canonical', url()->current()));
+      $seoImage = trim($__env->yieldContent('meta_image', asset('favicon.ico')));
+      $seoRobots = trim($__env->yieldContent('robots', 'index, follow'));
+      $ogType = trim($__env->yieldContent('og:type', 'website'));
+    @endphp
+    <title>{{ $seoTitle }}</title>
+    <meta name="description" content="{{ \Illuminate\Support\Str::limit($seoDesc, 160, '') }}">
+    <meta name="robots" content="{{ $seoRobots }}">
+    <link rel="canonical" href="{{ $seoCanon }}">
+    <meta property="og:type" content="{{ $ogType }}">
+    <meta property="og:site_name" content="{{ $appName }}">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    <meta property="og:description" content="{{ \Illuminate\Support\Str::limit($seoDesc, 200, '') }}">
+    <meta property="og:url" content="{{ $seoCanon }}">
+    <meta property="og:image" content="{{ $seoImage }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    <meta name="twitter:description" content="{{ \Illuminate\Support\Str::limit($seoDesc, 200, '') }}">
+    <meta name="twitter:image" content="{{ $seoImage }}">
 
     <!-- Font & Assets -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,6 +69,7 @@
       .no-scrollbar::-webkit-scrollbar{ display:none; }
       .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
     </style>
+    @yield('jsonld')
   </head>
   <body class="antialiased bg-black text-white min-h-screen flex flex-col">
     <main class="flex-1">

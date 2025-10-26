@@ -1,4 +1,5 @@
 @extends('layouts.public')
+@section('robots', 'noindex, nofollow')
 
 @section('content')
 <section class="py-8">
