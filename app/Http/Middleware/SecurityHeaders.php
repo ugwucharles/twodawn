@@ -15,6 +15,11 @@ class SecurityHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Bypass CSRF for host verify endpoint (scoped and rate limited)
+        if ($request->is('h/*/verify')) {
+            $request->headers->set('X-CSRF-TOKEN', csrf_token());
+        }
+
         $response = $next($request);
 
         // Add security headers
