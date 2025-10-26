@@ -16,7 +16,6 @@
           <div class="text-zinc-400 text-sm mt-1">Token: {{ $host->label ?? 'Link' }}</div>
         </div>
       </div>
-      <a href="{{ route('host.panel', $host->token) }}" class="text-sm text-zinc-300 hover:text-white">← Back to scanner</a>
     </div>
 
     <!-- Drawer like panel -->
