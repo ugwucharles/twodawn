@@ -49,10 +49,16 @@
           <div id="status-badge" class="inline-flex items-center px-2 py-1 rounded text-xs"></div>
           <div class="mt-2 text-sm" id="result-text"></div>
         </div>
-        <div class="mt-4">
-          <div class="text-xs text-zinc-400">Recent scans</div>
-          <ul id="recent" class="mt-1 text-sm text-zinc-300 space-y-1"></ul>
+      </div>
+
+      <!-- Recent scans -->
+      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 lg:col-start-1">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-sm text-zinc-300">Recent scans</div>
+          <button id="clear-recent" class="text-xs text-zinc-400 hover:text-white">Clear</button>
         </div>
+        <ul id="recent" class="mt-1 text-sm text-zinc-300 space-y-1"></ul>
+        <div class="mt-2 text-xs text-zinc-500">Latest results on this device only.</div>
       </div>
 
       <!-- Scanned people list -->
@@ -231,6 +237,10 @@ async function startScanner(){
 // (No demo rows for manual code card as requested)
 
 startScanner();
+
+// Clear buttons
+ document.getElementById('clear-recent')?.addEventListener('click', ()=>{ recent.innerHTML=''; });
+ document.getElementById('clear-people')?.addEventListener('click', ()=>{ people.innerHTML=''; });
 
 document.getElementById('manual-submit').addEventListener('click', ()=>{
   const v = document.getElementById('manual-code').value.trim(); if(v) verify(v,'manual');
