@@ -108,6 +108,11 @@ async function ensureHtml5Qrcode(){
   return h5qReady;
 }
 
+async function ensureJsQR(){
+  if (window.jsQR) return true;
+  try { await loadScript('https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'); return !!window.jsQR; } catch(_) { return false; }
+}
+
 async function startScanner(){
   const box = document.getElementById('qr-reader');
   const errBox = document.getElementById('scan-error');
@@ -131,7 +136,7 @@ async function startScanner(){
     }
   } catch (_) { /* fall back below */ }
 
-  // Fallback: Native BarcodeDetector if available and supports QR
+  // Fallback 1: Native BarcodeDetector if available and supports QR
   try{
     if ('BarcodeDetector' in window) {
       const supported = (typeof BarcodeDetector.getSupportedFormats === 'function') ? await BarcodeDetector.getSupportedFormats() : ['qr_code'];
@@ -146,6 +151,29 @@ async function startScanner(){
       return; // success
     }
   }catch{}
+
+  // Fallback 2: jsQR on canvas
+  try {
+    const ok = await ensureJsQR();
+    if (ok) {
+      const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment' } });
+      const v = document.createElement('video'); v.playsInline = true; v.muted = true; v.srcObject = stream; await v.play();
+      box.innerHTML=''; box.appendChild(v); v.style.width='100%'; v.style.height='100%'; v.style.objectFit='cover';
+      const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+      let last='';
+      const tick=()=>{
+        try {
+          const W = box.clientWidth || 400, H = box.clientHeight || 300;
+          canvas.width=W; canvas.height=H; ctx.drawImage(v,0,0,W,H);
+          const img = ctx.getImageData(0,0,W,H); const qr = window.jsQR(img.data, img.width, img.height);
+          if (qr && qr.data) { const t=qr.data; if (t!==last){ last=t; verify(t,'camera'); setTimeout(()=>last='',1200);} }
+        } catch(_){}
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      return;
+    }
+  } catch(_) {}
 
   if (errBox){ errBox.textContent = 'Camera unavailable. Allow permission or try another device.'; errBox.classList.remove('hidden'); errBox.classList.add('flex'); }
 }
