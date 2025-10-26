@@ -65,7 +65,19 @@ const statChecked = document.getElementById('stat-checked');
 const statRemaining = document.getElementById('stat-remaining');
 const recent = document.getElementById('recent');
 
-function addRecent(text){ const li=document.createElement('li'); li.textContent = text; recent.prepend(li); while(recent.children.length>6) recent.removeChild(recent.lastChild); }
+function clearDemo(){ recent.querySelectorAll('[data-demo]')?.forEach(el=>el.remove()); }
+function addRecent(kind, text){
+  clearDemo();
+  const li=document.createElement('li');
+  li.className='flex items-center gap-2';
+  const dot=document.createElement('span');
+  dot.className='w-2 h-2 rounded-full ' + (kind==='ok'?'bg-emerald-400':kind==='warn'?'bg-yellow-400':'bg-rose-400');
+  const label=document.createElement('span'); label.textContent = text;
+  const ts=document.createElement('span'); ts.className='ml-auto text-xs text-zinc-500'; ts.textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  li.append(dot,label,ts);
+  recent.prepend(li);
+  while(recent.children.length>6) recent.removeChild(recent.lastChild);
+}
 
 function setBadge(kind, msg){
   const box = document.getElementById('result'); box.classList.remove('hidden');
@@ -78,18 +90,33 @@ function setBadge(kind, msg){
   t.textContent = msg;
 }
 
+function notify(kind){
+  try {
+    if (navigator.vibrate) {
+      if (kind==='ok') navigator.vibrate([30]);
+      else if (kind==='warn') navigator.vibrate([20,40,20]);
+      else navigator.vibrate([30,30,30]);
+    }
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    const ctx = new AC(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination);
+    o.type='sine'; const now=ctx.currentTime; const freq = (kind==='ok')?880:(kind==='warn')?520:240; o.frequency.setValueAtTime(freq, now);
+    g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(0.12, now+0.02);
+    const dur = (kind==='ok')?0.12:(kind==='warn')?0.18:0.22; o.start(); o.stop(now+dur); o.onended=()=>ctx.close();
+  } catch(_) {}
+}
+
 async function verify(text, source='camera'){
   try{
     const res = await fetch(verifyUrl, { method:'POST', headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'}, body: JSON.stringify({ text, source }) });
     const data = await res.json();
-    if (!res.ok){ setBadge('err', data?.message || 'Link expired or invalid'); return; }
-    if (!data.valid){ setBadge(data.already?'warn':'err', data.already?`Already checked in • ${data.event?.title} • ${data.buyer?.name}`:'Invalid ticket'); addRecent('Invalid'); return; }
-    setBadge('ok', `Valid • ${data.event?.title} • ${data.buyer?.name}`);
+    if (!res.ok){ setBadge('err', data?.message || 'Link expired or invalid'); notify('err'); return; }
+    if (!data.valid){ const kind = data.already?'warn':'err'; setBadge(kind, data.already?`Already checked in • ${data.event?.title} • ${data.buyer?.name}`:'Invalid ticket'); addRecent(kind, data.already?`Already • ${data.buyer?.name || ''}`:'Invalid'); notify(kind); return; }
+    setBadge('ok', `Valid • ${data.event?.title} • ${data.buyer?.name}`); notify('ok');
     const rem = parseInt(data.remaining || 0,10);
     statChecked.textContent = String(parseInt(statChecked.textContent||'0',10) + 1);
     statRemaining.textContent = String(rem >= 0 ? rem : 0);
-    addRecent(`OK • ${data.buyer?.name}`);
-  }catch{ setBadge('err','Network error'); }
+    addRecent('ok', `OK • ${data.buyer?.name}`);
+  }catch{ setBadge('err','Network error'); notify('err'); }
 }
 
 // Camera scanner with robust fallbacks (BarcodeDetector → html5-qrcode)
@@ -177,6 +204,9 @@ async function startScanner(){
 
   if (errBox){ errBox.textContent = 'Camera unavailable. Allow permission or try another device.'; errBox.classList.remove('hidden'); errBox.classList.add('flex'); }
 }
+
+// Add demo placeholders so you can see the feed before scanning
+(function addDemo(){ if (recent.children.length) return; const now = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); const demo = [ ['ok','OK • John Doe'], ['warn','Already • Jane'], ['err','Invalid'] ]; demo.forEach(([k,t])=>{ const li=document.createElement('li'); li.setAttribute('data-demo','1'); li.className='flex items-center gap-2'; const dot=document.createElement('span'); dot.className='w-2 h-2 rounded-full '+(k==='ok'?'bg-emerald-400':k==='warn'?'bg-yellow-400':'bg-rose-400'); const label=document.createElement('span'); label.textContent=t; const ts=document.createElement('span'); ts.className='ml-auto text-xs text-zinc-500'; ts.textContent=now; li.append(dot,label,ts); recent.prepend(li); }); })();
 
 startScanner();
 
