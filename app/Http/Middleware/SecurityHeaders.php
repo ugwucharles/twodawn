@@ -26,8 +26,8 @@ class SecurityHeaders
         
         // Content Security Policy (production-safe)
         $csp = "default-src 'self'; " .
-               "script-src 'self' 'unsafe-inline' https://js.paystack.co https://www.googletagmanager.com https://plausible.io; " .
-               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net; " .
+               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co https://www.googletagmanager.com https://plausible.io https://cdn.jsdelivr.net; " .
+               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net; " .
                "img-src 'self' data: https: blob:; " .
                "font-src 'self' data: https://fonts.gstatic.com https://fonts.bunny.net; " .
                "connect-src 'self' https://api.paystack.co https://res.cloudinary.com https://www.google-analytics.com https://plausible.io; " .
