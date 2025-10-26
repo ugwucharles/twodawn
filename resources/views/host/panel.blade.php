@@ -11,35 +11,54 @@
         <h1 class="text-2xl font-extrabold">{{ $event->title }} — Host Panel</h1>
         <div class="text-zinc-400 text-sm mt-1">Token: {{ $host->label ?? 'Link' }} • Expires {{ optional($host->expires_at)->diffForHumans() }}</div>
       </div>
-      <div class="grid grid-cols-3 gap-3 text-center">
-        <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3">
-          <div class="text-xs text-zinc-400">Sold</div>
-          <div class="text-2xl font-bold">{{ $sold }}</div>
+      <div class="flex items-center gap-3">
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3 min-w-[88px]">
+            <div class="text-xs text-zinc-400">Sold</div>
+            <div class="text-2xl font-bold">{{ $sold }}</div>
+          </div>
+          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3 min-w-[88px]">
+            <div class="text-xs text-zinc-400">Checked in</div>
+            <div class="text-2xl font-bold" id="stat-checked">{{ $checked }}</div>
+          </div>
+          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3 min-w-[88px]">
+            <div class="text-xs text-zinc-400">Remaining</div>
+            <div class="text-2xl font-bold" id="stat-remaining">{{ $remaining }}</div>
+          </div>
         </div>
-        <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3">
-          <div class="text-xs text-zinc-400">Checked in</div>
-          <div class="text-2xl font-bold" id="stat-checked">{{ $checked }}</div>
-        </div>
-        <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3">
-          <div class="text-xs text-zinc-400">Remaining</div>
-          <div class="text-2xl font-bold" id="stat-remaining">{{ $remaining }}</div>
-        </div>
+        <button id="host-menu-btn" class="md:hidden ml-2 inline-flex items-center px-3 py-2 rounded-lg bg-white/10 ring-1 ring-white/15 text-sm">Menu</button>
       </div>
     </div>
 
+    <!-- Mobile side menu -->
+    <div id="host-menu-overlay" class="hidden fixed inset-0 bg-black/50 z-50"></div>
+    <aside id="host-menu" class="hidden fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-zinc-950/95 ring-1 ring-white/10 z-50 p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="font-semibold">Host Panel</div>
+        <button id="host-menu-close" class="text-zinc-400 hover:text-white">Close</button>
+      </div>
+      <nav class="grid gap-2 text-sm">
+        <a href="#scan" data-goto="#scan" class="rounded px-3 py-2 hover:bg-white/5">Scan</a>
+        <a href="#manual" data-goto="#manual" class="rounded px-3 py-2 hover:bg-white/5">Manual entry</a>
+        <a href="#recent-card" data-goto="#recent-card" class="rounded px-3 py-2 hover:bg-white/5">Recent scans</a>
+        <a href="#people-card" data-goto="#people-card" class="rounded px-3 py-2 hover:bg-white/5">Scanned people</a>
+        <button id="copy-link" class="text-left rounded px-3 py-2 hover:bg-white/5">Copy my link</button>
+      </nav>
+    </aside>
+
     <div class="grid lg:grid-cols-2 gap-6 items-start">
-      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+      <div id="scan" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
         <div class="flex items-center justify-between mb-3">
           <div class="text-sm text-zinc-300">Camera scan</div>
           <div class="text-xs text-zinc-400">Auto-start</div>
         </div>
-        <div id="qr-reader" class="rounded-xl overflow-hidden bg-black relative" style="width:400px; height:400px; max-width:100%">
+        <div id="qr-reader" class="rounded-xl overflow-hidden bg-black relative" style="width:100%; height:60vh; max-height:480px; min-height:280px">
           <div id="scan-error" class="absolute inset-0 hidden items-center justify-center text-center text-sm text-red-300 px-4"></div>
         </div>
         <div class="mt-3 text-xs text-zinc-400">Grant camera permission; on mobile use the rear camera.</div>
       </div>
 
-      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+      <div id="manual" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
         <div class="text-sm text-zinc-300 mb-2">Enter code manually</div>
         <form class="flex gap-2" onsubmit="return false;">
           <input id="manual-code" type="text" placeholder="Order ref (PA_...)" class="flex-1 rounded-md bg-black/30 border border-white/10 px-3 py-2 focus:border-white/30 focus:ring-0" />
@@ -52,7 +71,7 @@
       </div>
 
       <!-- Recent scans -->
-      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 lg:col-start-1">
+      <div id="recent-card" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 lg:col-start-1">
         <div class="flex items-center justify-between mb-2">
           <div class="text-sm text-zinc-300">Recent scans</div>
           <button id="clear-recent" class="text-xs text-zinc-400 hover:text-white">Clear</button>
@@ -62,7 +81,7 @@
       </div>
 
       <!-- Scanned people list -->
-      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 lg:col-start-2">
+      <div id="people-card" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 lg:col-start-2">
         <div class="flex items-center justify-between mb-2">
           <div class="text-sm text-zinc-300">Scanned people</div>
           <button id="clear-people" class="text-xs text-zinc-400 hover:text-white">Clear</button>
@@ -181,9 +200,10 @@ async function startScanner(){
       const devices = await Html5Qrcode.getCameras();
       if (devices && devices.length) {
         let id = devices.find(d=>/back|rear|environment/i.test(d.label||''))?.id || (devices[0].id);
-        await scanner.start(
-          id,
-          { fps: 10, qrbox: 250 }, // same settings as admin
+    const r = box.getBoundingClientRect(); const size = Math.round(Math.min(r.width, (r.height||r.width)) * 0.8);
+    await scanner.start(
+      id,
+      { fps: 10, qrbox: Math.max(180, Math.min(320, size)) }, // responsive box
           (txt)=>{ verify(txt,'camera'); },
           ()=>{}
         );
@@ -235,6 +255,21 @@ async function startScanner(){
 }
 
 // (No demo rows for manual code card as requested)
+
+// Mobile menu controls
+const menu = document.getElementById('host-menu');
+const overlay = document.getElementById('host-menu-overlay');
+const openBtn = document.getElementById('host-menu-btn');
+const closeBtn = document.getElementById('host-menu-close');
+function openMenu(){ menu.classList.remove('hidden'); overlay.classList.remove('hidden'); document.body.style.overflow='hidden'; }
+function closeMenu(){ menu.classList.add('hidden'); overlay.classList.add('hidden'); document.body.style.overflow=''; }
+openBtn?.addEventListener('click', openMenu); closeBtn?.addEventListener('click', closeMenu); overlay?.addEventListener('click', closeMenu);
+window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeMenu(); });
+Array.from(document.querySelectorAll('[data-goto]')).forEach(a=>{
+  a.addEventListener('click', (e)=>{ e.preventDefault(); const id=a.getAttribute('data-goto'); const el=document.querySelector(id); if(el){ el.scrollIntoView({behavior:'smooth', block:'start'}); } closeMenu(); });
+});
+
+document.getElementById('copy-link')?.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(location.href); alert('Link copied'); } catch{ alert(location.href); } });
 
 startScanner();
 
