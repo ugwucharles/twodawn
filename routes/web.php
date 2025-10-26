@@ -121,6 +121,7 @@ Route::post('/verify-ticket', [\App\Http\Controllers\Admin\TicketScanController:
 // Host Panel: public, token-scoped
 Route::get('/h/assets/html5-qrcode.js', [\App\Http\Controllers\Admin\AssetsController::class, 'html5qrcode'])->name('host.assets.h5qrcode');
 Route::get('/h/{token}', [\App\Http\Controllers\HostPanelController::class, 'show'])->name('host.panel');
+Route::get('/h/{token}/people', [\App\Http\Controllers\HostPanelController::class, 'people'])->name('host.people');
 Route::post('/h/{token}/verify', [\App\Http\Controllers\HostPanelController::class, 'verify'])->middleware('throttle:10,1');
 
 // Sitemap

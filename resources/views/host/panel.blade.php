@@ -35,7 +35,7 @@
         <a href="#scan" data-goto="#scan" class="rounded px-3 py-2 hover:bg-white/5">Scan</a>
         <a href="#manual" data-goto="#manual" class="rounded px-3 py-2 hover:bg-white/5">Manual entry</a>
         <a href="#recent-card" data-goto="#recent-card" class="rounded px-3 py-2 hover:bg-white/5">Recent scans</a>
-        <a href="#people-card" data-goto="#people-card" class="rounded px-3 py-2 hover:bg-white/5">Scanned people</a>
+        <a href="{{ route('host.people', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5">Scanned people</a>
         <button id="copy-link" class="text-left rounded px-3 py-2 hover:bg-white/5">Copy my link</button>
       </nav>
     </aside>
@@ -74,15 +74,6 @@
         <div class="mt-2 text-xs text-zinc-500">Latest results on this device only.</div>
       </div>
 
-      <!-- Scanned people list -->
-      <div id="people-card" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 lg:col-start-2">
-        <div class="flex items-center justify-between mb-2">
-          <div class="text-sm text-zinc-300">Scanned people</div>
-          <button id="clear-people" class="text-xs text-zinc-400 hover:text-white">Clear</button>
-        </div>
-        <ul id="people" class="mt-1 text-sm text-zinc-300 space-y-1"></ul>
-        <div class="mt-2 text-xs text-zinc-500">Shows the most recent check-ins on this device.</div>
-      </div>
     </div>
   </div>
 </section>
@@ -93,9 +84,8 @@ const verifyUrl = @json(url('/h/'.$host->token.'/verify'));
 const statChecked = document.getElementById('stat-checked');
 const statRemaining = document.getElementById('stat-remaining');
 const recent = document.getElementById('recent');
-const people = document.getElementById('people');
 
-function clearDemo(){ recent.querySelectorAll('[data-demo]')?.forEach(el=>el.remove()); people.querySelectorAll('[data-demo]')?.forEach(el=>el.remove()); }
+function clearDemo(){ recent.querySelectorAll('[data-demo]')?.forEach(el=>el.remove()); }
 function addRecent(kind, text){
   clearDemo();
   const li=document.createElement('li');
@@ -135,16 +125,6 @@ function notify(kind){
   } catch(_) {}
 }
 
-function addPerson(name, email){
-  const li = document.createElement('li');
-  li.className = 'flex items-center gap-2';
-  const nameEl = document.createElement('span'); nameEl.textContent = name || 'Guest';
-  const emailEl = document.createElement('span'); emailEl.className='text-xs text-zinc-400'; emailEl.textContent = email || '';
-  const ts = document.createElement('span'); ts.className='ml-auto text-xs text-zinc-500'; ts.textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-  li.append(nameEl, emailEl, ts);
-  people.prepend(li);
-  while(people.children.length>8) people.removeChild(people.lastChild);
-}
 
 async function verify(text, source='camera'){
   try{
@@ -159,7 +139,6 @@ async function verify(text, source='camera'){
     const mc=document.getElementById('menu-checked'); if(mc) mc.textContent = statChecked.textContent;
     const mr=document.getElementById('menu-remaining'); if(mr) mr.textContent = statRemaining.textContent;
     addRecent('ok', `OK • ${data.buyer?.name}`);
-    addPerson(data.buyer?.name, data.buyer?.email);
   }catch{ setBadge('err','Network error'); notify('err'); }
 }
 
@@ -271,7 +250,6 @@ startScanner();
 
 // Clear buttons
  document.getElementById('clear-recent')?.addEventListener('click', ()=>{ recent.innerHTML=''; });
- document.getElementById('clear-people')?.addEventListener('click', ()=>{ people.innerHTML=''; });
 
 document.getElementById('manual-submit').addEventListener('click', ()=>{
   const v = document.getElementById('manual-code').value.trim(); if(v) verify(v,'manual');
