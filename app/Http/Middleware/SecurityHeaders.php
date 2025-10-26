@@ -30,7 +30,7 @@ class SecurityHeaders
                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net; " .
                "img-src 'self' data: https: blob:; " .
                "font-src 'self' data: https://fonts.gstatic.com https://fonts.bunny.net; " .
-               "connect-src 'self' https://api.paystack.co https://res.cloudinary.com https://www.google-analytics.com https://plausible.io; " .
+               "connect-src 'self' https://api.paystack.co https://res.cloudinary.com https://www.google-analytics.com https://region1.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://plausible.io; " .
                "frame-src https://js.paystack.co https://checkout.paystack.com; " .
                "object-src 'none'; " .
                "base-uri 'self'; " .
