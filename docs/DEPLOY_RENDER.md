@@ -28,11 +28,18 @@ Render setup (high level)
    - New → PostgreSQL → pick region → wait for “Available”
    - Keep Internal Connection details (host, port 5432, db, user, password)
 
-2) Create Web Service (Docker)
+2) Option A — Build on Render (uses build minutes)
    - New → Web Service → select GitHub repo (branch: main)
    - Environment: Docker, Root Directory: /
    - Region: same as PostgreSQL
    - Add environment variables (below)
+
+2) Option B — Deploy prebuilt image from GHCR (saves build minutes)
+   - First run the GitHub Actions workflow (added at .github/workflows/docker-ghcr-render.yml) to publish ghcr.io/<owner>/2dawn:latest
+   - In Render: New → Web Service → “Deploy an existing image”
+     - Image URL: ghcr.io/<owner>/2dawn:latest
+     - If private: add registry credentials (GitHub username + PAT with read:packages)
+     - Enable Auto‑Deploy and (optional) create a Deploy Hook URL; add it as repo secret RENDER_DEPLOY_HOOK so the workflow triggers deploys automatically
 
 Environment variables
 Core
@@ -124,6 +131,7 @@ Troubleshooting
 Checklist for tomorrow
 - [ ] Confirm Web Service env includes DB_* and APP_KEY
 - [ ] Choose an object store (S3/R2/Spaces) and set FILESYSTEM_DISK=s3 + provider envs
+- [ ] If using GHCR: set Render Image URL to ghcr.io/<owner>/2dawn:latest and (if private) add registry credentials
 - [ ] Upload a flyer on an event → confirm it loads
 - [ ] Do a test checkout with Paystack test card → confirm tickets + QR
 - [ ] Set APP_URL to your final domain (Render or custom)
