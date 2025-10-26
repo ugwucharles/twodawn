@@ -79,17 +79,17 @@
   <!-- Scan result modal -->
   <div id="scan-modal" class="fixed inset-0 z-50 hidden">
     <style>
-      @keyframes bounceIn { 0%{transform:scale(.9);opacity:.6} 60%{transform:scale(1.05);opacity:1} 100%{transform:scale(1)} }
+      @keyframes bounceIn { 0%{transform:scale(.92);opacity:.0} 60%{transform:scale(1.04);opacity:1} 100%{transform:scale(1)} }
       .animate-bounceIn{ animation: bounceIn .28s ease-out both; }
     </style>
-    <div id="scan-modal-overlay" class="absolute inset-0 bg-black/60"></div>
-    <div class="relative mx-auto mt-[10vh] w-[92%] max-w-md">
-      <div id="scan-modal-card" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-5 text-center">
-        <div id="scan-modal-badge" class="mx-auto mb-2 inline-flex items-center px-3 py-1.5 rounded-full text-xs"></div>
-        <h3 id="scan-modal-title" class="text-xl font-extrabold"></h3>
-        <p id="scan-modal-sub" class="mt-1 text-zinc-300 text-sm"></p>
-        <p id="scan-modal-remaining" class="mt-2 text-zinc-400 text-xs"></p>
-        <button id="scan-modal-close" class="mt-4 px-4 py-2 rounded-md bg-white text-black text-sm">Close</button>
+    <div id="scan-modal-overlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div class="relative mx-auto mt-[12vh] w-[92%] max-w-md">
+      <div id="scan-modal-card" class="rounded-2xl bg-zinc-950/80 ring-1 ring-white/10 p-6 text-center shadow-2xl">
+        <div id="scan-modal-badge" class="mx-auto mb-3 inline-flex items-center px-3 py-1.5 rounded-full text-xs"></div>
+        <h3 id="scan-modal-title" class="text-2xl font-extrabold"></h3>
+        <p id="scan-modal-sub" class="mt-2 text-zinc-300"></p>
+        <p id="scan-modal-remaining" class="mt-3 text-zinc-400 text-sm"></p>
+        <button id="scan-modal-close" class="mt-5 px-5 py-2 rounded-md bg-white text-black font-medium">Close</button>
       </div>
     </div>
   </div>
