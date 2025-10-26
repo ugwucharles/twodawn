@@ -16,10 +16,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'security.headers' => \App\Http\Middleware\SecurityHeaders::class,
         ]);
         
-        // Apply security headers globally
-        $middleware->web(append: [
-            \App\Http\Middleware\SecurityHeaders::class,
-        ]);
+        // Apply security headers globally and swap CSRF for custom exclusions
+        $middleware->web(
+            remove: [\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class],
+            append: [
+                \App\Http\Middleware\VerifyCsrfToken::class,
+                \App\Http\Middleware\SecurityHeaders::class,
+            ]
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

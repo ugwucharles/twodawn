@@ -11,7 +11,7 @@ class AssetsController extends Controller
 {
     public function html5qrcode(): Response
     {
-        $js = Cache::remember('h5qrcode_js_v2_3_10', 60 * 60 * 12, function () {
+        $js = Cache::remember('h5qrcode_js_v2_3_10_v2', 60 * 60 * 12, function () {
             $urls = [
                 'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.10/minified/html5-qrcode.min.js',
                 'https://unpkg.com/html5-qrcode@2.3.10/minified/html5-qrcode.min.js',
