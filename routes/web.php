@@ -113,6 +113,10 @@ Route::post('/verify-ticket', [\App\Http\Controllers\Admin\TicketScanController:
     ->middleware(['auth','admin'])
     ->name('tickets.verify');
 
+// Host Panel: public, token-scoped
+Route::get('/h/{token}', [\App\Http\Controllers\HostPanelController::class, 'show'])->name('host.panel');
+Route::post('/h/{token}/verify', [\App\Http\Controllers\HostPanelController::class, 'verify'])->middleware('throttle:10,1');
+
 // Sitemap
 Route::get('/sitemap.xml', function () {
     try {

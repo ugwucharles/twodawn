@@ -25,7 +25,7 @@ class SecurityHeaders
 
         // Restrict camera globally; allow only on admin scanner routes
         $permissions = 'geolocation=(), microphone=(), camera=()';
-        if ($request->is('admin/scanner*')) {
+        if ($request->is('admin/scanner*') || $request->is('h/*')) {
             $permissions = 'geolocation=(), microphone=(), camera=(self)';
         }
         $response->headers->set('Permissions-Policy', $permissions);

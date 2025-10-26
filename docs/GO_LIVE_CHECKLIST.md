@@ -19,6 +19,7 @@ Use this list the same day you announce real events.
   - [ ] Ownership verified (meta tags set) and robots.txt accessible
   - [ ] GA4 purchase marked as conversion; test events visible in Realtime
 - Security
+  - [ ] Host Panel links: camera allowed on /h/*; tokens expire a day after event
   - [ ] Admin scanner works; camera allowed only on /admin/scanner
   - [ ] CSP allows required endpoints only; plan to remove 'unsafe-eval' later
   - [ ] Rate limits active on orders and comments; custom 404/500 pages render

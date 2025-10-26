@@ -23,4 +23,9 @@ class Order extends Model
         return $this->belongsTo(Event::class);
     }
 
+    public function checkins()
+    {
+        return $this->hasMany(\App\Models\OrderCheckin::class);
+    }
+
 }
