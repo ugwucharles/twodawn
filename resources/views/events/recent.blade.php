@@ -1,7 +1,39 @@
 @extends('layouts.public')
+@php
+  $page = (int) request()->input('page', 1);
+  $canonUrl = $page > 1 ? route('events.recent', ['page' => $page]) : route('events.recent');
+@endphp
 @section('title', 'Recent Events | ' . config('app.name', '2DAWN'))
 @section('meta_description', 'See events from the last 30 days.')
-@section('canonical', route('events.recent'))
+@section('canonical', $canonUrl)
+@section('jsonld')
+@php
+  $items = [];
+  foreach ($recentEvents as $i => $e) {
+    $items[] = [
+      '@type' => 'ListItem',
+      'position' => $i + 1 + (($recentEvents->currentPage() - 1) * $recentEvents->perPage()),
+      'url' => route('events.show', $e),
+      'name' => $e->title,
+    ];
+  }
+  $itemList = [
+    '@context' => 'https://schema.org',
+    '@type' => 'ItemList',
+    'itemListElement' => $items,
+  ];
+  $breadcrumbs = [
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+      [ '@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => route('home') ],
+      [ '@type' => 'ListItem', 'position' => 2, 'name' => 'Recent Events', 'item' => route('events.recent') ],
+    ],
+  ];
+@endphp
+<script type="application/ld+json">{!! json_encode($itemList, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
+<script type="application/ld+json">{!! json_encode($breadcrumbs, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
+@endsection
 
 @section('content')
 <section class="relative py-12 sm:py-16">

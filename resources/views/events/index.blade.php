@@ -1,7 +1,47 @@
 @extends('layouts.public')
+@php
+  $mood = request('mood');
+  $hasQuery = filled(request('q'));
+  $page = (int) request()->input('page', 1);
+  $canonParams = [];
+  if ($mood) { $canonParams['mood'] = $mood; }
+  if ($page > 1) { $canonParams['page'] = $page; }
+  $canonUrl = $canonParams ? route('events.index', $canonParams) : route('events.index');
+@endphp
 @section('title', 'All Events | ' . config('app.name', '2DAWN'))
 @section('meta_description', 'Browse upcoming events and buy tickets easily.')
-@section('canonical', route('events.index'))
+@section('canonical', $canonUrl)
+@if($hasQuery)
+  @section('robots', 'noindex, follow')
+@endif
+@section('jsonld')
+@php
+  $items = [];
+  foreach ($events as $i => $e) {
+    $items[] = [
+      '@type' => 'ListItem',
+      'position' => $i + 1 + (($events->currentPage() - 1) * $events->perPage()),
+      'url' => route('events.show', $e),
+      'name' => $e->title,
+    ];
+  }
+  $itemList = [
+    '@context' => 'https://schema.org',
+    '@type' => 'ItemList',
+    'itemListElement' => $items,
+  ];
+  $breadcrumbs = [
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+      [ '@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => route('home') ],
+      [ '@type' => 'ListItem', 'position' => 2, 'name' => 'Events', 'item' => route('events.index') ],
+    ],
+  ];
+@endphp
+<script type="application/ld+json">{!! json_encode($itemList, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
+<script type="application/ld+json">{!! json_encode($breadcrumbs, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
+@endsection
 
 @section('content')
 <section class="relative py-12 sm:py-16">

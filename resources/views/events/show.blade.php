@@ -33,6 +33,18 @@
 @endphp
 @section('jsonld')
   <script type="application/ld+json">{!! json_encode(array_filter($json, fn($v) => $v !== null), JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
+  @php
+    $breadcrumbs = [
+      '@context' => 'https://schema.org',
+      '@type' => 'BreadcrumbList',
+      'itemListElement' => [
+        [ '@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => route('home') ],
+        [ '@type' => 'ListItem', 'position' => 2, 'name' => 'Events', 'item' => route('events.index') ],
+        [ '@type' => 'ListItem', 'position' => 3, 'name' => $event->title, 'item' => route('events.show', $event) ],
+      ],
+    ];
+  @endphp
+  <script type="application/ld+json">{!! json_encode($breadcrumbs, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
 @endsection
 
 @section('content')
