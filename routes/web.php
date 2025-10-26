@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\CommentController as AdminCommentController;
 use App\Models\Order;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Event;
+use App\Http\Controllers\Admin\PaystackHealthController;
 
 Route::get('/', [EventPublicController::class, 'landing'])->name('home');
 
@@ -136,5 +137,8 @@ Route::get('/sitemap.xml', function () {
     $xml = view('sitemap.xml', ['urls' => $urls])->render();
     return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
 })->name('sitemap');
+
+// Temporary Paystack health endpoint (no secrets exposed)
+Route::get('/paystack/health', PaystackHealthController::class)->name('paystack.health');
 
 require __DIR__.'/auth.php';
