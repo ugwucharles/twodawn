@@ -228,11 +228,7 @@ async function startScanner(){
   if (errBox){ errBox.textContent = 'Camera unavailable. Allow permission or try another device.'; errBox.classList.remove('hidden'); errBox.classList.add('flex'); }
 }
 
-// Add demo placeholders so you can see the feed before scanning
-(function addDemo(){ if (recent.children.length) return; const now = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); const demo = [ ['ok','OK • John Doe'], ['warn','Already • Jane'], ['err','Invalid'] ]; demo.forEach(([k,t])=>{ const li=document.createElement('li'); li.setAttribute('data-demo','1'); li.className='flex items-center gap-2'; const dot=document.createElement('span'); dot.className='w-2 h-2 rounded-full '+(k==='ok'?'bg-emerald-400':k==='warn'?'bg-yellow-400':'bg-rose-400'); const label=document.createElement('span'); label.textContent=t; const ts=document.createElement('span'); ts.className='ml-auto text-xs text-zinc-500'; ts.textContent=now; li.append(dot,label,ts); recent.prepend(li); });
-  const peopleDemo = [ ['John Doe','john@example.com'], ['Jane','jane@example.com'] ];
-  peopleDemo.forEach(([n,e])=>{ const li=document.createElement('li'); li.setAttribute('data-demo','1'); li.className='flex items-center gap-2'; const nameEl=document.createElement('span'); nameEl.textContent=n; const emailEl=document.createElement('span'); emailEl.className='text-xs text-zinc-400'; emailEl.textContent=e; const ts=document.createElement('span'); ts.className='ml-auto text-xs text-zinc-500'; ts.textContent=now; li.append(nameEl,emailEl,ts); people.prepend(li); });
-})();
+// (No demo rows for manual code card as requested)
 
 startScanner();
 
