@@ -66,7 +66,27 @@ class HostPanelController extends Controller
         $text = (string) $request->input('text','');
         $ref = null;
         if (preg_match('/(PA_[A-Za-z0-9]{6,})/', $text, $m)) { $ref = $m[1]; } else { $ref = $text; }
-        $order = Order::with('event','checkins')->where('paystack_reference', $ref)->first();
+
+        // Temporary test reference support (local/testing only)
+        $testRef = env('HOST_TEST_REFERENCE', 'PA_ab12cd34ef56');
+        if (app()->environment('local') && $ref === $testRef) {
+            // Create or fetch a paid stub order for this event
+            $order = Order::firstOrCreate(
+                ['paystack_reference' => $testRef],
+                [
+                    'event_id' => $host->event_id,
+                    'buyer_name' => 'Test User',
+                    'buyer_email' => 'test@example.com',
+                    'quantity' => 1,
+                    'amount' => 0,
+                    'status' => 'paid',
+                ]
+            );
+            // Ensure status paid even if existed
+            if ($order->status !== 'paid') { $order->update(['status' => 'paid']); }
+        } else {
+            $order = Order::with('event','checkins')->where('paystack_reference', $ref)->first();
+        }
         if (! $order || $order->event_id !== $host->event_id || $order->status !== 'paid') {
             return response()->json(['ok'=>true,'valid'=>false,'message'=>'Invalid ticket'], 200);
         }
