@@ -28,7 +28,7 @@
         </div>
       @endif
 
-      <form method="POST" action="{{ route('orders.create', $event) }}" class="space-y-4 rounded-2xl bg-white/5 ring-1 ring-white/10 p-6" id="payment-form">
+      <form method="POST" action="{{ route('orders.create', $event, false) }}" class="space-y-4 rounded-2xl bg-white/5 ring-1 ring-white/10 p-6" id="payment-form">
         @csrf
         <!-- Security token to prevent double submissions -->
         <input type="hidden" name="submission_token" value="{{ Str::random(32) }}" id="submission-token">
