@@ -22,7 +22,13 @@ class SecurityHeaders
         $response->headers->set('X-Frame-Options', 'DENY');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
-        $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=(self)');
+
+        // Restrict camera globally; allow only on admin scanner routes
+        $permissions = 'geolocation=(), microphone=(), camera=()';
+        if ($request->is('admin/scanner*')) {
+            $permissions = 'geolocation=(), microphone=(), camera=(self)';
+        }
+        $response->headers->set('Permissions-Policy', $permissions);
         
         // Content Security Policy (production-safe)
         $csp = "default-src 'self'; " .

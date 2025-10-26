@@ -69,6 +69,8 @@ Route::post('/events/{event}/orders', [CheckoutController::class, 'create'])
     ->middleware(['throttle:3,1']) // Only 3 attempts per minute
     ->name('orders.create');
 Route::get('/paystack/callback', [CheckoutController::class, 'callback'])->name('paystack.callback');
+// Paystack Webhook (server-to-server). Configure in Paystack Dashboard.
+Route::post('/paystack/webhook', \App\Http\Controllers\PaystackWebhookController::class)->name('paystack.webhook');
 Route::get('/orders/{reference}', [CheckoutController::class, 'showByReference'])->name('orders.public');
 Route::get('/orders/{reference}/download', [CheckoutController::class, 'downloadPdf'])->middleware('signed')->name('orders.pdf');
 
