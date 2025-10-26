@@ -131,10 +131,14 @@ Route::get('/sitemap.xml', function () {
     $push(route('events.recent'), now()->toAtomString(), 'daily', '0.6');
     if (view()->exists('about')) { $push(url('/about'), now()->toAtomString(), 'monthly', '0.4'); }
 
-    Event::where('is_published', true)->orderByDesc('updated_at')->limit(1000)->get()
-        ->each(function ($event) use (&$push) {
-            $push(route('events.show', $event), optional($event->updated_at)->toAtomString(), 'weekly', '0.8');
-        });
+    try {
+        Event::where('is_published', true)->orderByDesc('updated_at')->limit(1000)->get()
+            ->each(function ($event) use (&$push) {
+                $push(route('events.show', $event), optional($event->updated_at)->toAtomString(), 'weekly', '0.8');
+            });
+    } catch (\Throwable $e) {
+        // Fail open: if DB is unavailable, still return a minimal sitemap
+    }
 
     $xml = view('sitemap.xml', ['urls' => $urls])->render();
     return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
