@@ -87,6 +87,11 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
     Route::resource('events', AdminEventController::class);
     Route::patch('events/{event}/toggle', [AdminEventController::class, 'togglePublish'])->name('events.toggle');
     Route::patch('events/{event}/toggle-json', [AdminEventController::class, 'togglePublishJson'])->name('events.toggle.json');
+
+    // Host panel links
+    Route::post('events/{event}/host-tokens', [\App\Http\Controllers\Admin\HostTokenController::class, 'store'])->name('events.tokens.store');
+    Route::patch('host-tokens/{hostToken}/toggle', [\App\Http\Controllers\Admin\HostTokenController::class, 'toggle'])->name('tokens.toggle');
+    Route::delete('host-tokens/{hostToken}', [\App\Http\Controllers\Admin\HostTokenController::class, 'destroy'])->name('tokens.destroy');
     
     // Orders admin
     Route::get('orders/export', [AdminOrderController::class, 'export'])->name('orders.export');

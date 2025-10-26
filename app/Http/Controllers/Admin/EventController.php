@@ -145,7 +145,8 @@ class EventController extends Controller
      */
     public function edit(Event $event)
     {
-        return view('admin.events.edit', compact('event'));
+        $tokens = \App\Models\HostToken::where('event_id', $event->id)->latest()->get();
+        return view('admin.events.edit', compact('event','tokens'));
     }
 
     /**
