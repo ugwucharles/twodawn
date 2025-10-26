@@ -7,27 +7,17 @@
 <section class="py-8 sm:py-10">
   <div class="max-w-6xl mx-auto px-6">
     <div class="flex items-start justify-between gap-6 mb-6">
-      <div>
-        <h1 class="text-2xl font-extrabold">{{ $event->title }} — Host Panel</h1>
-        <div class="text-zinc-400 text-sm mt-1">Token: {{ $host->label ?? 'Link' }} • Expires {{ optional($host->expires_at)->diffForHumans() }}</div>
-      </div>
       <div class="flex items-center gap-3">
-        <div class="grid grid-cols-3 gap-3 text-center">
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3 min-w-[88px]">
-            <div class="text-xs text-zinc-400">Sold</div>
-            <div class="text-2xl font-bold">{{ $sold }}</div>
-          </div>
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3 min-w-[88px]">
-            <div class="text-xs text-zinc-400">Checked in</div>
-            <div class="text-2xl font-bold" id="stat-checked">{{ $checked }}</div>
-          </div>
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3 min-w-[88px]">
-            <div class="text-xs text-zinc-400">Remaining</div>
-            <div class="text-2xl font-bold" id="stat-remaining">{{ $remaining }}</div>
-          </div>
+        <button id="host-menu-btn" class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 ring-1 ring-white/15">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div>
+          <h1 class="text-2xl font-extrabold">{{ $event->title }} — Host Panel</h1>
+          <div class="text-zinc-400 text-sm mt-1">Token: {{ $host->label ?? 'Link' }} • Expires {{ optional($host->expires_at)->diffForHumans() }}</div>
         </div>
-        <button id="host-menu-btn" class="md:hidden ml-2 inline-flex items-center px-3 py-2 rounded-lg bg-white/10 ring-1 ring-white/15 text-sm">Menu</button>
       </div>
+      <!-- Hide tags on page; they appear inside the mobile menu instead -->
+      <div class="hidden"></div>
     </div>
 
     <!-- Mobile side menu -->
@@ -36,6 +26,12 @@
       <div class="flex items-center justify-between mb-4">
         <div class="font-semibold">Host Panel</div>
         <button id="host-menu-close" class="text-zinc-400 hover:text-white">Close</button>
+      </div>
+      <!-- Tags inside the menu -->
+      <div class="grid grid-cols-3 gap-3 text-center mb-4">
+        <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3"><div class="text-xs text-zinc-400">Sold</div><div class="text-2xl font-bold">{{ $sold }}</div></div>
+        <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3"><div class="text-xs text-zinc-400">Checked</div><div class="text-2xl font-bold" id="menu-checked">{{ $checked }}</div></div>
+        <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3"><div class="text-xs text-zinc-400">Remaining</div><div class="text-2xl font-bold" id="menu-remaining">{{ $remaining }}</div></div>
       </div>
       <nav class="grid gap-2 text-sm">
         <a href="#scan" data-goto="#scan" class="rounded px-3 py-2 hover:bg-white/5">Scan</a>
@@ -162,6 +158,9 @@ async function verify(text, source='camera'){
     const rem = parseInt(data.remaining || 0,10);
     statChecked.textContent = String(parseInt(statChecked.textContent||'0',10) + 1);
     statRemaining.textContent = String(rem >= 0 ? rem : 0);
+    // reflect in menu tags too
+    const mc=document.getElementById('menu-checked'); if(mc) mc.textContent = statChecked.textContent;
+    const mr=document.getElementById('menu-remaining'); if(mr) mr.textContent = statRemaining.textContent;
     addRecent('ok', `OK • ${data.buyer?.name}`);
     addPerson(data.buyer?.name, data.buyer?.email);
   }catch{ setBadge('err','Network error'); notify('err'); }
