@@ -89,6 +89,23 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         const currentToken = submissionToken.value;
         
+        // Fire GA begin_checkout (if GA is present)
+        try {
+            const qtyEl = document.getElementById('quantity');
+            const qty = parseInt((qtyEl && qtyEl.value) || '1', 10) || 1;
+            if (window.gtag) {
+                window.gtag('event', 'begin_checkout', {
+                    currency: 'NGN',
+                    items: [{
+                        item_id: 'event_{{ $event->id }}',
+                        item_name: @json($event->title),
+                        item_category: 'Event',
+                        quantity: qty,
+                    }],
+                });
+            }
+        } catch (_) {}
+
         // Prevent double submission
         if (isSubmitting) {
             e.preventDefault();

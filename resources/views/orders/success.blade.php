@@ -45,4 +45,24 @@
     </div>
   </div>
 </section>
+<script>
+  (function(){
+    try {
+      if (!window.gtag) return;
+      const payload = {
+        transaction_id: @json($order->paystack_reference),
+        value: {{ number_format($order->amount/100, 2, '.', '') }},
+        currency: 'NGN',
+        items: [{
+          item_id: 'event_{{ $event?->id }}',
+          item_name: @json($event?->title ?? 'Ticket'),
+          item_category: 'Event',
+          quantity: {{ (int) $order->quantity }},
+          price: {{ number_format(($order->amount/100)/max(1,$order->quantity), 2, '.', '') }},
+        }]
+      };
+      window.gtag('event', 'purchase', payload);
+    } catch (e) {}
+  })();
+</script>
 @endsection
