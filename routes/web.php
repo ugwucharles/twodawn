@@ -115,33 +115,40 @@ Route::post('/verify-ticket', [\App\Http\Controllers\Admin\TicketScanController:
 
 // Sitemap
 Route::get('/sitemap.xml', function () {
-    $base = rtrim(config('app.url', url('/')), '/');
-    $urls = [];
-    $push = function ($loc, $lastmod = null, $changefreq = 'weekly', $priority = '0.7') use (&$urls) {
-        $urls[] = [
-            'loc' => $loc,
-            'lastmod' => $lastmod,
-            'changefreq' => $changefreq,
-            'priority' => $priority,
-        ];
-    };
-
-    $push($base . '/', now()->toAtomString(), 'daily', '1.0');
-    $push(route('events.index'), now()->toAtomString(), 'daily', '0.8');
-    $push(route('events.recent'), now()->toAtomString(), 'daily', '0.6');
-    if (view()->exists('about')) { $push(url('/about'), now()->toAtomString(), 'monthly', '0.4'); }
-
     try {
-        Event::where('is_published', true)->orderByDesc('updated_at')->limit(1000)->get()
-            ->each(function ($event) use (&$push) {
-                $push(route('events.show', $event), optional($event->updated_at)->toAtomString(), 'weekly', '0.8');
-            });
-    } catch (\Throwable $e) {
-        // Fail open: if DB is unavailable, still return a minimal sitemap
-    }
+        $base = rtrim((string) request()->getSchemeAndHttpHost(), '/');
+        $urls = [];
+        $push = function ($loc, $lastmod = null, $changefreq = 'weekly', $priority = '0.7') use (&$urls) {
+            $urls[] = [
+                'loc' => $loc,
+                'lastmod' => $lastmod,
+                'changefreq' => $changefreq,
+                'priority' => $priority,
+            ];
+        };
 
-    $xml = view('sitemap.xml', ['urls' => $urls])->render();
-    return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+        // Static pages
+        $push($base . '/', now()->toAtomString(), 'daily', '1.0');
+        $push(url('/events'), now()->toAtomString(), 'daily', '0.8');
+        $push(url('/events/recent'), now()->toAtomString(), 'daily', '0.6');
+        if (view()->exists('about')) { $push(url('/about'), now()->toAtomString(), 'monthly', '0.4'); }
+
+        // Dynamic event pages (best-effort)
+        try {
+            Event::where('is_published', true)->orderByDesc('updated_at')->limit(1000)->get()
+                ->each(function ($event) use (&$push) {
+                    $push(url('/events/'.$event->id), optional($event->updated_at)->toAtomString(), 'weekly', '0.8');
+                });
+        } catch (\Throwable $e) { /* ignore */ }
+
+        $xml = view('sitemap.xml', ['urls' => $urls])->render();
+        return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+    } catch (\Throwable $e) {
+        // Absolute last-resort minimal sitemap (never 500)
+        $base = rtrim((string) request()->getSchemeAndHttpHost(), '/');
+        $fallback = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"><url><loc>{$base}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url></urlset>";
+        return response($fallback, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+    }
 })->name('sitemap');
 
 // Temporary Paystack health endpoint (no secrets exposed)
