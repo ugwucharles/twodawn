@@ -69,6 +69,7 @@
       .no-scrollbar::-webkit-scrollbar{ display:none; }
       .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
     </style>
+    @yield('head_links')
     @yield('jsonld')
   </head>
   <body class="antialiased bg-black text-white min-h-screen flex flex-col">

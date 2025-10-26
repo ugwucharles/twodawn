@@ -6,6 +6,15 @@
 @section('title', 'Recent Events | ' . config('app.name', '2DAWN'))
 @section('meta_description', 'See events from the last 30 days.')
 @section('canonical', $canonUrl)
+@section('head_links')
+  @if($recentEvents->previousPageUrl())
+    <link rel="prev" href="{{ $recentEvents->previousPageUrl() }}">
+  @endif
+  @if($recentEvents->nextPageUrl())
+    <link rel="next" href="{{ $recentEvents->nextPageUrl() }}">
+  @endif
+@endsection
+
 @section('jsonld')
 @php
   $items = [];

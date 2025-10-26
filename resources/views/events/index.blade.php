@@ -14,6 +14,15 @@
 @if($hasQuery)
   @section('robots', 'noindex, follow')
 @endif
+@section('head_links')
+  @if($events->previousPageUrl())
+    <link rel="prev" href="{{ $events->previousPageUrl() }}">
+  @endif
+  @if($events->nextPageUrl())
+    <link rel="next" href="{{ $events->nextPageUrl() }}">
+  @endif
+@endsection
+
 @section('jsonld')
 @php
   $items = [];
