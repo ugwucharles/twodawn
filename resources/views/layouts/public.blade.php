@@ -29,6 +29,24 @@
     <meta name="twitter:description" content="{{ \Illuminate\Support\Str::limit($seoDesc, 200, '') }}">
     <meta name="twitter:image" content="{{ $seoImage }}">
 
+    @if (env('GOOGLE_SITE_VERIFICATION'))
+      <meta name="google-site-verification" content="{{ env('GOOGLE_SITE_VERIFICATION') }}">
+    @endif
+    @if (env('BING_SITE_VERIFICATION'))
+      <meta name="msvalidate.01" content="{{ env('BING_SITE_VERIFICATION') }}">
+    @endif
+
+    @if (env('GA_MEASUREMENT_ID'))
+      <script async src="https://www.googletagmanager.com/gtag/js?id={{ env('GA_MEASUREMENT_ID') }}"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);} gtag('js', new Date());
+        gtag('config', '{{ env('GA_MEASUREMENT_ID') }}');
+      </script>
+    @elseif (env('PLAUSIBLE_DOMAIN'))
+      <script defer data-domain="{{ env('PLAUSIBLE_DOMAIN') }}" src="https://plausible.io/js/script.js"></script>
+    @endif
+
     <!-- Font & Assets -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,6 +89,29 @@
     </style>
     @yield('head_links')
     @yield('jsonld')
+
+    @php
+      $orgJson = [
+        '@context' => 'https://schema.org',
+        '@type' => 'Organization',
+        'name' => $appName,
+        'url' => config('app.url', url('/')),
+        'logo' => asset('images/Group 2.png'),
+      ];
+      $siteJson = [
+        '@context' => 'https://schema.org',
+        '@type' => 'WebSite',
+        'url' => config('app.url', url('/')),
+        'name' => $appName,
+        'potentialAction' => [
+          '@type' => 'SearchAction',
+          'target' => route('events.index', ['q' => '{search_term_string}']),
+          'query-input' => 'required name=search_term_string',
+        ],
+      ];
+    @endphp
+    <script type="application/ld+json">{!! json_encode($orgJson, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
+    <script type="application/ld+json">{!! json_encode($siteJson, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
   </head>
   <body class="antialiased bg-black text-white min-h-screen flex flex-col">
     <main class="flex-1">
