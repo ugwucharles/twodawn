@@ -91,7 +91,7 @@ class EventController extends Controller
                     $data['image_path'] = $upload->getSecurePath();
                     
                     LoggerService::logImageUpload('Event image uploaded to Cloudinary', [
-                        'event_id' => $event->id,
+                        'event_title' => $data['title'] ?? null,
                         'file_name' => $request->file('image')->getClientOriginalName(),
                         'file_size' => $request->file('image')->getSize(),
                         'cloudinary_url' => $upload->getSecurePath(),
@@ -99,7 +99,7 @@ class EventController extends Controller
                 } catch (\Throwable $e) {
                     // Log the error for debugging
                     LoggerService::logImageUpload('Cloudinary upload failed, falling back to local storage', [
-                        'event_id' => $event->id,
+                        'event_title' => $data['title'] ?? null,
                         'file_name' => $request->file('image')->getClientOriginalName(),
                         'error' => $e->getMessage(),
                     ]);
@@ -108,7 +108,7 @@ class EventController extends Controller
                     $data['image_path'] = $request->file('image')->storePublicly('events');
                     
                     LoggerService::logImageUpload('Event image uploaded to local storage', [
-                        'event_id' => $event->id,
+                        'event_title' => $data['title'] ?? null,
                         'file_name' => $request->file('image')->getClientOriginalName(),
                         'local_path' => $data['image_path'],
                     ]);
