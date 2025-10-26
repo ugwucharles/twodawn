@@ -6,6 +6,16 @@
 @section('content')
 <section class="py-8 sm:py-10">
   <div class="max-w-6xl mx-auto px-6">
+    <style>
+      .glow-ok { box-shadow: 0 0 0 2px rgba(16,185,129,.5), 0 0 30px rgba(16,185,129,.25) inset; }
+      .glow-warn { box-shadow: 0 0 0 2px rgba(250,204,21,.5), 0 0 30px rgba(250,204,21,.2) inset; }
+      .glow-err { box-shadow: 0 0 0 2px rgba(248,113,113,.5), 0 0 30px rgba(248,113,113,.2) inset; }
+      @keyframes pop {
+        0% { transform: scale(0.96); opacity:.8 }
+        100% { transform: scale(1); opacity:1 }
+      }
+      .badge-pop { animation: pop .14s ease-out; }
+    </style>
     <div class="flex items-start justify-between gap-6 mb-6">
       <div class="flex items-center gap-3">
         <button id="host-menu-btn" class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 ring-1 ring-white/15">
@@ -22,7 +32,7 @@
 
     <!-- Mobile side menu -->
     <div id="host-menu-overlay" class="hidden fixed inset-0 bg-black/50 z-50"></div>
-    <aside id="host-menu" class="hidden fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-zinc-950/95 ring-1 ring-white/10 z-50 p-6">
+    <aside id="host-menu" class="hidden fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-zinc-950/80 backdrop-blur-md ring-1 ring-white/10 z-50 p-6 shadow-2xl">
       <div class="flex items-center justify-between mb-4">
         <div class="font-semibold">Host Panel</div>
         <button id="host-menu-close" class="text-zinc-400 hover:text-white">Close</button>
@@ -43,7 +53,7 @@
     </aside>
 
     <div class="grid lg:grid-cols-2 gap-6 items-start">
-      <div id="scan" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+      <div id="scan" class="rounded-2xl bg-white/5 backdrop-blur-md ring-1 ring-white/10 p-4 shadow-xl transition">
         <div class="flex items-center justify-between mb-3">
           <div class="text-sm text-zinc-300">Camera scan</div>
           <div class="text-xs text-zinc-400">Auto-start</div>
@@ -54,20 +64,20 @@
         <div class="mt-3 text-xs text-zinc-400">Grant camera permission; on mobile use the rear camera.</div>
       </div>
 
-      <div id="manual" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+      <div id="manual" class="rounded-2xl bg-white/5 backdrop-blur-md ring-1 ring-white/10 p-4 shadow-xl transition">
         <div class="text-sm text-zinc-300 mb-2">Enter code manually</div>
         <form class="flex gap-2" onsubmit="return false;">
           <input id="manual-code" type="text" placeholder="Order ref (PA_...)" class="flex-1 rounded-md bg-black/30 border border-white/10 px-3 py-2 focus:border-white/30 focus:ring-0" />
           <button id="manual-submit" class="rounded-md px-4 py-2 bg-white text-black text-sm hover:bg-zinc-100">Verify</button>
         </form>
         <div id="result" class="mt-4 hidden">
-          <div id="status-badge" class="inline-flex items-center px-2 py-1 rounded text-xs"></div>
+          <div id="status-badge" class="inline-flex items-center px-3 py-1.5 rounded-full text-xs badge-pop"></div>
           <div class="mt-2 text-sm" id="result-text"></div>
         </div>
       </div>
 
       <!-- Recent scans -->
-      <div id="recent-card" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 lg:col-start-1">
+      <div id="recent-card" class="rounded-2xl bg-white/5 backdrop-blur-md ring-1 ring-white/10 p-4 shadow-xl transition lg:col-start-1">
         <div class="flex items-center justify-between mb-2">
           <div class="text-sm text-zinc-300">Recent scans</div>
           <button id="clear-recent" class="text-xs text-zinc-400 hover:text-white">Clear</button>
@@ -77,7 +87,7 @@
       </div>
 
       <!-- Scanned people list -->
-      <div id="people-card" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 lg:col-start-2">
+      <div id="people-card" class="rounded-2xl bg-white/5 backdrop-blur-md ring-1 ring-white/10 p-4 shadow-xl transition lg:col-start-2">
         <div class="flex items-center justify-between mb-2">
           <div class="text-sm text-zinc-300">Scanned people</div>
           <button id="clear-people" class="text-xs text-zinc-400 hover:text-white">Clear</button>
@@ -114,7 +124,7 @@ function addRecent(kind, text){
 function setBadge(kind, msg){
   const box = document.getElementById('result'); box.classList.remove('hidden');
   const b = document.getElementById('status-badge'); const t = document.getElementById('result-text');
-  b.className = 'inline-flex items-center px-2 py-1 rounded text-xs';
+  b.className = 'inline-flex items-center px-3 py-1.5 rounded-full text-xs badge-pop';
   if (kind==='ok') b.classList.add('bg-emerald-500/20','text-emerald-300','ring-1','ring-emerald-500/30');
   else if (kind==='warn') b.classList.add('bg-yellow-500/20','text-yellow-300','ring-1','ring-yellow-500/30');
   else b.classList.add('bg-red-500/20','text-red-300','ring-1','ring-red-500/30');
@@ -148,13 +158,22 @@ function addPerson(name, email){
   while(people.children.length>8) people.removeChild(people.lastChild);
 }
 
+function setGlow(kind){
+  const box = document.getElementById('qr-reader');
+  box.classList.remove('glow-ok','glow-warn','glow-err');
+  if (kind==='ok') box.classList.add('glow-ok');
+  else if (kind==='warn') box.classList.add('glow-warn');
+  else if (kind==='err') box.classList.add('glow-err');
+  setTimeout(()=>{ box.classList.remove('glow-ok','glow-warn','glow-err'); }, 900);
+}
+
 async function verify(text, source='camera'){
   try{
     const res = await fetch(verifyUrl, { method:'POST', headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'}, body: JSON.stringify({ text, source }) });
     const data = await res.json();
-    if (!res.ok){ setBadge('err', data?.message || 'Link expired or invalid'); notify('err'); return; }
-    if (!data.valid){ const kind = data.already?'warn':'err'; setBadge(kind, data.already?`Already checked in • ${data.event?.title} • ${data.buyer?.name}`:'Invalid ticket'); addRecent(kind, data.already?`Already • ${data.buyer?.name || ''}`:'Invalid'); notify(kind); return; }
-    setBadge('ok', `Valid • ${data.event?.title} • ${data.buyer?.name}`); notify('ok');
+    if (!res.ok){ setBadge('err', data?.message || 'Link expired or invalid'); setGlow('err'); notify('err'); return; }
+    if (!data.valid){ const kind = data.already?'warn':'err'; setBadge(kind, data.already?`Already checked in • ${data.event?.title} • ${data.buyer?.name}`:'Invalid ticket'); setGlow(kind); addRecent(kind, data.already?`Already • ${data.buyer?.name || ''}`:'Invalid'); notify(kind); return; }
+    setBadge('ok', `Valid • ${data.event?.title} • ${data.buyer?.name}`); setGlow('ok'); notify('ok');
     const rem = parseInt(data.remaining || 0,10);
     statChecked.textContent = String(parseInt(statChecked.textContent||'0',10) + 1);
     statRemaining.textContent = String(rem >= 0 ? rem : 0);
@@ -268,7 +287,21 @@ Array.from(document.querySelectorAll('[data-goto]')).forEach(a=>{
   a.addEventListener('click', (e)=>{ e.preventDefault(); const id=a.getAttribute('data-goto'); const el=document.querySelector(id); if(el){ el.scrollIntoView({behavior:'smooth', block:'start'}); } closeMenu(); });
 });
 
-document.getElementById('copy-link')?.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(location.href); alert('Link copied'); } catch{ alert(location.href); } });
+document.getElementById('copy-link')?.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(location.href); const prev = document.activeElement; alert('Link copied'); prev?.focus?.(); } catch{ alert(location.href); } });
+
+// Sticky bottom action bar (mobile)
+(function(){
+  const bar = document.createElement('nav');
+  bar.className='md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/10 backdrop-blur-lg ring-1 ring-white/15 rounded-full shadow-lg px-3 py-2 flex gap-4';
+  bar.innerHTML = `
+    <a href="#scan" class="px-3 py-2" data-goto="#scan">Scan</a>
+    <a href="#manual" class="px-3 py-2" data-goto="#manual">Manual</a>
+    <a href="#recent-card" class="px-3 py-2" data-goto="#recent-card">Recent</a>
+    <a href="#people-card" class="px-3 py-2" data-goto="#people-card">People</a>
+  `;
+  document.body.appendChild(bar);
+  bar.querySelectorAll('[data-goto]').forEach(a=>a.addEventListener('click', (e)=>{ e.preventDefault(); const id=a.getAttribute('data-goto'); const el=document.querySelector(id); if(el){ el.scrollIntoView({behavior:'smooth', block:'start'});} }));
+})();
 
 startScanner();
 
