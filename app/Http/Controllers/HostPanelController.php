@@ -46,11 +46,15 @@ class HostPanelController extends Controller
             abort(410, 'This link has expired.');
         }
         $event = $host->event;
+        $sold = \App\Models\Order::where('event_id', $event->id)->where('status','paid')->sum('quantity');
+        $checked = OrderCheckin::whereHas('order', function($q) use($event){ $q->where('event_id',$event->id)->where('status','paid'); })->sum('count');
+        $remaining = max(0, (int) $sold - (int) $checked);
+
         $checkins = OrderCheckin::with(['order' => function($q){ $q->select('id','buyer_name','buyer_email','paystack_reference','event_id'); }])
             ->whereHas('order', function($q) use ($event){ $q->where('event_id', $event->id)->where('status','paid'); })
             ->orderByDesc('created_at')
             ->paginate(25);
-        return view('host.people', compact('host','event','checkins'));
+        return view('host.people', compact('host','event','checkins','sold','checked','remaining'));
     }
 
     public function verify(string $token, Request $request)
