@@ -54,6 +54,16 @@
           <ul id="recent" class="mt-1 text-sm text-zinc-300 space-y-1"></ul>
         </div>
       </div>
+
+      <!-- Scanned people list -->
+      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 lg:col-start-2">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-sm text-zinc-300">Scanned people</div>
+          <button id="clear-people" class="text-xs text-zinc-400 hover:text-white">Clear</button>
+        </div>
+        <ul id="people" class="mt-1 text-sm text-zinc-300 space-y-1"></ul>
+        <div class="mt-2 text-xs text-zinc-500">Shows the most recent check-ins on this device.</div>
+      </div>
     </div>
   </div>
 </section>
@@ -64,8 +74,9 @@ const verifyUrl = @json(url('/h/'.$host->token.'/verify'));
 const statChecked = document.getElementById('stat-checked');
 const statRemaining = document.getElementById('stat-remaining');
 const recent = document.getElementById('recent');
+const people = document.getElementById('people');
 
-function clearDemo(){ recent.querySelectorAll('[data-demo]')?.forEach(el=>el.remove()); }
+function clearDemo(){ recent.querySelectorAll('[data-demo]')?.forEach(el=>el.remove()); people.querySelectorAll('[data-demo]')?.forEach(el=>el.remove()); }
 function addRecent(kind, text){
   clearDemo();
   const li=document.createElement('li');
@@ -105,6 +116,17 @@ function notify(kind){
   } catch(_) {}
 }
 
+function addPerson(name, email){
+  const li = document.createElement('li');
+  li.className = 'flex items-center gap-2';
+  const nameEl = document.createElement('span'); nameEl.textContent = name || 'Guest';
+  const emailEl = document.createElement('span'); emailEl.className='text-xs text-zinc-400'; emailEl.textContent = email || '';
+  const ts = document.createElement('span'); ts.className='ml-auto text-xs text-zinc-500'; ts.textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  li.append(nameEl, emailEl, ts);
+  people.prepend(li);
+  while(people.children.length>8) people.removeChild(people.lastChild);
+}
+
 async function verify(text, source='camera'){
   try{
     const res = await fetch(verifyUrl, { method:'POST', headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'}, body: JSON.stringify({ text, source }) });
@@ -116,6 +138,7 @@ async function verify(text, source='camera'){
     statChecked.textContent = String(parseInt(statChecked.textContent||'0',10) + 1);
     statRemaining.textContent = String(rem >= 0 ? rem : 0);
     addRecent('ok', `OK • ${data.buyer?.name}`);
+    addPerson(data.buyer?.name, data.buyer?.email);
   }catch{ setBadge('err','Network error'); notify('err'); }
 }
 
@@ -206,7 +229,10 @@ async function startScanner(){
 }
 
 // Add demo placeholders so you can see the feed before scanning
-(function addDemo(){ if (recent.children.length) return; const now = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); const demo = [ ['ok','OK • John Doe'], ['warn','Already • Jane'], ['err','Invalid'] ]; demo.forEach(([k,t])=>{ const li=document.createElement('li'); li.setAttribute('data-demo','1'); li.className='flex items-center gap-2'; const dot=document.createElement('span'); dot.className='w-2 h-2 rounded-full '+(k==='ok'?'bg-emerald-400':k==='warn'?'bg-yellow-400':'bg-rose-400'); const label=document.createElement('span'); label.textContent=t; const ts=document.createElement('span'); ts.className='ml-auto text-xs text-zinc-500'; ts.textContent=now; li.append(dot,label,ts); recent.prepend(li); }); })();
+(function addDemo(){ if (recent.children.length) return; const now = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); const demo = [ ['ok','OK • John Doe'], ['warn','Already • Jane'], ['err','Invalid'] ]; demo.forEach(([k,t])=>{ const li=document.createElement('li'); li.setAttribute('data-demo','1'); li.className='flex items-center gap-2'; const dot=document.createElement('span'); dot.className='w-2 h-2 rounded-full '+(k==='ok'?'bg-emerald-400':k==='warn'?'bg-yellow-400':'bg-rose-400'); const label=document.createElement('span'); label.textContent=t; const ts=document.createElement('span'); ts.className='ml-auto text-xs text-zinc-500'; ts.textContent=now; li.append(dot,label,ts); recent.prepend(li); });
+  const peopleDemo = [ ['John Doe','john@example.com'], ['Jane','jane@example.com'] ];
+  peopleDemo.forEach(([n,e])=>{ const li=document.createElement('li'); li.setAttribute('data-demo','1'); li.className='flex items-center gap-2'; const nameEl=document.createElement('span'); nameEl.textContent=n; const emailEl=document.createElement('span'); emailEl.className='text-xs text-zinc-400'; emailEl.textContent=e; const ts=document.createElement('span'); ts.className='ml-auto text-xs text-zinc-500'; ts.textContent=now; li.append(nameEl,emailEl,ts); people.prepend(li); });
+})();
 
 startScanner();
 
