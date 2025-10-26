@@ -60,7 +60,7 @@
 
 <script>
 const token = @json($host->token);
-const verifyUrl = @json(url('/h/'+$host->token+'/verify'));
+const verifyUrl = @json(url('/h/'.$host->token.'/verify'));
 const statChecked = document.getElementById('stat-checked');
 const statRemaining = document.getElementById('stat-remaining');
 const recent = document.getElementById('recent');
@@ -92,22 +92,62 @@ async function verify(text, source='camera'){
   }catch{ setBadge('err','Network error'); }
 }
 
-// Minimal camera scanner using BarcodeDetector first, fallback to jsQR via admin scanner if needed
+// Camera scanner with robust fallbacks (BarcodeDetector → html5-qrcode)
+async function loadScript(url){ return new Promise((res, rej)=>{ const s=document.createElement('script'); s.src=url; s.async=true; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+let h5qReady = null;
+async function ensureHtml5Qrcode(){
+  if (window.Html5Qrcode) return true;
+  if (h5qReady) return h5qReady;
+  const urls = [
+    @json(route('host.assets.h5qrcode')),
+    'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.10/minified/html5-qrcode.min.js',
+    'https://unpkg.com/html5-qrcode@2.3.10/minified/html5-qrcode.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.10/html5-qrcode.min.js'
+  ];
+  h5qReady = (async () => { for (const u of urls){ try{ await loadScript(u); if (window.Html5Qrcode) return true; } catch(_){} } return false; })();
+  return h5qReady;
+}
+
 async function startScanner(){
   const box = document.getElementById('qr-reader');
+  const errBox = document.getElementById('scan-error');
+
+  // Prefer the same library as Admin: html5-qrcode
+  try {
+    const ok = await ensureHtml5Qrcode();
+    if (ok && window.Html5Qrcode) {
+      const scanner = new Html5Qrcode('qr-reader');
+      const devices = await Html5Qrcode.getCameras();
+      if (devices && devices.length) {
+        let id = devices.find(d=>/back|rear|environment/i.test(d.label||''))?.id || (devices[0].id);
+        await scanner.start(
+          id,
+          { fps: 10, qrbox: 250 }, // same settings as admin
+          (txt)=>{ verify(txt,'camera'); },
+          ()=>{}
+        );
+        return; // success
+      }
+    }
+  } catch (_) { /* fall back below */ }
+
+  // Fallback: Native BarcodeDetector if available and supports QR
   try{
-    if ('BarcodeDetector' in window){
+    if ('BarcodeDetector' in window) {
+      const supported = (typeof BarcodeDetector.getSupportedFormats === 'function') ? await BarcodeDetector.getSupportedFormats() : ['qr_code'];
+      if (!supported || !supported.includes('qr_code')) throw new Error('QR not supported');
       const det = new BarcodeDetector({ formats:['qr_code'] });
       const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment' } });
-      const v = document.createElement('video'); v.playsInline = true; v.srcObject = stream; await v.play();
+      const v = document.createElement('video'); v.playsInline = true; v.muted = true; v.srcObject = stream; await v.play();
       box.innerHTML=''; box.appendChild(v); v.style.width='100%'; v.style.height='100%'; v.style.objectFit='cover';
       let last='';
       const tick=async()=>{ try{ const codes=await det.detect(v); if(codes&&codes.length){ const t=codes[0].rawValue; if(t && t!==last){ last=t; verify(t,'camera'); setTimeout(()=>last='',1200); } } }catch{} requestAnimationFrame(tick); };
       requestAnimationFrame(tick);
-      return;
+      return; // success
     }
   }catch{}
-  // Fallback: reuse admin scanner script loader and canvas approach if needed
+
+  if (errBox){ errBox.textContent = 'Camera unavailable. Allow permission or try another device.'; errBox.classList.remove('hidden'); errBox.classList.add('flex'); }
 }
 
 startScanner();
