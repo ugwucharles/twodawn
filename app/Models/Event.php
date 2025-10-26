@@ -43,9 +43,34 @@ class Event extends Model
         if (empty($this->image_path)) {
             return null;
         }
+        
+        // If it's already a full URL (Cloudinary), return as-is
         if (str_starts_with($this->image_path, 'http')) {
             return $this->image_path;
         }
-        return Storage::url($this->image_path);
+        
+        // For local storage paths, use Storage::url() which handles both local and S3
+        try {
+            return Storage::url($this->image_path);
+        } catch (\Exception $e) {
+            // Fallback: if Storage::url() fails, try to construct URL manually
+            $disk = config('filesystems.default', 'public');
+            if ($disk === 's3') {
+                $bucket = config('filesystems.disks.s3.bucket');
+                $region = config('filesystems.disks.s3.region');
+                $endpoint = config('filesystems.disks.s3.endpoint');
+                
+                if ($endpoint) {
+                    // Custom endpoint (Cloudflare R2, DigitalOcean Spaces, etc.)
+                    return rtrim($endpoint, '/') . '/' . $bucket . '/' . $this->image_path;
+                } else {
+                    // Standard AWS S3
+                    return "https://{$bucket}.s3.{$region}.amazonaws.com/{$this->image_path}";
+                }
+            } else {
+                // Local storage fallback
+                return url('storage/' . $this->image_path);
+            }
+        }
     }
 }

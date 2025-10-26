@@ -66,15 +66,13 @@ class EventController extends Controller
         $data = $this->validated($request);
         $data['is_published'] = $request->boolean('is_published');
 
-if ($request->hasFile('image')) {
+        if ($request->hasFile('image')) {
             try {
+                // Try Cloudinary first (production preferred)
                 $upload = Cloudinary::uploadFile($request->file('image')->getRealPath(), ['folder' => '2dawn/events']);
                 $data['image_path'] = $upload->getSecurePath();
             } catch (\Throwable $e) {
-                if (app()->environment('production')) {
-                    return back()->withErrors(['image' => 'Image upload failed. Please try again.'])->withInput();
-                }
-                // Dev fallback only
+                // Fallback to configured storage disk
                 $data['image_path'] = $request->file('image')->storePublicly('events');
             }
         }
@@ -107,17 +105,15 @@ if ($request->hasFile('image')) {
         $data = $this->validated($request);
         $data['is_published'] = $request->boolean('is_published');
 
-if ($request->hasFile('image')) {
+        if ($request->hasFile('image')) {
             // Optionally delete old image (local)
             // if ($event->image_path && !str_starts_with($event->image_path, 'http')) Storage::delete($event->image_path);
             try {
+                // Try Cloudinary first (production preferred)
                 $upload = Cloudinary::uploadFile($request->file('image')->getRealPath(), ['folder' => '2dawn/events']);
                 $data['image_path'] = $upload->getSecurePath();
             } catch (\Throwable $e) {
-                if (app()->environment('production')) {
-                    return back()->withErrors(['image' => 'Image upload failed. Please try again.'])->withInput();
-                }
-                // Dev fallback only
+                // Fallback to configured storage disk
                 $data['image_path'] = $request->file('image')->storePublicly('events');
             }
         }

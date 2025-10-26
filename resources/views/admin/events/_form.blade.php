@@ -81,7 +81,7 @@
     <x-input-error :messages="$errors->get('image')" class="mt-2" />
     @if (!empty($event->image_path))
         <div class="mt-2">
-            <img src="{{ Storage::url($event->image_path) }}" alt="Flyer" class="h-24 rounded" />
+            <img src="{{ $event->image_url }}" alt="Flyer" class="h-24 rounded" />
         </div>
     @endif
 </div>
