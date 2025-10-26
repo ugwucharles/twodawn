@@ -15,6 +15,7 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
+use App\Services\LoggerService;
 
 class CheckoutController extends Controller
 {
@@ -31,117 +32,215 @@ class CheckoutController extends Controller
 
     public function create(Request $request, Event $event)
     {
+        $startTime = microtime(true);
+        
         abort_unless($event->is_published, 404);
         $now = now();
         $isPast = ($event->ends_at && $event->ends_at->lt($now)) || (!$event->ends_at && $event->starts_at && $event->starts_at->lt($now));
         if ($isPast) {
+            LoggerService::logSecurity('Attempted to buy tickets for past event', array_merge([
+                'event_id' => $event->id,
+                'event_title' => $event->title,
+            ], LoggerService::getRequestContext($request)));
             return back()->withErrors(['event' => 'Ticket sales closed for this event.']);
         }
 
-        $data = $request->validate([
-            'buyer_name' => ['required','string','max:255'],
-            'buyer_email' => ['required','email','max:255'],
-            'buyer_phone' => ['nullable','string','max:50'],
-'quantity' => ['required','integer','min:1'],
-            'coupon' => ['nullable','string','max:50'],
-        ]);
-
-        $quantity = (int) $data['quantity'];
-
-        // Prevent oversell: basic pre-check
-        if (! is_null($event->capacity) && $quantity > (int)$event->capacity) {
-            return back()->withErrors(['quantity' => 'Only '.$event->capacity.' ticket(s) remaining for this event.'])->withInput();
+        // Server-side double submission protection
+        $submissionToken = $request->input('submission_token');
+        if (!$submissionToken) {
+            LoggerService::logSecurity('Form submission without token', LoggerService::getRequestContext($request));
+            return back()->withErrors(['general' => 'Invalid form submission. Please refresh and try again.'])->withInput();
         }
 
-        // Early bird pricing
-        $now = now();
-        $unitPrice = (float) ($event->price ?? 0);
-        if (!is_null($event->early_bird_price) && !is_null($event->early_bird_ends_at) && $now->lte($event->early_bird_ends_at)) {
-            $unitPrice = (float) $event->early_bird_price;
+        // Check if this token was already used (simple in-memory cache for demo)
+        $cacheKey = 'submission_token_' . $submissionToken;
+        if (\Cache::has($cacheKey)) {
+            LoggerService::logSecurity('Duplicate form submission detected', array_merge([
+                'submission_token' => $submissionToken,
+            ], LoggerService::getRequestContext($request)));
+            return back()->withErrors(['general' => 'This form has already been submitted. Please refresh the page to try again.'])->withInput();
         }
-        $subtotalKobo = (int) round($unitPrice * $quantity * 100);
 
-        // Apply coupon if valid
-        $couponCode = $data['coupon'] ?? null;
-        $discountKobo = 0;
-        if ($couponCode) {
-            $coupon = \App\Models\Coupon::where('code', $couponCode)->validFor($event->id)->first();
-            if ($coupon) {
-                if ($coupon->type === 'percent') {
-                    $discountKobo = (int) floor($subtotalKobo * min(100, $coupon->value) / 100);
-                } else { // fixed (in kobo)
-                    $discountKobo = min($subtotalKobo, (int) $coupon->value);
+        // Mark token as used (expires in 1 hour)
+        \Cache::put($cacheKey, true, 3600);
+
+        try {
+            $data = $request->validate([
+                'buyer_name' => ['required','string','max:255'],
+                'buyer_email' => ['required','email','max:255'],
+                'buyer_phone' => ['nullable','string','max:50'],
+                'quantity' => ['required','integer','min:1'],
+                'coupon' => ['nullable','string','max:50'],
+            ]);
+
+            $quantity = (int) $data['quantity'];
+
+            // Prevent oversell: basic pre-check
+            if (! is_null($event->capacity) && $quantity > (int)$event->capacity) {
+                return back()->withErrors(['quantity' => 'Only '.$event->capacity.' ticket(s) remaining for this event.'])->withInput();
+            }
+
+            // Early bird pricing
+            $now = now();
+            $unitPrice = (float) ($event->price ?? 0);
+            if (!is_null($event->early_bird_price) && !is_null($event->early_bird_ends_at) && $now->lte($event->early_bird_ends_at)) {
+                $unitPrice = (float) $event->early_bird_price;
+            }
+            $subtotalKobo = (int) round($unitPrice * $quantity * 100);
+
+            // Apply coupon if valid
+            $couponCode = $data['coupon'] ?? null;
+            $discountKobo = 0;
+            if ($couponCode) {
+                $coupon = \App\Models\Coupon::where('code', $couponCode)->validFor($event->id)->first();
+                if ($coupon) {
+                    if ($coupon->type === 'percent') {
+                        $discountKobo = (int) floor($subtotalKobo * min(100, $coupon->value) / 100);
+                    } else { // fixed (in kobo)
+                        $discountKobo = min($subtotalKobo, (int) $coupon->value);
+                    }
+                } else {
+                    return back()->withErrors(['coupon' => 'Invalid or expired coupon code.'])->withInput();
                 }
             }
-        }
 
-        $amountKobo = max(0, $subtotalKobo - $discountKobo);
+            $amountKobo = max(0, $subtotalKobo - $discountKobo);
 
-        // Create pending order
-        $reference = 'PA_'.bin2hex(random_bytes(8));
-        $order = Order::create([
-            'event_id' => $event->id,
-            'buyer_name' => $data['buyer_name'],
-            'buyer_email' => $data['buyer_email'],
-'buyer_phone' => $data['buyer_phone'] ?? null,
-            'coupon_code' => $couponCode,
-            'quantity' => $quantity,
-            'amount' => $amountKobo,
-            'paystack_reference' => $reference,
-            'status' => 'pending',
-        ]);
+            // Create pending order
+            $reference = 'PA_'.bin2hex(random_bytes(8));
+            $order = Order::create([
+                'event_id' => $event->id,
+                'buyer_name' => $data['buyer_name'],
+                'buyer_email' => $data['buyer_email'],
+                'buyer_phone' => $data['buyer_phone'] ?? null,
+                'coupon_code' => $couponCode,
+                'quantity' => $quantity,
+                'amount' => $amountKobo,
+                'paystack_reference' => $reference,
+                'status' => 'pending',
+            ]);
 
-        $secret = config('services.paystack.secret');
-        if (! $secret) {
-            return back()->withErrors(['payment' => 'Payment gateway not configured. Set PAYSTACK_SECRET_KEY in your .env.']);
-        }
+            // Log order creation
+            LoggerService::logOrder('created', $reference, array_merge([
+                'event_id' => $event->id,
+                'event_title' => $event->title,
+                'buyer_email' => $data['buyer_email'],
+                'quantity' => $quantity,
+                'amount_kobo' => $amountKobo,
+                'coupon_code' => $couponCode,
+            ], LoggerService::getRequestContext($request)));
 
-        // If the amount is zero (free), bypass gateway and mark as paid immediately
-        if ($amountKobo <= 0) {
-            $this->finalizeZeroCostOrder($order);
-            return redirect()->route('orders.public', $reference);
-        }
-
-        $callback = config('services.paystack.callback_url') ?: route('paystack.callback');
-        $response = Http::withToken($secret)->post('https://api.paystack.co/transaction/initialize', [
-            'email' => $order->buyer_email,
-            'amount' => $amountKobo,
-            'reference' => $reference,
-            'callback_url' => $callback,
-            'currency' => 'NGN',
-        ]);
-
-        if (! $response->ok() || ! data_get($response->json(), 'status')) {
-            // Log full context so we can diagnose production failures
-            try {
-                \Log::error('paystack-init-failed', [
-                    'http_status' => $response->status(),
-                    'body' => $response->body(),
-                    'amount_kobo' => $amountKobo,
-                    'reference' => $reference,
-                    'email' => $order->buyer_email,
+            $secret = config('services.paystack.secret');
+            if (! $secret) {
+                LoggerService::logPaymentFailure('Paystack secret key not configured', [
+                    'order_reference' => $reference,
                 ]);
-            } catch (\Throwable $e) { /* ignore logging errors */ }
-            $order->update(['status' => 'failed']);
-            return back()->withErrors(['payment' => 'Unable to initialize payment. Please try again.']);
-        }
+                return back()->withErrors(['payment' => 'Payment gateway not configured. Please contact support.'])->withInput();
+            }
 
-        $authUrl = data_get($response->json(), 'data.authorization_url');
-        return redirect()->away($authUrl);
+            // If the amount is zero (free), bypass gateway and mark as paid immediately
+            if ($amountKobo <= 0) {
+                LoggerService::logPayment('Free order processed', [
+                    'order_reference' => $reference,
+                    'amount_kobo' => $amountKobo,
+                ]);
+                $this->finalizeZeroCostOrder($order);
+                return redirect()->route('orders.public', $reference);
+            }
+
+            // Log payment initialization attempt
+            LoggerService::logPayment('Initializing payment', [
+                'order_reference' => $reference,
+                'amount_kobo' => $amountKobo,
+                'buyer_email' => $order->buyer_email,
+            ]);
+
+            $callback = config('services.paystack.callback_url') ?: route('paystack.callback');
+            $response = Http::withToken($secret)->post('https://api.paystack.co/transaction/initialize', [
+                'email' => $order->buyer_email,
+                'amount' => $amountKobo,
+                'reference' => $reference,
+                'callback_url' => $callback,
+                'currency' => 'NGN',
+            ]);
+
+            if (! $response->ok() || ! data_get($response->json(), 'status')) {
+                // Log payment failure with detailed context
+                LoggerService::logPaymentFailure('Paystack initialization failed', [
+                    'order_reference' => $reference,
+                    'http_status' => $response->status(),
+                    'response_body' => $response->body(),
+                    'amount_kobo' => $amountKobo,
+                    'buyer_email' => $order->buyer_email,
+                ]);
+                $order->update(['status' => 'failed']);
+                return back()->withErrors(['payment' => 'Unable to initialize payment. Please try again or contact support.'])->withInput();
+            }
+
+            $authUrl = data_get($response->json(), 'data.authorization_url');
+            
+            // Log successful payment initialization
+            LoggerService::logPayment('Payment initialized successfully', [
+                'order_reference' => $reference,
+                'amount_kobo' => $amountKobo,
+                'buyer_email' => $order->buyer_email,
+            ]);
+
+            // Log performance
+            $duration = microtime(true) - $startTime;
+            LoggerService::logPerformance('Order creation and payment initialization', $duration, [
+                'order_reference' => $reference,
+                'event_id' => $event->id,
+            ]);
+
+            return redirect()->away($authUrl);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Log validation errors
+            LoggerService::logUserAction('Order validation failed', array_merge([
+                'event_id' => $event->id,
+                'validation_errors' => $e->errors(),
+            ], LoggerService::getRequestContext($request)));
+            
+            // Re-throw validation exceptions to show form errors
+            throw $e;
+        } catch (\Exception $e) {
+            // Log unexpected errors with comprehensive context
+            LoggerService::logPaymentFailure('Unexpected error during order creation', array_merge([
+                'error' => $e->getMessage(),
+                'event_id' => $event->id,
+                'event_title' => $event->title,
+                'trace' => $e->getTraceAsString(),
+            ], LoggerService::getRequestContext($request)));
+            
+            return back()->withErrors(['general' => 'Failed to process your order. Please try again.'])->withInput();
+        }
     }
 
     public function callback(Request $request)
     {
         $reference = (string) $request->query('reference', '');
         if ($reference === '') {
+            LoggerService::logPaymentFailure('Callback received without reference', LoggerService::getRequestContext($request));
             return view('orders.failed', ['message' => 'Missing payment reference.']);
         }
+
+        LoggerService::logPayment('Callback received', [
+            'reference' => $reference,
+        ]);
 
         // Finalize payment. If it fails (sold out or gateway error), show a friendly message.
         $ok = $this->finalizePayment($reference);
         if (! $ok) {
+            LoggerService::logPaymentFailure('Payment verification failed', [
+                'reference' => $reference,
+            ]);
             return view('orders.failed', ['message' => 'Payment failed or tickets sold out.']);
         }
+        
+        LoggerService::logPayment('Payment completed successfully', [
+            'reference' => $reference,
+        ]);
         return redirect()->route('orders.public', $reference);
     }
 

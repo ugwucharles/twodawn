@@ -8,12 +8,22 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use App\Services\LoggerService;
 
 class EventController extends Controller
 {
     public function togglePublish(Event $event)
     {
+        $oldStatus = $event->is_published;
         $event->update(['is_published' => ! $event->is_published]);
+        
+        LoggerService::logAdminAction('Event publish status toggled', auth()->id(), [
+            'event_id' => $event->id,
+            'event_title' => $event->title,
+            'old_status' => $oldStatus,
+            'new_status' => $event->is_published,
+        ]);
+        
         return redirect()->route('admin.events.index')->with('status', 'Event '.($event->is_published ? 'published' : 'unpublished'));
     }
 
@@ -25,7 +35,7 @@ class EventController extends Controller
 
     protected function validated(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'title' => ['required','string','max:255'],
             'description' => ['nullable','string'],
             'venue' => ['nullable','string','max:255'],
@@ -39,6 +49,13 @@ class EventController extends Controller
             'is_published' => ['sometimes','boolean'],
             'image' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
         ]);
+
+        // Sanitize string inputs
+        $data['title'] = trim(strip_tags($data['title']));
+        $data['description'] = $data['description'] ? trim($data['description']) : null;
+        $data['venue'] = $data['venue'] ? trim(strip_tags($data['venue'])) : null;
+
+        return $data;
     }
     /**
      * Display a listing of the resource.
@@ -63,22 +80,56 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $this->validated($request);
-        $data['is_published'] = $request->boolean('is_published');
+        try {
+            $data = $this->validated($request);
+            $data['is_published'] = $request->boolean('is_published');
 
-        if ($request->hasFile('image')) {
-            try {
-                // Try Cloudinary first (production preferred)
-                $upload = Cloudinary::uploadFile($request->file('image')->getRealPath(), ['folder' => '2dawn/events']);
-                $data['image_path'] = $upload->getSecurePath();
-            } catch (\Throwable $e) {
-                // Fallback to configured storage disk
-                $data['image_path'] = $request->file('image')->storePublicly('events');
+            if ($request->hasFile('image')) {
+                try {
+                    // Try Cloudinary first (production preferred)
+                    $upload = Cloudinary::uploadFile($request->file('image')->getRealPath(), ['folder' => '2dawn/events']);
+                    $data['image_path'] = $upload->getSecurePath();
+                    
+                    LoggerService::logImageUpload('Event image uploaded to Cloudinary', [
+                        'event_id' => $event->id,
+                        'file_name' => $request->file('image')->getClientOriginalName(),
+                        'file_size' => $request->file('image')->getSize(),
+                        'cloudinary_url' => $upload->getSecurePath(),
+                    ]);
+                } catch (\Throwable $e) {
+                    // Log the error for debugging
+                    LoggerService::logImageUpload('Cloudinary upload failed, falling back to local storage', [
+                        'event_id' => $event->id,
+                        'file_name' => $request->file('image')->getClientOriginalName(),
+                        'error' => $e->getMessage(),
+                    ]);
+                    
+                    // Fallback to configured storage disk
+                    $data['image_path'] = $request->file('image')->storePublicly('events');
+                    
+                    LoggerService::logImageUpload('Event image uploaded to local storage', [
+                        'event_id' => $event->id,
+                        'file_name' => $request->file('image')->getClientOriginalName(),
+                        'local_path' => $data['image_path'],
+                    ]);
+                }
             }
-        }
 
-        Event::create($data);
-        return redirect()->route('admin.events.index')->with('status', 'Event created');
+            Event::create($data);
+            return redirect()->route('admin.events.index')->with('status', 'Event created successfully!');
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Re-throw validation exceptions to show form errors
+            throw $e;
+        } catch (\Exception $e) {
+            // Log unexpected errors
+            \Log::error('Failed to create event', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->withErrors(['general' => 'Failed to create event. Please try again.'])->withInput();
+        }
     }
 
     /**
@@ -102,24 +153,46 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event)
     {
-        $data = $this->validated($request);
-        $data['is_published'] = $request->boolean('is_published');
+        try {
+            $data = $this->validated($request);
+            $data['is_published'] = $request->boolean('is_published');
 
-        if ($request->hasFile('image')) {
-            // Optionally delete old image (local)
-            // if ($event->image_path && !str_starts_with($event->image_path, 'http')) Storage::delete($event->image_path);
-            try {
-                // Try Cloudinary first (production preferred)
-                $upload = Cloudinary::uploadFile($request->file('image')->getRealPath(), ['folder' => '2dawn/events']);
-                $data['image_path'] = $upload->getSecurePath();
-            } catch (\Throwable $e) {
-                // Fallback to configured storage disk
-                $data['image_path'] = $request->file('image')->storePublicly('events');
+            if ($request->hasFile('image')) {
+                // Optionally delete old image (local)
+                // if ($event->image_path && !str_starts_with($event->image_path, 'http')) Storage::delete($event->image_path);
+                try {
+                    // Try Cloudinary first (production preferred)
+                    $upload = Cloudinary::uploadFile($request->file('image')->getRealPath(), ['folder' => '2dawn/events']);
+                    $data['image_path'] = $upload->getSecurePath();
+                } catch (\Throwable $e) {
+                    // Log the error for debugging
+                    \Log::warning('Cloudinary upload failed, falling back to local storage', [
+                        'error' => $e->getMessage(),
+                        'file' => $request->file('image')->getClientOriginalName(),
+                        'event_id' => $event->id
+                    ]);
+                    
+                    // Fallback to configured storage disk
+                    $data['image_path'] = $request->file('image')->storePublicly('events');
+                }
             }
-        }
 
-        $event->update($data);
-        return redirect()->route('admin.events.index')->with('status', 'Event updated');
+            $event->update($data);
+            return redirect()->route('admin.events.index')->with('status', 'Event updated successfully!');
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Re-throw validation exceptions to show form errors
+            throw $e;
+        } catch (\Exception $e) {
+            // Log unexpected errors
+            \Log::error('Failed to update event', [
+                'error' => $e->getMessage(),
+                'event_id' => $event->id,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->withErrors(['general' => 'Failed to update event. Please try again.'])->withInput();
+        }
     }
 
     /**

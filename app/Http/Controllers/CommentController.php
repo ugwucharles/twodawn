@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Comment;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use App\Services\LoggerService;
 
 class CommentController extends Controller
 {
@@ -18,13 +19,21 @@ class CommentController extends Controller
             'content' => ['required','string','max:2000'],
         ]);
 
-        Comment::create([
+        $comment = Comment::create([
             'event_id' => $event->id,
             'name' => $data['name'],
             'email' => $data['email'] ?? null,
             'content' => $data['content'],
             'approved' => false,
         ]);
+
+        LoggerService::logUserAction('Comment submitted', array_merge([
+            'event_id' => $event->id,
+            'event_title' => $event->title,
+            'comment_id' => $comment->id,
+            'commenter_name' => $data['name'],
+            'commenter_email' => $data['email'] ?? null,
+        ], LoggerService::getRequestContext($request)));
 
         return back()->with('status', 'Comment submitted and awaiting approval.');
     }

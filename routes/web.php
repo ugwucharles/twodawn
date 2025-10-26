@@ -55,15 +55,17 @@ Route::get('/events/recent', [EventPublicController::class, 'recent'])->name('ev
 Route::get('/events/{event}/remaining', [EventPublicController::class, 'remaining'])->name('events.remaining');
 Route::get('/events/{event}', [EventPublicController::class, 'show'])->name('events.show');
 
-// Comments (guest)
+// Comments (guest) with enhanced rate limiting
 Route::post('/events/{event}/comments', [CommentController::class, 'store'])
-    ->middleware('throttle:5,1')
+    ->middleware('throttle:3,1') // Reduced from 5 to 3 per minute
     ->name('events.comments.store');
 
-// Guest checkout
+// Guest checkout with enhanced rate limiting
 use App\Http\Controllers\CheckoutController;
 Route::get('/events/{event}/buy', [CheckoutController::class, 'buy'])->name('events.buy');
-Route::post('/events/{event}/orders', [CheckoutController::class, 'create'])->middleware('throttle:10,1')->name('orders.create');
+Route::post('/events/{event}/orders', [CheckoutController::class, 'create'])
+    ->middleware(['throttle:3,1']) // Only 3 attempts per minute
+    ->name('orders.create');
 Route::get('/paystack/callback', [CheckoutController::class, 'callback'])->name('paystack.callback');
 Route::get('/orders/{reference}', [CheckoutController::class, 'showByReference'])->name('orders.public');
 Route::get('/orders/{reference}/download', [CheckoutController::class, 'downloadPdf'])->middleware('signed')->name('orders.pdf');
@@ -72,8 +74,8 @@ Route::get('/orders/{reference}/download', [CheckoutController::class, 'download
 // Host with us (contact) form
 Route::post('/host-request', [HostRequestController::class, 'store'])->name('host.request.store');
 
-// Admin routes
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+// Admin routes with enhanced security
+Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('admin.')->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

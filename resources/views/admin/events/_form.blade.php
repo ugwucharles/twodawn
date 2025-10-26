@@ -1,4 +1,8 @@
 <div class="space-y-4">
+    @if ($errors->has('general'))
+        <x-alert type="error">{{ $errors->first('general') }}</x-alert>
+    @endif
+    
     <div>
         <x-input-label for="title" :value="__('Title')" />
         <x-text-input id="title" name="title" type="text" class="mt-1 block w-full" :value="old('title', $event->title)" required autofocus />

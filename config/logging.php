@@ -127,6 +127,63 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        // Custom log channels for better organization
+        'payments' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/payments.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30, // Keep payment logs for 30 days
+            'replace_placeholders' => true,
+        ],
+
+        'security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/security.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 90, // Keep security logs for 90 days
+            'replace_placeholders' => true,
+        ],
+
+        'user_actions' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/user_actions.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14, // Keep user action logs for 14 days
+            'replace_placeholders' => true,
+        ],
+
+        'admin' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/admin.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 90, // Keep admin logs for 90 days
+            'replace_placeholders' => true,
+        ],
+
+        'performance' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/performance.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 7, // Keep performance logs for 7 days
+            'replace_placeholders' => true,
+        ],
+
+        'uploads' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/uploads.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14, // Keep upload logs for 14 days
+            'replace_placeholders' => true,
+        ],
+
+        'orders' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/orders.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30, // Keep order logs for 30 days
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];
