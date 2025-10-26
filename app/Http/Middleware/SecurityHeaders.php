@@ -34,7 +34,7 @@ class SecurityHeaders
                "frame-src https://js.paystack.co https://checkout.paystack.com; " .
                "object-src 'none'; " .
                "base-uri 'self'; " .
-               "form-action 'self'; " .
+               "form-action 'self' https:; " .
                "frame-ancestors 'none';";
         
         $response->headers->set('Content-Security-Policy', $csp);
