@@ -52,9 +52,10 @@ class Event extends Model
         // For local storage paths, prefer public disk URL if available
         try {
             if (Storage::disk('public')->exists($this->image_path)) {
-                return Storage::disk('public')->url($this->image_path);
+                // Use app URL to avoid misconfigured filesystems.public.url
+                return url('storage/' . ltrim($this->image_path, '/'));
             }
-            return Storage::url($this->image_path);
+            return url('storage/' . ltrim($this->image_path, '/'));
         } catch (\Exception $e) {
             // Fallback: if Storage::url() fails, try to construct URL manually
             $disk = config('filesystems.default', 'public');
