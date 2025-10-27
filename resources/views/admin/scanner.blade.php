@@ -1,5 +1,5 @@
 <x-app-layout>
-  <div class="py-6">
+  <div id="page-content" class="py-6">
     <div class="max-w-6xl mx-auto px-6">
       <div class="mb-6 flex items-center">
         <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-rose-400 bg-clip-text text-transparent">QR Scanner</h1>
@@ -65,6 +65,27 @@
     </div>
   </div>
 
+  <!-- Scan result modal -->
+  <div id="scan-modal" class="fixed inset-0 z-[60] hidden">
+    <style>
+      @keyframes bounceIn { 0%{transform:scale(.92);opacity:.0} 60%{transform:scale(1.04);opacity:1} 100%{transform:scale(1)} }
+      .animate-bounceIn{ animation: bounceIn .28s ease-out both; }
+      html.scan-modal-open { overflow: hidden; overscroll-behavior: none; }
+      html.scan-modal-open #page-content { pointer-events: none; }
+      html.scan-modal-open #page-content > :not(#scan-modal){ filter: blur(12px); }
+    </style>
+    <div id="scan-modal-overlay" class="absolute inset-0 bg-black/80 backdrop-blur-2xl z-0"></div>
+    <div class="absolute inset-0 z-10 flex items-center justify-center p-4">
+      <div id="scan-modal-card" class="rounded-2xl bg-black ring-1 ring-white/10 p-8 text-center shadow-2xl w-full max-w-xl">
+        <div id="scan-modal-badge" class="mx-auto mb-3 inline-flex items-center px-3 py-1.5 rounded-full text-xs"></div>
+        <h3 id="scan-modal-title" class="text-2xl font-extrabold"></h3>
+        <p id="scan-modal-sub" class="mt-2 text-zinc-300"></p>
+        <p id="scan-modal-meta" class="mt-2 text-zinc-500 text-xs"></p>
+        <button id="scan-modal-close" class="mt-5 px-5 py-2 rounded-md bg-white text-black font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Utilities
     function setBadge(kind, msg){
@@ -81,6 +102,68 @@
     function getToken(){ return document.querySelector('meta[name="csrf-token"]').getAttribute('content'); }
     const VERIFY_URL = @json(route('tickets.verify'));
 
+    // Modal elements
+    const modalEl = document.getElementById('scan-modal');
+    const modalCard = document.getElementById('scan-modal-card');
+    const modalOverlay = document.getElementById('scan-modal-overlay');
+    const modalClose = document.getElementById('scan-modal-close');
+    const modalBadge = document.getElementById('scan-modal-badge');
+    const modalTitle = document.getElementById('scan-modal-title');
+    const modalSub = document.getElementById('scan-modal-sub');
+    const modalMeta = document.getElementById('scan-modal-meta');
+    let modalTimer = null;
+
+    // Robust scroll lock
+    let __scrollY = 0;
+    function lockScroll(){
+      __scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      document.documentElement.classList.add('scan-modal-open');
+      document.documentElement.style.overflow = 'hidden';
+      document.documentElement.style.overscrollBehavior = 'none';
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${__scrollY}px`;
+      document.body.style.width = '100%';
+    }
+    function unlockScroll(){
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.overscrollBehavior = '';
+      document.documentElement.classList.remove('scan-modal-open');
+      window.scrollTo(0, __scrollY || 0);
+    }
+
+    function closeScanModal(){ if(modalEl){ modalEl.classList.add('hidden'); } if(modalTimer){ clearTimeout(modalTimer); modalTimer=null; } unlockScroll(); }
+    function openScanModal(kind, opts){
+      if(!modalEl) return;
+      modalBadge.className = 'mx-auto mb-3 inline-flex items-center px-3 py-1.5 rounded-full text-xs';
+      if (kind==='ok') modalBadge.classList.add('bg-emerald-500/20','text-emerald-300','ring-1','ring-emerald-500/30');
+      else if (kind==='warn') modalBadge.classList.add('bg-yellow-500/20','text-yellow-300','ring-1','ring-yellow-500/30');
+      else modalBadge.classList.add('bg-red-500/20','text-red-300','ring-1','ring-red-500/30');
+      modalBadge.textContent = kind==='ok' ? 'Valid ticket' : (kind==='warn' ? 'Already checked in' : 'Invalid ticket');
+      modalTitle.textContent = opts?.title || '';
+      modalSub.textContent = opts?.sub || '';
+      modalMeta.textContent = opts?.last ? ('Last check-in: ' + new Date(opts.last).toLocaleString()) : '';
+      modalEl.classList.remove('hidden');
+      modalCard.classList.remove('animate-bounceIn'); void modalCard.offsetWidth; modalCard.classList.add('animate-bounceIn');
+      if (modalTimer) clearTimeout(modalTimer);
+      lockScroll();
+    }
+    // Keep modal open unless Close is clicked
+    modalOverlay?.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); });
+    modalEl?.addEventListener('click', (e)=>{ if(e.target === modalEl) { e.preventDefault(); e.stopPropagation(); } });
+    modalClose?.addEventListener('click', closeScanModal);
+    // Prevent scroll on overlay for iOS
+    const preventScroll = (ev)=>{ ev.preventDefault(); };
+    modalEl?.addEventListener('wheel', preventScroll, { passive:false });
+    modalEl?.addEventListener('touchmove', preventScroll, { passive:false });
+    // Disable ESC-to-close: no handler
+
+    function notify(kind){ try{ if(navigator.vibrate){ if(kind==='ok') navigator.vibrate([30]); else if(kind==='warn') navigator.vibrate([20,40,20]); else navigator.vibrate([30,30,30]); } }catch(_){} }
+
     async function verifyPayload(text){
       try{
         setBadge('scan','Verifying…');
@@ -90,12 +173,14 @@
           body: JSON.stringify({ text })
         });
         const data = await res.json();
-        if (!res.ok || !data || !data.ok){ setBadge('err','Invalid or unauthorized.'); return; }
+        if (!res.ok || !data || !data.ok){ setBadge('err','Invalid or unauthorized.'); openScanModal('err',{ title:'Invalid ticket', sub:'' }); notify('err'); return; }
         const ev = data.event?.title || 'Event';
         const buyer = data.buyer?.name || ''; const email = data.buyer?.email || '';
         const status = data.valid ? 'Valid ticket' : 'Invalid ticket';
         setBadge(data.valid ? 'ok' : 'err', `${status} • ${ev} • ${buyer} (${email})`);
-      }catch(e){ setBadge('err','Network error.'); }
+        openScanModal(data.valid ? 'ok' : 'err', { title: status, sub: `${buyer} • ${ev}`, last: data.last_checkin_at });
+        notify(data.valid ? 'ok' : 'err');
+      }catch(e){ setBadge('err','Network error.'); openScanModal('err',{ title:'Network error', sub:'Please try again' }); }
     }
 
     // Camera scanning (BarcodeDetector -> jsQR)

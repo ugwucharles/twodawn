@@ -156,7 +156,7 @@
         <div class="max-w-7xl mx-auto px-6">
             <div class="mb-8 w-full flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <h2 class="text-3xl sm:text-4xl font-bold">How to buy tickets</h2>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-white/5 ring-1 ring-white/10 text-xs sm:text-sm text-zinc-300">3 easy steps</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs sm:text-sm text-zinc-300 sm:bg-white/5 sm:ring-1 sm:ring-white/10">3 easy steps</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <!-- Step 1 -->

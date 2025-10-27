@@ -21,11 +21,28 @@ class TicketScanController extends Controller
         $ref = null;
         if (preg_match('/(PA_[A-Za-z0-9]{6,})/', $text, $m)) { $ref = $m[1]; } else { $ref = $text; }
 
-        $order = Order::with('event')->where('paystack_reference', $ref)->first();
+        // Local/test override: accept a fixed reference for easy manual testing without DB
+        $adminTestRef = strtoupper((string) env('ADMIN_TEST_REFERENCE', 'PA_1234567'));
+        if (app()->environment(['local','testing']) && strtoupper($ref) === $adminTestRef) {
+            return response()->json([
+                'ok' => true,
+                'valid' => true,
+                'type' => 'order',
+                'reference' => $adminTestRef,
+                'buyer' => [ 'name' => 'Test User', 'email' => 'test@example.com' ],
+                'event' => [ 'id' => null, 'title' => 'Test Event' ],
+                'status' => 'paid',
+                'quantity' => 1,
+                'last_checkin_at' => null,
+            ]);
+        }
+
+        $order = Order::with('event','checkins')->where('paystack_reference', $ref)->first();
         if (! $order) {
             return response()->json(['ok'=>false,'valid'=>false,'type'=>'order','message'=>'Order not found'], 404);
         }
         $valid = $order->status === 'paid';
+        $last = optional($order->checkins()->latest('created_at')->first())->created_at;
         return response()->json([
             'ok' => true,
             'valid' => $valid,
@@ -35,6 +52,7 @@ class TicketScanController extends Controller
             'event' => [ 'id' => $order->event?->id, 'title' => $order->event?->title ],
             'status' => $order->status,
             'quantity' => $order->quantity,
+            'last_checkin_at' => $last ? $last->toIso8601String() : null,
         ]);
     }
 

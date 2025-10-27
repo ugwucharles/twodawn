@@ -68,11 +68,13 @@ class HostPanelController extends Controller
         if (preg_match('/(PA_[A-Za-z0-9]{6,})/', $text, $m)) { $ref = $m[1]; } else { $ref = $text; }
 
         // Temporary test reference support (local/testing only)
-        $testRef = env('HOST_TEST_REFERENCE', 'PA_ab12cd34ef56');
-        if (app()->environment('local') && $ref === $testRef) {
+        $refNorm = strtoupper($ref);
+        $testRef1 = strtoupper((string) env('HOST_TEST_REFERENCE', 'PA_ab12cd34ef56'));
+        $testRef2 = strtoupper((string) env('HOST_TEST_REFERENCE_2', 'PA_1234567'));
+        if (app()->environment(['local','testing']) && ($refNorm === $testRef1 || $refNorm === $testRef2)) {
             // Create or fetch a paid stub order for this event
             $order = Order::firstOrCreate(
-                ['paystack_reference' => $testRef],
+                ['paystack_reference' => $refNorm],
                 [
                     'event_id' => $host->event_id,
                     'buyer_name' => 'Test User',
@@ -94,6 +96,7 @@ class HostPanelController extends Controller
         $used = (int) $order->checkins()->sum('count');
         $allowed = max(0, (int) $order->quantity - $used);
         if ($allowed <= 0) {
+            $last = optional($order->checkins()->latest('created_at')->first())->created_at;
             return response()->json([
                 'ok'=>true,
                 'valid'=>false,
@@ -101,9 +104,11 @@ class HostPanelController extends Controller
                 'buyer' => ['name'=>$order->buyer_name,'email'=>$order->buyer_email],
                 'event' => ['title'=>$order->event?->title],
                 'remaining'=>0,
+                'last_checkin_at' => $last ? $last->toIso8601String() : null,
             ], 200);
         }
         // record one check-in by default
+        $now = now();
         OrderCheckin::create([
             'order_id' => $order->id,
             'host_token_id' => $host->id,
@@ -117,6 +122,7 @@ class HostPanelController extends Controller
             'buyer' => ['name'=>$order->buyer_name,'email'=>$order->buyer_email],
             'event' => ['title'=>$order->event?->title],
             'remaining'=>$remaining,
+            'last_checkin_at' => $now->toIso8601String(),
         ]);
     }
 }

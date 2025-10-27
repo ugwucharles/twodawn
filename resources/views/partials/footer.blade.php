@@ -1,4 +1,4 @@
-<footer class="py-12 border-t border-white/10">
+<footer class="py-12">
   <div class="max-w-7xl mx-auto px-6">
     <div class="flex flex-col items-center text-center gap-4">
       <div class="flex items-center gap-3 text-zinc-300">
