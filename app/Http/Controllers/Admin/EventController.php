@@ -104,8 +104,8 @@ class EventController extends Controller
                         'error' => $e->getMessage(),
                     ]);
                     
-                    // Fallback to configured storage disk
-                    $data['image_path'] = $request->file('image')->storePublicly('events');
+                    // Fallback to local public storage (symlink public/storage required)
+                    $data['image_path'] = $request->file('image')->storePublicly('events', 'public');
                     
                     LoggerService::logImageUpload('Event image uploaded to local storage', [
                         'event_title' => $data['title'] ?? null,
@@ -173,8 +173,8 @@ class EventController extends Controller
                         'event_id' => $event->id
                     ]);
                     
-                    // Fallback to configured storage disk
-                    $data['image_path'] = $request->file('image')->storePublicly('events');
+                    // Fallback to local public storage (symlink public/storage required)
+                    $data['image_path'] = $request->file('image')->storePublicly('events', 'public');
                 }
             }
 

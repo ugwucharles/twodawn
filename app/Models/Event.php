@@ -49,8 +49,11 @@ class Event extends Model
             return $this->image_path;
         }
         
-        // For local storage paths, use Storage::url() which handles both local and S3
+        // For local storage paths, prefer public disk URL if available
         try {
+            if (Storage::disk('public')->exists($this->image_path)) {
+                return Storage::disk('public')->url($this->image_path);
+            }
             return Storage::url($this->image_path);
         } catch (\Exception $e) {
             // Fallback: if Storage::url() fails, try to construct URL manually

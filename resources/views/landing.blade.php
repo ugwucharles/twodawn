@@ -1,11 +1,11 @@
 @extends('layouts.public')
-@section('title', 'Find the Night | ' . config('app.name', '2DAWN'))
+@section('title', 'Find the Event | ' . config('app.name', '2DAWN'))
 @section('meta_description', 'Curated events. Seamless tickets. No accounts, just vibes.')
 @section('canonical', route('home'))
 
 @section('content')
     <!-- Hero: full screen, minimal -->
-    <section class="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
+    <section class="relative min-h-[92vh] lg:min-h-[96vh] flex items-center justify-center overflow-hidden">
         <!-- Header inside hero -->
         @include('partials.public-header')
         <div class="absolute inset-0 -z-10">
@@ -14,7 +14,7 @@
         </div>
         <div class="max-w-5xl mx-auto px-6 text-center">
 <h1 class="fluid-title font-extrabold tracking-tight">
-                Find the Night.
+                Find the Event.
             </h1>
 <p class="mt-5 text-zinc-300 fluid-subtitle">
                 Curated events. Seamless tickets. No accounts, just vibes.
