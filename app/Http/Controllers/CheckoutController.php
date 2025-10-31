@@ -88,6 +88,14 @@ class CheckoutController extends Controller
             }
             $subtotalKobo = (int) round($unitPrice * $quantity * 100);
 
+            // Calculate buyer fees if passed to buyer: 5% + ₦50 per ticket
+            // Never add fees for free events (unit price <= 0)
+            $feesKobo = 0;
+            if ($unitPrice > 0 && $event->pass_fees_to_buyer) {
+                $perTicketFeeKobo = (int) round($unitPrice * 0.05 * 100) + 5000; // 50 NGN = 5000 kobo
+                $feesKobo = max(0, $perTicketFeeKobo * $quantity);
+            }
+
             // Apply coupon if valid
             $couponCode = $data['coupon'] ?? null;
             $discountKobo = 0;
@@ -104,7 +112,23 @@ class CheckoutController extends Controller
                 }
             }
 
-            $amountKobo = max(0, $subtotalKobo - $discountKobo);
+            $amountKobo = max(0, $subtotalKobo - $discountKobo + $feesKobo);
+
+            // If total is zero (free), enforce 1 free claim per hour per email
+            if ($amountKobo <= 0) {
+                $ip = (string) $request->ip();
+                $recentFree = Order::where('created_ip', $ip)
+                    ->where('event_id', $event->id)
+                    ->where('amount', '<=', 0)
+                    ->where('status', 'paid')
+                    ->where('created_at', '>=', now()->subHour())
+                    ->orderByDesc('created_at')
+                    ->first();
+                if ($recentFree) {
+                    $mins = max(1, 60 - now()->diffInMinutes($recentFree->created_at));
+                    return back()->withErrors(['general' => 'You recently claimed a free ticket. Please try again in ~'.$mins.' minute(s).'])->withInput();
+                }
+            }
 
             // Create pending order
             $reference = 'PA_'.bin2hex(random_bytes(8));
@@ -118,6 +142,7 @@ class CheckoutController extends Controller
                 'amount' => $amountKobo,
                 'paystack_reference' => $reference,
                 'status' => 'pending',
+                'created_ip' => $request->ip(),
             ]);
 
             // Log order creation
@@ -214,6 +239,62 @@ class CheckoutController extends Controller
             ], LoggerService::getRequestContext($request)));
             
             return back()->withErrors(['general' => 'Failed to process your order. Please try again.'])->withInput();
+        }
+    }
+
+    public function quote(Event $event, Request $request)
+    {
+        abort_unless($event->is_published, 404);
+        try {
+            $data = $request->validate([
+                'quantity' => ['required','integer','min:1'],
+                'coupon' => ['nullable','string','max:50'],
+            ]);
+            $quantity = (int) $data['quantity'];
+
+            // Base/early-bird unit price
+            $unitPrice = (float) ($event->price ?? 0);
+            $now = now();
+            if (!is_null($event->early_bird_price) && !is_null($event->early_bird_ends_at) && $now->lte($event->early_bird_ends_at)) {
+                $unitPrice = (float) $event->early_bird_price;
+            }
+            $subtotalKobo = (int) round($unitPrice * $quantity * 100);
+
+            // Fees (never add fees for free events)
+            $feesKobo = 0;
+            if ($unitPrice > 0 && $event->pass_fees_to_buyer) {
+                $perTicketFeeKobo = (int) round($unitPrice * 0.05 * 100) + 5000; // 50 NGN
+                $feesKobo = max(0, $perTicketFeeKobo * $quantity);
+            }
+
+            // Coupon
+            $discountKobo = 0;
+            $validCoupon = false;
+            $couponCode = $data['coupon'] ?? null;
+            if ($couponCode) {
+                $coupon = \App\Models\Coupon::where('code', $couponCode)->validFor($event->id)->first();
+                if ($coupon) {
+                    $validCoupon = true;
+                    if ($coupon->type === 'percent') {
+                        $discountKobo = (int) floor($subtotalKobo * min(100, $coupon->value) / 100);
+                    } else {
+                        $discountKobo = min($subtotalKobo, (int) $coupon->value);
+                    }
+                }
+            }
+
+            $totalKobo = max(0, $subtotalKobo - $discountKobo + $feesKobo);
+
+            return response()->json([
+                'ok' => true,
+                'subtotal_kobo' => $subtotalKobo,
+                'fees_kobo' => $feesKobo,
+                'discount_kobo' => $discountKobo,
+                'total_kobo' => $totalKobo,
+                'coupon_valid' => $validCoupon,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['ok' => false, 'message' => 'Could not compute quote'], 422);
         }
     }
 

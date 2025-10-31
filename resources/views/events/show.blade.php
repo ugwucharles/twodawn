@@ -2,7 +2,7 @@
 
 @section('title', $event->title . ' | ' . config('app.name', '2DAWN'))
 @section('meta_description', $event->description ? \Illuminate\Support\Str::limit(strip_tags($event->description), 160, '') : 'Buy tickets for ' . $event->title)
-@section('canonical', route('events.show', $event))
+@section('canonical', $event->public_url)
 @section('meta_image', $event->image_url ?? asset('favicon.ico'))
 @section('og:type', 'article')
 
@@ -13,7 +13,7 @@
     'name' => $event->title,
     'description' => $event->description ? strip_tags($event->description) : null,
     'image' => $event->image_url ?: null,
-    'url' => route('events.show', $event),
+'url' => $event->public_url,
     'startDate' => optional($event->starts_at)?->toAtomString(),
     'endDate' => optional($event->ends_at)?->toAtomString(),
     'location' => $event->venue ? [
@@ -40,7 +40,7 @@
       'itemListElement' => [
         [ '@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => route('home') ],
         [ '@type' => 'ListItem', 'position' => 2, 'name' => 'Events', 'item' => route('events.index') ],
-        [ '@type' => 'ListItem', 'position' => 3, 'name' => $event->title, 'item' => route('events.show', $event) ],
+[ '@type' => 'ListItem', 'position' => 3, 'name' => $event->title, 'item' => $event->public_url ],
       ],
     ];
   @endphp
@@ -50,8 +50,8 @@
 @section('content')
 <section class="py-10">
   <div class="max-w-7xl mx-auto px-6 mb-4 flex justify-between">
-    <a href="{{ url('/') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-100 transition">Home</a>
-    <a href="{{ route('events.index') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white/10 ring-1 ring-white/15 text-white text-sm hover:bg-white/15 transition">All Events</a>
+    <a href="{{ url('/') }}" class="text-sm text-zinc-300 hover:text-white hover:underline underline-offset-4">Home</a>
+    <a href="{{ route('events.index') }}" class="text-sm text-zinc-300 hover:text-white hover:underline underline-offset-4">All Events</a>
   </div>
   <div class="max-w-7xl mx-auto px-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -112,7 +112,35 @@
                 <a href="{{ route('events.buy', $event) }}" class="inline-flex items-center px-4 py-2 rounded-xl bg-white text-black text-sm font-semibold hover:bg-zinc-100 transition">Buy ticket</a>
               @endif
             </div>
+            <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
+              <span class="text-zinc-400 uppercase tracking-widest">Share:</span>
+              <a href="https://wa.me/?text={{ urlencode(($event->title ?? 'Event').' — '.$event->public_url) }}" target="_blank" class="px-2.5 py-1 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20">WhatsApp</a>
+              <a href="https://twitter.com/intent/tweet?text={{ urlencode($event->title ?? 'Event') }}&url={{ urlencode($event->public_url) }}" target="_blank" class="px-2.5 py-1 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20">X</a>
+              <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($event->public_url) }}" target="_blank" class="px-2.5 py-1 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20">Facebook</a>
+              <button id="copy-link-ev" class="px-2.5 py-1 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20" data-url="{{ $event->public_url }}">Copy link</button>
+            </div>
+            @php
+              $start = optional($event?->starts_at);
+              $end = optional($event?->ends_at) ?: optional($event?->starts_at)?->copy()->addHours(2);
+              $startUtc = $start ? $start->copy()->utc()->format('Ymd\THis\Z') : null;
+              $endUtc = $end ? $end->copy()->utc()->format('Ymd\THis\Z') : null;
+              $gc = $startUtc && $endUtc ? ('https://calendar.google.com/calendar/render?action=TEMPLATE&text=' . urlencode($event?->title ?? 'Event') . '&dates='.$startUtc.'/'.$endUtc.'&details=' . urlencode($event->public_url) . ($event?->venue ? ('&location='.urlencode($event->venue)) : '')) : null;
+            @endphp
+            <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
+              <span class="text-zinc-400 uppercase tracking-widest">Calendar:</span>
+              @if($gc)
+                <a href="{{ $gc }}" target="_blank" class="px-2.5 py-1 rounded-full bg-white text-black hover:bg-zinc-100">Google</a>
+              @endif
+              <a href="{{ route('events.ics', $event) }}" class="px-2.5 py-1 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20">Apple/Outlook (.ics)</a>
+            </div>
           </div>
+
+          <script>
+            document.getElementById('copy-link-ev')?.addEventListener('click', async (e) => {
+              const url = e.currentTarget.getAttribute('data-url');
+              try { await navigator.clipboard.writeText(url); e.currentTarget.textContent = 'Copied!'; setTimeout(()=>e.currentTarget.textContent='Copy link', 1500);} catch(_) { alert(url); }
+            });
+          </script>
 
           @if ($errors->any())
             <div class="mt-6 p-3 bg-red-500/10 text-red-300 rounded ring-1 ring-red-500/30">

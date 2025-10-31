@@ -22,7 +22,7 @@
     $items[] = [
       '@type' => 'ListItem',
       'position' => $i + 1 + (($recentEvents->currentPage() - 1) * $recentEvents->perPage()),
-      'url' => route('events.show', $e),
+'url' => $e->public_url,
       'name' => $e->title,
     ];
   }
@@ -47,8 +47,8 @@
 @section('content')
 <section class="relative py-12 sm:py-16">
   <div class="max-w-7xl mx-auto px-6 mb-6 flex justify-between">
-    <a href="{{ url('/') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-100 transition">Home</a>
-    <a href="{{ route('events.index') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white/10 ring-1 ring-white/15 text-white text-sm hover:bg-white/15 transition">All Events</a>
+    <a href="{{ url('/') }}" class="text-sm text-zinc-300 hover:text-white">Home</a>
+    <a href="{{ route('events.index') }}" class="text-sm text-zinc-300 hover:text-white">All events</a>
   </div>
   <style>
     /* Responsive card aspect for recent page */
@@ -77,7 +77,7 @@
           $duration = $minutes ? (int) floor($minutes/60).'h '.($minutes%60).'m' : null;
         @endphp
         <div class="group relative rounded-3xl overflow-hidden ring-1 ring-white/10 hover:ring-white/20 transition ticket-notch" data-tilt data-tilt-max="6">
-          <a href="{{ route('events.show', $event) }}" class="absolute inset-0 z-10">
+<a href="{{ $event->public_url }}" class="absolute inset-0 z-10">
             <span class="sr-only">Open {{ $event->title }}</span>
           </a>
           <div class="card-aspect">
@@ -96,7 +96,7 @@
                 {{ $year ?? '—' }}@if($event->venue) • {{ $event->venue }}@endif @if($duration) • {{ $duration }}@endif
               </div>
               <div class="mt-3 flex items-center justify-between">
-                <a href="{{ route('events.show', $event) }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-xs sm:text-sm font-medium hover:bg-zinc-100 transition">View</a>
+<a href="{{ $event->public_url }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-xs sm:text-sm font-medium hover:bg-zinc-100 transition">View</a>
               </div>
             </div>
           </div>

@@ -1,6 +1,7 @@
 @extends('layouts.public')
 
 @section('title', 'Scanned people')
+@section('chat','off')
 @section('robots', 'noindex, nofollow')
 
 @section('content')
@@ -14,13 +15,20 @@
   <div class="max-w-6xl mx-auto px-6 host-desktop-content">
     <div class="mb-6 flex items-start justify-between gap-6">
       <div class="flex items-center gap-3">
-<button id="host-menu-btn" class="md:hidden inline-flex items-center justify-center w-10 h-10 text-white">
+        <button id="host-menu-btn" class="md:hidden inline-flex items-center justify-center w-10 h-10 text-white">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
         <div>
           <h1 class="text-2xl font-extrabold">Scanned people — {{ $event->title }}</h1>
           <div class="text-zinc-400 text-sm mt-1">Token: {{ $host->label ?? 'Link' }}</div>
         </div>
+      </div>
+      <div>
+        <form method="GET" action="{{ route('host.people.export', $host->token) }}" class="flex items-center gap-2">
+          <input type="date" name="from" value="{{ request('from') }}" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm" />
+          <input type="date" name="to" value="{{ request('to') }}" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm" />
+          <button class="inline-flex items-center px-4 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Export CSV</button>
+        </form>
       </div>
     </div>
 

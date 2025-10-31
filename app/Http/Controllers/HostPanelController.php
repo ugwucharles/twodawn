@@ -8,6 +8,7 @@ use App\Models\HostToken;
 use App\Models\OrderCheckin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class HostPanelController extends Controller
 {
@@ -55,6 +56,106 @@ class HostPanelController extends Controller
             ->orderByDesc('created_at')
             ->paginate(25);
         return view('host.people', compact('host','event','checkins','sold','checked','remaining'));
+    }
+
+    public function exportCheckins(string $token): StreamedResponse
+    {
+        $host = \App\Models\HostToken::with('event')->where('token', $token)->firstOrFail();
+        $from = request()->date('from');
+        $to = request()->date('to');
+        if (! $host->active || ($host->expires_at && now()->gt($host->expires_at))) {
+            abort(410, 'This link has expired.');
+        }
+        $event = $host->event;
+        $checkins = \App\Models\OrderCheckin::with(['order' => function($q){ $q->select('id','buyer_name','buyer_email','paystack_reference','event_id'); }])
+            ->whereHas('order', function($q) use ($event){ $q->where('event_id',$event->id)->where('status','paid'); })
+            ->when($from, fn($q) => $q->where('created_at', '>=', \Carbon\Carbon::parse($from)->startOfDay()))
+            ->when($to, fn($q) => $q->where('created_at', '<=', \Carbon\Carbon::parse($to)->endOfDay()))
+            ->orderByDesc('created_at')
+            ->get();
+        $filename = 'checkins_event_'.$event->id.'_'.now()->format('Ymd_His').'.csv';
+        $headers = [ 'Content-Type' => 'text/csv', 'Content-Disposition' => "attachment; filename=\"$filename\"" ];
+        return response()->streamDownload(function () use ($checkins, $event) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Event','Time','Buyer Name','Buyer Email','Reference','Count','Source']);
+            foreach ($checkins as $c) {
+                fputcsv($out, [
+                    $event->title,
+                    optional($c->created_at)->format('Y-m-d H:i'),
+                    $c->order?->buyer_name,
+                    $c->order?->buyer_email,
+                    $c->order?->paystack_reference,
+                    (int) $c->count,
+                    $c->source,
+                ]);
+            }
+            fclose($out);
+        }, $filename, $headers);
+    }
+
+    public function exportSales(string $token): StreamedResponse
+    {
+        $host = \App\Models\HostToken::with('event')->where('token', $token)->firstOrFail();
+        $from = request()->date('from');
+        $to = request()->date('to');
+        if (! $host->active || ($host->expires_at && now()->gt($host->expires_at))) {
+            abort(410, 'This link has expired.');
+        }
+        $event = $host->event;
+        $orders = \App\Models\Order::where('event_id', $event->id)->where('status','paid')
+            ->when($from, fn($q) => $q->where('created_at', '>=', \Carbon\Carbon::parse($from)->startOfDay()))
+            ->when($to, fn($q) => $q->where('created_at', '<=', \Carbon\Carbon::parse($to)->endOfDay()))
+            ->get(['quantity','amount','created_at']);
+        $tickets = (int) $orders->sum('quantity');
+        $gross = (int) $orders->sum('amount');
+        $filename = 'sales_summary_event_'.$event->id.'_'.now()->format('Ymd_His').'.csv';
+        $headers = [ 'Content-Type' => 'text/csv', 'Content-Disposition' => "attachment; filename=\"$filename\"" ];
+        return response()->streamDownload(function () use ($event, $tickets, $gross) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Event Title','Tickets Sold','Gross (NGN)','Avg Price (NGN)']);
+            $avg = $tickets > 0 ? number_format(($gross/100)/$tickets, 2, '.', '') : '0.00';
+            fputcsv($out, [$event->title, $tickets, number_format($gross/100, 2, '.', ''), $avg]);
+            fclose($out);
+        }, $filename, $headers);
+    }
+
+    public function exportSalesDaily(string $token): StreamedResponse
+    {
+        $host = \App\Models\HostToken::with('event')->where('token', $token)->firstOrFail();
+        $from = request()->date('from');
+        $to = request()->date('to');
+        if (! $host->active || ($host->expires_at && now()->gt($host->expires_at))) {
+            abort(410, 'This link has expired.');
+        }
+        $event = $host->event;
+        $rows = \App\Models\Order::where('event_id', $event->id)->where('status','paid')
+            ->when($from, fn($q) => $q->where('created_at', '>=', \Carbon\Carbon::parse($from)->startOfDay()))
+            ->when($to, fn($q) => $q->where('created_at', '<=', \Carbon\Carbon::parse($to)->endOfDay()))
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as orders, SUM(quantity) as tickets, SUM(amount) as gross')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get();
+
+        $filename = 'sales_daily_event_'.$event->id.'_'.now()->format('Ymd_His').'.csv';
+        $headers = [ 'Content-Type' => 'text/csv', 'Content-Disposition' => "attachment; filename=\"$filename\"" ];
+        return response()->streamDownload(function () use ($event, $rows) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Date','Event Title','Paid Orders','Tickets Sold','Gross (NGN)','Avg Price (NGN)']);
+            foreach ($rows as $r) {
+                $tickets = (int) ($r->tickets ?? 0);
+                $gross = (int) ($r->gross ?? 0);
+                $avg = $tickets > 0 ? number_format(($gross/100)/$tickets, 2, '.', '') : '0.00';
+                fputcsv($out, [
+                    $r->day,
+                    $event->title,
+                    (int) ($r->orders ?? 0),
+                    $tickets,
+                    number_format($gross/100, 2, '.', ''),
+                    $avg,
+                ]);
+            }
+            fclose($out);
+        }, $filename, $headers);
     }
 
     public function verify(string $token, Request $request)

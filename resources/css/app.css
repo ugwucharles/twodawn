@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide scrollbars globally but keep scrolling */
+html, body { -ms-overflow-style: none; scrollbar-width: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
+
 /* Fluid type scales for headings/subtitles */
 .fluid-title{ font-size: clamp(2.25rem, 6vw + 0.25rem, 4.5rem); line-height: .95; letter-spacing: -0.02em; }
 .fluid-subtitle{ font-size: clamp(1rem, 1.1vw + 0.6rem, 1.25rem); }

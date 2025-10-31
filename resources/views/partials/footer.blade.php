@@ -11,6 +11,8 @@
         <span aria-hidden class="mx-[5px] opacity-40">|</span>
         <a href="{{ route('events.recent') }}" class="px-0 hover:text-white">Recent</a>
         <span aria-hidden class="mx-[5px] opacity-40">|</span>
+        <a href="{{ route('pricing') }}" class="px-0 hover:text-white">Pricing</a>
+        <span aria-hidden class="mx-[5px] opacity-40">|</span>
         <a href="{{ url('/#how-to-buy') }}" class="px-0 hover:text-white">How it works</a>
         <span aria-hidden class="mx-[5px] opacity-40">|</span>
         <a href="{{ url('/#host') }}" class="px-0 hover:text-white">Host</a>

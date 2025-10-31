@@ -16,12 +16,18 @@ use App\Models\Order;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Event;
 use App\Http\Controllers\Admin\PaystackHealthController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ChatController;
 
 Route::get('/', [EventPublicController::class, 'landing'])->name('home');
 
 Route::view('/about', 'about')->name('about');
+Route::view('/pricing', 'pricing')->name('pricing');
 
 Route::redirect('/dashboard', '/')->name('dashboard');
+
+// Pricing page
+Route::view('/pricing', 'pricing')->name('pricing');
 
 // Admin portal smart redirect (works for guest or authenticated)
 Route::get('/admin', function () {
@@ -52,9 +58,20 @@ Route::middleware('auth')->group(function () {
 
 // Public event routes
 Route::get('/events', [EventPublicController::class, 'index'])->name('events.index');
+
+// Native chat (public)
+Route::post('/chat/start', [ChatController::class, 'start'])->name('chat.start')->middleware('throttle:6,1');
+Route::get('/chat/{token}/messages', [ChatController::class, 'messages'])->name('chat.messages');
+Route::post('/chat/{token}/messages', [ChatController::class, 'postMessage'])->name('chat.messages.post')->middleware('throttle:12,1');
+Route::get('/discover', [EventPublicController::class, 'index'])->name('events.discover');
 // Important: place the more specific/static routes before the dynamic {event} route
 Route::get('/events/recent', [EventPublicController::class, 'recent'])->name('events.recent');
 Route::get('/events/{event}/remaining', [EventPublicController::class, 'remaining'])->name('events.remaining');
+// Pricing/quote preview (JSON)
+Route::get('/events/{event}/quote', [CheckoutController::class, 'quote'])->name('orders.quote');
+Route::get('/events/{event}/ics', [EventPublicController::class, 'ics'])->name('events.ics');
+// Custom slug route for public event page
+Route::get('/event/{slug}', [EventPublicController::class, 'showBySlug'])->name('events.slug');
 Route::get('/events/{event}', [EventPublicController::class, 'show'])->name('events.show');
 
 // Comments (guest) with enhanced rate limiting
@@ -63,7 +80,6 @@ Route::post('/events/{event}/comments', [CommentController::class, 'store'])
     ->name('events.comments.store');
 
 // Guest checkout with enhanced rate limiting
-use App\Http\Controllers\CheckoutController;
 Route::get('/events/{event}/buy', [CheckoutController::class, 'buy'])->name('events.buy');
 Route::post('/events/{event}/orders', [CheckoutController::class, 'create'])
     ->middleware(['throttle:3,1']) // Only 3 attempts per minute
@@ -95,14 +111,32 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
     
     // Orders admin
     Route::get('orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
+Route::get('orders/export-summary', [AdminOrderController::class, 'exportSummary'])->name('orders.export.summary');
+Route::get('orders/export-summary-daily', [AdminOrderController::class, 'exportSummaryDaily'])->name('orders.export.summaryDaily');
     Route::resource('orders', AdminOrderController::class)->only(['index','show']);
+    Route::post('orders/{order}/refunds', [\App\Http\Controllers\Admin\RefundController::class, 'store'])->name('orders.refunds.store');
+    Route::post('orders/{order}/refunds.json', [\App\Http\Controllers\Admin\RefundController::class, 'store'])->name('orders.refunds.store.json');
+
+    // Check-ins export
+    Route::get('checkins/export', [\App\Http\Controllers\Admin\TicketScanController::class, 'export'])->name('checkins.export');
 
     // Ticket scanner
     Route::get('scanner', [\App\Http\Controllers\Admin\TicketScanController::class, 'index'])->name('scanner.index');
     Route::post('scanner/redeem', [\App\Http\Controllers\Admin\TicketScanController::class, 'redeem'])->name('scanner.redeem');
 
+    // Admin chat
+    Route::get('chat', [\App\Http\Controllers\Admin\ChatAdminController::class, 'index'])->name('chat.index');
+    Route::get('chat/{conversation}', [\App\Http\Controllers\Admin\ChatAdminController::class, 'show'])->name('chat.show');
+    Route::get('chat/{conversation}/messages', [\App\Http\Controllers\Admin\ChatAdminController::class, 'messages'])->name('chat.messages');
+    Route::post('chat/{conversation}/reply', [\App\Http\Controllers\Admin\ChatAdminController::class, 'reply'])->name('chat.reply');
+    Route::post('chat/{conversation}/close', [\App\Http\Controllers\Admin\ChatAdminController::class, 'close'])->name('chat.close');
+    Route::post('chat/{conversation}/reopen', [\App\Http\Controllers\Admin\ChatAdminController::class, 'reopen'])->name('chat.reopen');
+
     // Admin assets proxy (bypass CSP/CDN blocks)
     Route::get('assets/html5-qrcode.js', [\App\Http\Controllers\Admin\AssetsController::class, 'html5qrcode'])->name('assets.h5qrcode');
+
+    // Tenants (multi-tenant/white-label)
+    Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class)->except(['show']);
 
     // Host requests
     Route::resource('host-requests', AdminHostRequestController::class)->only(['index','show','update']);
@@ -122,6 +156,9 @@ Route::post('/verify-ticket', [\App\Http\Controllers\Admin\TicketScanController:
 Route::get('/h/assets/html5-qrcode.js', [\App\Http\Controllers\Admin\AssetsController::class, 'html5qrcode'])->name('host.assets.h5qrcode');
 Route::get('/h/{token}', [\App\Http\Controllers\HostPanelController::class, 'show'])->name('host.panel');
 Route::get('/h/{token}/people', [\App\Http\Controllers\HostPanelController::class, 'people'])->name('host.people');
+Route::get('/h/{token}/checkins.csv', [\App\Http\Controllers\HostPanelController::class, 'exportCheckins'])->name('host.people.export');
+Route::get('/h/{token}/sales.csv', [\App\Http\Controllers\HostPanelController::class, 'exportSales'])->name('host.sales.export');
+Route::get('/h/{token}/sales_daily.csv', [\App\Http\Controllers\HostPanelController::class, 'exportSalesDaily'])->name('host.sales.exportDaily');
 Route::post('/h/{token}/verify', [\App\Http\Controllers\HostPanelController::class, 'verify'])
     ->middleware('throttle:10,1')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class, \App\Http\Middleware\VerifyCsrfToken::class]);
@@ -148,9 +185,9 @@ Route::get('/sitemap.xml', function () {
 
         // Dynamic event pages (best-effort)
         try {
-            Event::where('is_published', true)->orderByDesc('updated_at')->limit(1000)->get()
+                    Event::where('is_published', true)->orderByDesc('updated_at')->limit(1000)->get()
                 ->each(function ($event) use (&$push) {
-                    $push(url('/events/'.$event->id), optional($event->updated_at)->toAtomString(), 'weekly', '0.8');
+                    $push($event->public_url, optional($event->updated_at)->toAtomString(), 'weekly', '0.8');
                 });
         } catch (\Throwable $e) { /* ignore */ }
 
@@ -166,5 +203,10 @@ Route::get('/sitemap.xml', function () {
 
 // Temporary Paystack health endpoint (no secrets exposed)
 Route::get('/paystack/health', PaystackHealthController::class)->name('paystack.health');
+
+// Public API v1 (read-only)
+Route::prefix('api/v1')->middleware('throttle:60,1')->group(function(){
+    Route::get('/events', [\App\Http\Controllers\Api\PublicApiController::class, 'events']);
+});
 
 require __DIR__.'/auth.php';

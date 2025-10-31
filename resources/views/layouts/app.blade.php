@@ -37,6 +37,8 @@
         <style>
             :root{ --font-ui: 'Manrope', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }
             body{ font-family: var(--font-ui); }
+            /* Prevent Alpine FOUC */
+            [x-cloak]{ display:none !important; }
             /* Prevent horizontal dragging/scroll on mobile */
             html,body{ width:100%; max-width:100vw; overflow-x:hidden; }
             body{ overscroll-behavior-x:none; touch-action: pan-y; }
@@ -48,7 +50,7 @@
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-zinc-900 border-b border-zinc-800">
+                <header class="bg-zinc-900 border-b border-zinc-800 mt-24 sm:mt-28">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
@@ -60,5 +62,16 @@
                 {{ $slot }}
             </main>
         </div>
+
+        @php
+          $chatPref = trim($__env->yieldContent('chat', 'on'));
+          $chatOk = config('chat.enabled') && strtolower($chatPref) !== 'off' && config('chat.provider') === 'crisp' && config('chat.crisp_website_id');
+        @endphp
+        @if ($chatOk)
+          <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID={{ json_encode(config('chat.crisp_website_id')) }};(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
+          @auth
+            <script>window.$crisp=window.$crisp||[];window.$crisp.push(["set","user:email", {{ json_encode(Auth::user()->email) }} ]);window.$crisp.push(["set","user:nickname", {{ json_encode(Auth::user()->name ?? 'Admin') }} ]);</script>
+          @endauth
+        @endif
     </body>
 </html>

@@ -1,0 +1,12 @@
+{
+  "name": "2DAWN",
+  "short_name": "2DAWN",
+  "start_url": "/?source=pwa",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    { "src": "/images/Group 2.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/images/Group 2.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

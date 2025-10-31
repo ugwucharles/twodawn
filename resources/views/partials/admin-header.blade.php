@@ -5,14 +5,16 @@
       <a href="{{ route('admin.dashboard') }}" class="justify-self-start inline-flex items-center h-14 leading-none text-lg font-extrabold tracking-tight text-white">2<span class="text-indigo-400">DAWN</span> <span class="hidden sm:inline text-zinc-300">Admin</span></a>
 
       <!-- Center nav (hidden on small) -->
-      <nav class="justify-self-center hidden md:flex h-14 items-center justify-center gap-6 text-sm text-zinc-200">
-        <a href="{{ route('admin.dashboard') }}" class="hover:text-white {{ request()->routeIs('admin.dashboard') ? 'text-white font-semibold' : '' }}">Dashboard</a>
-        <a href="{{ route('admin.events.index') }}" class="hover:text-white {{ request()->routeIs('admin.events.*') ? 'text-white font-semibold' : '' }}">Events</a>
-        <a href="{{ route('admin.orders.index') }}" class="hover:text-white {{ request()->routeIs('admin.orders.*') ? 'text-white font-semibold' : '' }}">Orders</a>
-        <a href="{{ route('admin.scanner.index') }}" class="hover:text-white {{ request()->routeIs('admin.scanner.*') ? 'text-white font-semibold' : '' }}">Scanner</a>
-        <a href="{{ route('admin.host-requests.index') }}" class="hover:text-white {{ request()->routeIs('admin.host-requests.*') ? 'text-white font-semibold' : '' }}">Host Requests</a>
-        <a href="{{ route('admin.comments.index') }}" class="hover:text-white {{ request()->routeIs('admin.comments.*') ? 'text-white font-semibold' : '' }}">Comments</a>
-        <a href="{{ route('admin.events.create') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black hover:bg-zinc-100 transition">New Event</a>
+      <nav class="justify-self-center hidden md:flex h-14 items-center justify-center gap-6 text-sm text-zinc-200 whitespace-nowrap">
+        <a href="{{ route('admin.dashboard') }}" class="hover:text-white whitespace-nowrap {{ request()->routeIs('admin.dashboard') ? 'text-white font-semibold' : '' }}">Dashboard</a>
+        <a href="{{ route('admin.events.index') }}" class="hover:text-white whitespace-nowrap {{ request()->routeIs('admin.events.*') ? 'text-white font-semibold' : '' }}">Events</a>
+        <a href="{{ route('admin.orders.index') }}" class="hover:text-white whitespace-nowrap {{ request()->routeIs('admin.orders.*') ? 'text-white font-semibold' : '' }}">Orders</a>
+        <a href="{{ route('admin.scanner.index') }}" class="hover:text-white whitespace-nowrap {{ request()->routeIs('admin.scanner.*') ? 'text-white font-semibold' : '' }}">Scanner</a>
+        <a href="{{ route('admin.host-requests.index') }}" class="hover:text-white whitespace-nowrap {{ request()->routeIs('admin.host-requests.*') ? 'text-white font-semibold' : '' }}">Host Requests</a>
+        <a href="{{ route('admin.comments.index') }}" class="hover:text-white whitespace-nowrap {{ request()->routeIs('admin.comments.*') ? 'text-white font-semibold' : '' }}">Comments</a>
+        <a href="{{ route('admin.chat.index') }}" class="hover:text-white whitespace-nowrap {{ request()->routeIs('admin.chat.*') ? 'text-white font-semibold' : '' }}">Chat</a>
+        <a href="{{ route('admin.tenants.index') }}" class="hover:text-white whitespace-nowrap {{ request()->routeIs('admin.tenants.*') ? 'text-white font-semibold' : '' }}">Tenants</a>
+        <a href="{{ route('admin.events.create') }}" class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black hover:bg-zinc-100 transition whitespace-nowrap">New Event</a>
       </nav>
 
       <!-- Right: hamburger on mobile (no search) -->
@@ -25,10 +27,10 @@
   </div>
 
   <!-- Overlay -->
-  <div x-show="open" x-transition.opacity class="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 md:hidden" @click="open=false" aria-hidden="true"></div>
+  <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 md:hidden" @click="open=false" aria-hidden="true"></div>
 
   <!-- Right drawer -->
-  <aside x-show="open" x-transition:enter="transition transform ease-out duration-150" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition transform ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" class="fixed inset-y-0 right-0 w-72 max-w-[85vw] bg-zinc-950/95 border-l border-white/10 z-70 p-6 md:hidden">
+  <aside x-cloak x-show="open" x-transition:enter="transition transform ease-out duration-150" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition transform ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" class="fixed inset-y-0 right-0 w-72 max-w-[85vw] bg-zinc-950/95 border-l border-white/10 z-70 p-6 md:hidden">
     <div class="flex items-center justify-between">
       <span class="text-base font-extrabold text-white">Menu</span>
       <button type="button" class="text-zinc-300 hover:text-white" aria-label="Close menu" @click="open=false">
@@ -42,6 +44,7 @@
       <a href="{{ route('admin.scanner.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Scanner</a>
       <a href="{{ route('admin.host-requests.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Host Requests</a>
       <a href="{{ route('admin.comments.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Comments</a>
+      <a href="{{ route('admin.chat.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Chat</a>
       <a href="{{ route('admin.events.create') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">New Event</a>
       <a href="{{ route('profile.edit') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Profile</a>
       <form method="POST" action="{{ route('logout') }}" class="pt-2">

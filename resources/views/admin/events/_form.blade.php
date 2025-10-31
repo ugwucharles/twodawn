@@ -50,13 +50,35 @@
             <x-input-label for="price" :value="__('Price')" />
             <x-text-input id="price" name="price" type="number" step="0.01" min="0" class="mt-1 block w-full" :value="old('price', $event->price)" />
             <x-input-error :messages="$errors->get('price')" class="mt-2" />
+            <p class="mt-1 text-xs text-zinc-400">Set to 0 for a free event.</p>
         </div>
         <div>
             <x-input-label for="early_bird_price" :value="__('Early-bird price')" />
             <x-text-input id="early_bird_price" name="early_bird_price" type="number" step="0.01" min="0" class="mt-1 block w-full" :value="old('early_bird_price', $event->early_bird_price)" />
             <x-input-error :messages="$errors->get('early_bird_price')" class="mt-2" />
+            <p class="mt-1 text-xs text-zinc-400">Optional discounted price until the date below.</p>
         </div>
     </div>
+
+    <div class="flex items-start gap-2">
+        <input id="pass_fees_to_buyer" name="pass_fees_to_buyer" type="checkbox" value="1" class="mt-1 rounded border-white/20 text-indigo-500 shadow-sm focus:ring-indigo-400/30" @checked(old('pass_fees_to_buyer', $event->pass_fees_to_buyer)) />
+        <label for="pass_fees_to_buyer" class="text-sm text-zinc-300">Pass fees to buyer <span class="text-zinc-500">(adds 5% + ₦50 per ticket at checkout)</span></label>
+        <x-input-error :messages="$errors->get('pass_fees_to_buyer')" class="mt-2" />
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const price = document.getElementById('price');
+        const eb = document.getElementById('early_bird_price');
+        const fees = document.getElementById('pass_fees_to_buyer');
+        function sync(){
+          const isFree = parseFloat(price.value||'0') <= 0;
+          fees.disabled = isFree; if (isFree) fees.checked = false;
+          eb.disabled = isFree; eb.classList.toggle('opacity-60', isFree);
+        }
+        price.addEventListener('input', sync);
+        sync();
+      });
+    </script>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -76,10 +98,38 @@
         <label for="is_published" class="ms-2 text-sm text-zinc-300">{{ __('Published') }}</label>
         <x-input-error :messages="$errors->get('is_published')" class="mt-2" />
     </div>
+
+    <div class="mt-4 flex items-start gap-2">
+        <input id="use_custom_slug" name="use_custom_slug" type="checkbox" value="1" class="mt-1 rounded border-white/20 text-indigo-500 shadow-sm focus:ring-indigo-400/30" @checked(old('use_custom_slug', $event->use_custom_slug)) />
+        <div class="flex-1">
+            <label for="slug" class="text-sm text-zinc-300">Custom URL</label>
+            <div class="mt-1 flex items-center gap-2">
+                <span class="text-zinc-400 text-sm">{{ url('/event') }}/</span>
+                <input id="slug" name="slug" type="text" placeholder="event-name" value="{{ old('slug', $event->slug) }}" class="flex-1 rounded-md bg-black/30 border border-white/10 px-3 py-2 focus:border-white/30 focus:ring-0" />
+            </div>
+            <p class="mt-1 text-xs text-zinc-500">Toggle to use a friendly URL. Only lowercase letters, numbers and hyphens.</p>
+            <x-input-error :messages="$errors->get('slug')" class="mt-1" />
+        </div>
+    </div>
 </div>
 
 <div>
     <x-input-label for="image" :value="__('Flyer')" />
+
+    <script>
+      // Simple slug sync
+      document.addEventListener('DOMContentLoaded', () => {
+        const title = document.getElementById('title');
+        const slug = document.getElementById('slug');
+        const toggle = document.getElementById('use_custom_slug');
+        const normalize = (s) => (s||'').toLowerCase().trim().replace(/[^a-z0-9\s-]/g,'').replace(/[\s_-]+/g,'-').replace(/^-+|-+$/g,'');
+        function refreshState(){ slug.disabled = !toggle.checked; slug.classList.toggle('opacity-60', !toggle.checked); }
+        title?.addEventListener('input', () => { if (!slug.value) slug.value = normalize(title.value); });
+        slug?.addEventListener('input', () => { slug.value = normalize(slug.value); });
+        toggle?.addEventListener('change', refreshState);
+        refreshState();
+      });
+    </script>
     <input id="image" name="image" type="file" accept="image/*"
            class="mt-1 block w-full rounded-md shadow-sm border-white/20 bg-zinc-900/70 text-white file:text-white file:bg-zinc-800 file:border-0 focus:border-indigo-400 focus:ring-indigo-400/30" />
     <x-input-error :messages="$errors->get('image')" class="mt-2" />

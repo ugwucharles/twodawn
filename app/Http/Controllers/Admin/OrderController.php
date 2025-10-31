@@ -16,14 +16,18 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $eventId = $request->integer('event_id');
+        $from = $request->date('from');
+        $to = $request->date('to');
         $orders = Order::with('event')
             ->when($eventId, fn($q) => $q->where('event_id', $eventId))
+            ->when($from, fn($q) => $q->where('created_at', '>=', \Carbon\Carbon::parse($from)->startOfDay()))
+            ->when($to, fn($q) => $q->where('created_at', '<=', \Carbon\Carbon::parse($to)->endOfDay()))
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
         $events = Event::orderBy('title')->get(['id','title']);
-        return view('admin.orders.index', compact('orders','events','eventId'));
+        return view('admin.orders.index', compact('orders','events','eventId','from','to'));
     }
 
     /**
@@ -77,8 +81,12 @@ class OrderController extends Controller
     public function export(Request $request): StreamedResponse
     {
         $eventId = $request->integer('event_id');
+        $from = $request->date('from');
+        $to = $request->date('to');
         $orders = Order::with('event')
             ->when($eventId, fn($q) => $q->where('event_id', $eventId))
+            ->when($from, fn($q) => $q->where('created_at', '>=', \Carbon\Carbon::parse($from)->startOfDay()))
+            ->when($to, fn($q) => $q->where('created_at', '<=', \Carbon\Carbon::parse($to)->endOfDay()))
             ->latest()
             ->get();
 
@@ -103,6 +111,83 @@ class OrderController extends Controller
                     number_format($o->amount/100, 2, '.', ''),
                     $o->status,
                     $o->paystack_reference,
+                ]);
+            }
+            fclose($out);
+        }, $filename, $headers);
+    }
+
+    public function exportSummary(Request $request): StreamedResponse
+    {
+        $eventId = $request->integer('event_id');
+        $from = $request->date('from');
+        $to = $request->date('to');
+        $query = Order::query()->where('status','paid')
+            ->when($eventId, fn($q) => $q->where('event_id', $eventId))
+            ->when($from, fn($q) => $q->where('created_at', '>=', \Carbon\Carbon::parse($from)->startOfDay()))
+            ->when($to, fn($q) => $q->where('created_at', '<=', \Carbon\Carbon::parse($to)->endOfDay()));
+
+        // Aggregate per event
+        $rows = $query->selectRaw('event_id, COUNT(*) as orders, SUM(quantity) as tickets, SUM(amount) as gross')
+            ->groupBy('event_id')
+            ->with('event:id,title')
+            ->get();
+
+        $filename = 'sales_summary'.($eventId ? ('_event_'.$eventId) : '').'_'.now()->format('Ymd_His').'.csv';
+        $headers = [ 'Content-Type' => 'text/csv', 'Content-Disposition' => "attachment; filename=\"$filename\"" ];
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Event ID','Event Title','Paid Orders','Tickets Sold','Gross (NGN)','Avg Price (NGN)']);
+            foreach ($rows as $r) {
+                $tickets = (int) ($r->tickets ?? 0);
+                $gross = (int) ($r->gross ?? 0);
+                $avg = $tickets > 0 ? number_format(($gross/100)/$tickets, 2, '.', '') : '0.00';
+                fputcsv($out, [
+                    $r->event_id,
+                    optional($r->event)->title,
+                    (int) ($r->orders ?? 0),
+                    $tickets,
+                    number_format($gross/100, 2, '.', ''),
+                    $avg,
+                ]);
+            }
+            fclose($out);
+        }, $filename, $headers);
+    }
+
+    public function exportSummaryDaily(Request $request): StreamedResponse
+    {
+        $eventId = $request->integer('event_id');
+        $from = $request->date('from');
+        $to = $request->date('to');
+        $query = Order::query()->where('status','paid')
+            ->when($eventId, fn($q) => $q->where('event_id', $eventId))
+            ->when($from, fn($q) => $q->where('created_at', '>=', \Carbon\Carbon::parse($from)->startOfDay()))
+            ->when($to, fn($q) => $q->where('created_at', '<=', \Carbon\Carbon::parse($to)->endOfDay()));
+
+        $rows = $query->selectRaw('event_id, DATE(created_at) as day, COUNT(*) as orders, SUM(quantity) as tickets, SUM(amount) as gross')
+            ->groupBy('event_id', 'day')
+            ->orderBy('day')
+            ->with('event:id,title')
+            ->get();
+
+        $filename = 'sales_daily'.($eventId ? ('_event_'.$eventId) : '').'_'.now()->format('Ymd_His').'.csv';
+        $headers = [ 'Content-Type' => 'text/csv', 'Content-Disposition' => "attachment; filename=\"$filename\"" ];
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Date','Event ID','Event Title','Paid Orders','Tickets Sold','Gross (NGN)','Avg Price (NGN)']);
+            foreach ($rows as $r) {
+                $tickets = (int) ($r->tickets ?? 0);
+                $gross = (int) ($r->gross ?? 0);
+                $avg = $tickets > 0 ? number_format(($gross/100)/$tickets, 2, '.', '') : '0.00';
+                fputcsv($out, [
+                    $r->day,
+                    $r->event_id,
+                    optional($r->event)->title,
+                    (int) ($r->orders ?? 0),
+                    $tickets,
+                    number_format($gross/100, 2, '.', ''),
+                    $avg,
                 ]);
             }
             fclose($out);

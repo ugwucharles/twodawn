@@ -35,6 +35,8 @@
             <script type="module" src="{{ $jsSrc }}"></script>
         @endif
         <style>
+            /* Prevent Alpine FOUC */
+            [x-cloak]{ display:none !important; }
             /* Prevent horizontal dragging/scroll on mobile */
             html,body{ width:100%; max-width:100vw; overflow-x:hidden; }
             body{ overscroll-behavior-x:none; touch-action: pan-y; }

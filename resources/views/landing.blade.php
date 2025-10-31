@@ -8,24 +8,20 @@
     <section class="relative min-h-[92vh] lg:min-h-[96vh] flex items-center justify-center overflow-hidden">
         <!-- Header inside hero -->
         @include('partials.public-header')
+        <div class="absolute inset-0 -z-20">
+            <img src="{{ asset('images/party.jpg') }}" alt="" class="h-full w-full object-cover opacity-30 pointer-events-none select-none"/>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+        </div>
         <div class="absolute inset-0 -z-10">
             <div class="absolute -top-48 -left-32 h-[40rem] w-[40rem] rounded-full blur-3xl opacity-30 bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-rose-500"></div>
             <div class="absolute -bottom-48 -right-32 h-[40rem] w-[40rem] rounded-full blur-3xl opacity-20 bg-gradient-to-tr from-sky-500 to-emerald-400"></div>
         </div>
-        <div class="max-w-5xl mx-auto px-6 text-center">
-<h1 class="fluid-title font-extrabold tracking-tight">
-                Find the Event.
-            </h1>
-<p class="mt-5 text-zinc-300 fluid-subtitle">
-                Curated events. Seamless tickets. No accounts, just vibes.
-            </p>
-            <div class="mt-8 flex items-center justify-center gap-1 sm:gap-3">
-                <a href="{{ route('events.index') }}" class="inline-flex items-center rounded-full bg-white text-black font-semibold transition px-3 py-1.5 text-xs sm:px-6 sm:py-3 sm:text-base hover:bg-zinc-100">Browse Events</a>
-                <a href="#upcoming" class="inline-flex items-center rounded-full bg-white/10 ring-1 ring-white/15 transition px-3 py-1.5 text-xs sm:px-6 sm:py-3 sm:text-base hover:bg-white/15">Upcoming ▼</a>
-            </div>
-            <div class="mt-10 flex items-center justify-center gap-8 text-zinc-400 text-sm">
-                <div><span class="text-white font-semibold text-xl">{{ number_format($stats['events_count']) }}</span> events</div>
-                <div><span class="text-white font-semibold text-xl">{{ number_format($stats['tickets_sold']) }}</span> tickets sold</div>
+        <div class="w-full mx-auto text-center">
+            <h1 class="fluid-title font-extrabold tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">Find the vibe. Book in seconds.</h1>
+            <p class="mt-5 text-zinc-200 fluid-subtitle">Curated nights across the city — no accounts, instant tickets, pure vibes.</p>
+            <div class="mt-10 flex items-center justify-center text-zinc-300 text-sm">
+                @php $uc = (int) ($stats['upcoming_events_count'] ?? 0); @endphp
+                <div><span class="text-white font-semibold text-xl">{{ number_format($uc) }}</span> upcoming {{ $uc === 1 ? 'event' : 'events' }}</div>
             </div>
         </div>
     </section>
@@ -70,7 +66,7 @@
                         $duration = $minutes ? (int) floor($minutes/60).'h '.($minutes%60).'m' : null;
                     @endphp
                     <div class="group relative rounded-3xl overflow-hidden ring-1 ring-white/10 hover:ring-white/20 transition ticket-notch" data-tilt data-tilt-max="6">
-                        <a href="{{ route('events.show', $event) }}" class="absolute inset-0 z-10">
+<a href="{{ $event->public_url }}" class="absolute inset-0 z-10">
                             <span class="sr-only">Open {{ $event->title }}</span>
                         </a>
                         <div class="relative aspect-[10/13]">
@@ -160,34 +156,43 @@
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <!-- Step 1 -->
-                <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-8">
-                    <div class="flex items-center gap-3">
-                        <div class="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white flex items-center justify-center font-extrabold">1</div>
-                        <h3 class="text-lg font-semibold">Pick an event</h3>
+                <div class="group rounded-3xl bg-white/5 backdrop-blur-md ring-1 ring-white/10 hover:ring-white/20 transition p-8">
+                    <div class="flex items-center gap-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-zinc-200"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                        <div>
+                            <h3 class="text-lg font-semibold">Pick an event</h3>
+                            <div class="text-[10px] uppercase tracking-widest text-zinc-400">Step 1</div>
+                        </div>
                     </div>
-                    <p class="mt-3 text-sm text-zinc-300">Browse Upcoming or All Events, open a card to see details, then click <span class="font-semibold text-white">Buy Tickets</span>.</p>
-                    <div class="mt-4 text-zinc-400 text-xs">No account required.</div>
+                    <p class="mt-4 text-sm text-zinc-300">Browse Upcoming or All Events, open a card to see details, then click <span class="font-semibold text-white">Buy Tickets</span>.</p>
+                    <div class="mt-4 text-xs text-zinc-400">No account required.</div>
                 </div>
                 <!-- Step 2 -->
-                <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-8">
-                    <div class="flex items-center gap-3">
-                        <div class="h-9 w-9 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-white flex items-center justify-center font-extrabold">2</div>
-                        <h3 class="text-lg font-semibold">Checkout securely</h3>
+                <div class="group rounded-3xl bg-white/5 backdrop-blur-md ring-1 ring-white/10 hover:ring-white/20 transition p-8">
+                    <div class="flex items-center gap-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-zinc-200"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>
+                        <div>
+                            <h3 class="text-lg font-semibold">Checkout securely</h3>
+                            <div class="text-[10px] uppercase tracking-widest text-zinc-400">Step 2</div>
+                        </div>
                     </div>
-                    <p class="mt-3 text-sm text-zinc-300">Enter your name and email, apply coupons if you have one, and pay with <span class="font-semibold text-white">Paystack</span>.</p>
-                    <ul class="mt-3 space-y-1 text-xs text-zinc-400 list-disc list-inside">
+                    <p class="mt-4 text-sm text-zinc-300">Enter your name and email, apply coupons if you have one, and pay with <span class="font-semibold text-white">Paystack</span>.</p>
+                    <ul class="mt-4 space-y-1 text-xs text-zinc-400 list-disc list-inside">
                         <li>Instant confirmation</li>
                         <li>Mobile friendly</li>
                     </ul>
                 </div>
                 <!-- Step 3 -->
-                <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-8">
-                    <div class="flex items-center gap-3">
-                        <div class="h-9 w-9 rounded-full bg-gradient-to-br from-rose-500 to-orange-500 text-white flex items-center justify-center font-extrabold">3</div>
-                        <h3 class="text-lg font-semibold">Get your ticket</h3>
+                <div class="group rounded-3xl bg-white/5 backdrop-blur-md ring-1 ring-white/10 hover:ring-white/20 transition p-8">
+                    <div class="flex items-center gap-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-zinc-200"><rect x="5" y="5" width="4" height="4"/><rect x="15" y="5" width="4" height="4"/><rect x="5" y="15" width="4" height="4"/><rect x="15" y="15" width="4" height="4"/></svg>
+                        <div>
+                            <h3 class="text-lg font-semibold">Get your ticket</h3>
+                            <div class="text-[10px] uppercase tracking-widest text-zinc-400">Step 3</div>
+                        </div>
                     </div>
-                    <p class="mt-3 text-sm text-zinc-300">You’ll receive a QR ticket instantly. Download as <span class="font-semibold text-white">PNG</span> or print, and present it at the gate.</p>
-                    <div class="mt-4 text-zinc-400 text-xs">You’ll also get a receipt PDF if needed.</div>
+                    <p class="mt-4 text-sm text-zinc-300">You’ll receive a QR ticket instantly. Download as <span class="font-semibold text-white">PNG</span> or print, and present it at the gate.</p>
+                    <div class="mt-4 text-xs text-zinc-400">You’ll also get a receipt PDF if needed.</div>
                 </div>
             </div>
         </div>
@@ -199,7 +204,6 @@
             <div class="mb-8 w-full flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <h2 class="text-3xl sm:text-4xl font-bold">Recent Events</h2>
                 <div class="flex items-center justify-between sm:justify-start sm:gap-4 text-xs sm:text-sm text-zinc-300">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-white/5 ring-1 ring-white/10">Past 30 days</span>
                     <a href="{{ route('events.recent') }}" class="hover:text-white">View all recent →</a>
                 </div>
             </div>
@@ -211,7 +215,7 @@
                         $duration = $minutes ? (int) floor($minutes/60).'h '.($minutes%60).'m' : null;
                     @endphp
                     <div class="group relative rounded-3xl overflow-hidden ring-1 ring-white/10 hover:ring-white/20 transition ticket-notch" data-tilt data-tilt-max="6">
-                        <a href="{{ route('events.show', $event) }}" class="absolute inset-0 z-10">
+<a href="{{ $event->public_url }}" class="absolute inset-0 z-10">
                             <span class="sr-only">Open {{ $event->title }}</span>
                         </a>
                         <div class="relative aspect-[10/13]">
@@ -243,76 +247,73 @@
     </section>
 
     <!-- Host with us -->
-    <section id="host" class="py-16 sm:py-20">
+    <section id="host" class="relative py-16 sm:py-20 overflow-visible">
+      <div class="absolute inset-0 pointer-events-none -z-10">
+        <div class="absolute -top-32 -left-24 h-80 w-80 rounded-full blur-3xl opacity-20 bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-rose-500"></div>
+        <div class="absolute -bottom-32 -right-24 h-80 w-80 rounded-full blur-3xl opacity-10 bg-gradient-to-tr from-sky-500 to-emerald-400"></div>
+      </div>
       <div class="max-w-7xl mx-auto px-6">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-          <!-- Minimal left card -->
-          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-10">
-            <h3 class="text-3xl sm:text-4xl font-bold">Host with us</h3>
-            <p class="mt-2 text-zinc-300">Plan the vibe, we’ll handle ticketing, payments, and check‑ins.</p>
-            <ul class="mt-6 space-y-2 text-sm text-zinc-300">
-              <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Instant payouts with Paystack</li>
-              <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>QR tickets and capacity protection</li>
-              <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Coupons, early‑bird, CSV exports</li>
-            </ul>
-            @if (session('status'))
-              <div class="mt-6 rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-300 px-3 py-2">{{ session('status') }}</div>
-            @endif
-            @if ($errors->any())
-              <div class="mt-4 rounded-lg bg-red-500/10 ring-1 ring-red-500/20 text-red-300 px-3 py-2">
-                <ul class="list-disc list-inside">
-                  @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                  @endforeach
-                </ul>
-              </div>
-            @endif
+        <div class="mb-6 sm:mb-8">
+          <h2 class="text-3xl sm:text-4xl font-bold">Host with us</h2>
+        </div>
+        <div class="relative rounded-[28px] ring-1 ring-white/10 p-4 sm:p-6 lg:p-10 overflow-hidden">
+          <div class="absolute inset-0 -z-10">
+            <div class="absolute inset-0" style="background-image:radial-gradient(80rem_40rem_at_-10%_-10%,rgba(59,130,246,0.15),transparent),radial-gradient(70rem_35rem_at_110%_110%,rgba(236,72,153,0.12),transparent),radial-gradient(60rem_30rem_at_50%_120%,rgba(16,185,129,0.10),transparent);"></div>
+            <div class="absolute inset-0" style="background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');opacity:.06;mix-blend:overlay;"></div>
           </div>
+          <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
+            <!-- Left: offer list + headline -->
+            <div class="flex flex-col justify-between h-full min-h-[460px]">
+              <h3 class="mt-4 text-4xl sm:text-5xl font-extrabold">Get in touch with us!</h3>
+              <p class="mt-3 text-zinc-300">We’ll handle ticketing, payments, and check‑ins so you can focus on the vibe.</p>
+              <ul class="mt-6 space-y-2 text-sm text-zinc-300">
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Instant payouts with Paystack</li>
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>QR tickets & capacity protection</li>
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Analytics, coupons, exports</li>
+              </ul>
+              <div class="mt-auto pt-8 flex justify-start self-start">
+                <button type="submit" form="host-form-el" class="inline-flex items-center justify-center rounded-full text-white border border-white/70 hover:bg-white/10 text-base font-medium focus:outline-none focus:ring-0" style="padding:7px 15px; min-width:180px; text-align:center">Submit</button>
+              </div>
+            </div>
 
-          <!-- Minimal form card -->
-          <div>
-            <form method="POST" action="{{ route('host.request.store') }}" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-8 sm:p-10 lg:p-12 grid grid-cols-1 sm:grid-cols-2 gap-6">
-              @csrf
-              <div>
-                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="name">Your name</label>
-                <input id="name" name="name" type="text" required value="{{ old('name') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
+            <!-- Right: dark inner card with minimal form -->
+            <div>
+              <div id="host-form" class="rounded-2xl bg-black ring-1 ring-white/10 p-6 sm:p-8 lg:p-10">
+                <h4 class="text-xl font-semibold mb-6">Contact Us</h4>
+                <form id="host-form-el" method="POST" action="{{ route('host.request.store') }}" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  @csrf
+                  <div>
+                    <label class="block text-xs uppercase tracking-widest text-zinc-400" for="name">Full name</label>
+                    <input id="name" name="name" type="text" required value="{{ old('name') }}" class="mt-2 block w-full bg-transparent border-0 border-b border-white/10 px-0 py-3 focus:border-white/30 focus:ring-0" />
+                  </div>
+                  <div>
+                    <label class="block text-xs uppercase tracking-widest text-zinc-400" for="email">Email</label>
+                    <input id="email" name="email" type="email" required value="{{ old('email') }}" class="mt-2 block w-full bg-transparent border-0 border-b border-white/10 px-0 py-3 focus:border-white/30 focus:ring-0" />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="block text-xs uppercase tracking-widest text-zinc-400" for="event_title">Event idea / title</label>
+                    <input id="event_title" name="event_title" type="text" required value="{{ old('event_title') }}" class="mt-2 block w-full bg-transparent border-0 border-b border-white/10 px-0 py-3 focus:border-white/30 focus:ring-0" />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="block text-xs uppercase tracking-widest text-zinc-400" for="message">Message (optional)</label>
+                    <textarea id="message" name="message" rows="4" class="mt-2 block w-full bg-transparent border-0 border-b border-white/10 px-0 py-3 focus:border-white/30 focus:ring-0">{{ old('message') }}</textarea>
+                  </div>
+                </form>
+
+                @if (session('status'))
+                  <div class="mt-6 rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-300 px-3 py-2">{{ session('status') }}</div>
+                @endif
+                @if ($errors->any())
+                  <div class="mt-4 rounded-lg bg-red-500/10 ring-1 ring-red-500/20 text-red-300 px-3 py-2">
+                    <ul class="list-disc list-inside">
+                      @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                      @endforeach
+                    </ul>
+                  </div>
+                @endif
               </div>
-              <div>
-                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="email">Email</label>
-                <input id="email" name="email" type="email" required value="{{ old('email') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
-              </div>
-              <div>
-                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="phone">Phone</label>
-                <input id="phone" name="phone" type="text" value="{{ old('phone') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
-              </div>
-              <div>
-                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="event_title">Event name</label>
-                <input id="event_title" name="event_title" type="text" required value="{{ old('event_title') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
-              </div>
-              <div>
-                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="event_date">Event date</label>
-                <input id="event_date" name="event_date" type="datetime-local" min="{{ now()->format('Y-m-d\\TH:i') }}" value="{{ old('event_date') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
-              </div>
-              <div>
-                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="venue">Venue / City</label>
-                <input id="venue" name="venue" type="text" value="{{ old('venue') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
-              </div>
-              <div>
-                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="expected_attendees">Expected attendees</label>
-                <input id="expected_attendees" name="expected_attendees" type="number" min="1" value="{{ old('expected_attendees') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
-              </div>
-              <div>
-                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="budget">Budget (₦)</label>
-                <input id="budget" name="budget" type="number" step="0.01" min="0" value="{{ old('budget') }}" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0" />
-              </div>
-              <div class="sm:col-span-2">
-                <label class="block text-xs uppercase tracking-widest text-zinc-400" for="message">Tell us about the event</label>
-                <textarea id="message" name="message" rows="5" class="mt-2 block w-full rounded-lg bg-black/20 border border-white/10 px-3 py-3 focus:border-white/20 focus:ring-0">{{ old('message') }}</textarea>
-              </div>
-              <div class="sm:col-span-2">
-                <button class="mx-auto inline-flex items-center justify-center px-7 py-3 rounded-full bg-white text-black font-semibold hover:bg-zinc-100">Submit request</button>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
@@ -340,7 +341,7 @@
     <section class="py-20">
         <div class="max-w-6xl mx-auto px-6">
             <div class="rounded-[2rem] bg-white/5 ring-1 ring-white/10 p-10 text-center">
-                <h3 class="text-3xl sm:text-4xl font-bold">Ready for your next night out?</h3>
+                <h3 class="text-3xl sm:text-4xl font-bold">Ready for your next event ?</h3>
                 <p class="mt-2 text-zinc-300">Browse all events happening soon.</p>
                 <div class="mt-6">
                     <a href="{{ route('events.index') }}" class="inline-flex items-center px-8 py-3 rounded-full bg-white text-black font-semibold hover:bg-zinc-100 transition">Explore all events</a>

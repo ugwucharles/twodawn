@@ -20,10 +20,10 @@
     @endphp
 
     <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-6">
-      <h1 class="text-2xl font-extrabold">Payment Successful</h1>
+      <h1 class="text-2xl font-extrabold">{{ ($order->amount ?? 0) <= 0 ? 'Ticket Confirmed' : 'Payment Successful' }}</h1>
       <p class="mt-2 text-zinc-300">Show this QR at the gate. It encodes your order reference.</p>
 
-      <div class="mt-6 grid sm:grid-cols-2 gap-6 items-center">
+      <div class="mt-6 grid sm:grid-cols-2 gap-6 items-start">
         <div class="rounded-xl bg-white p-4 flex items-center justify-center">
           @if($qrData)
             <img src="{{ $qrData }}" alt="Order QR" class="w-64 h-64"/>
@@ -41,8 +41,42 @@
           <div class="mt-4 text-zinc-400">Quantity</div>
           <div class="text-white">{{ $order->quantity }}</div>
         </div>
+        <div>
+          @php
+            $start = optional($event?->starts_at);
+            $end = optional($event?->ends_at) ?: optional($event?->starts_at)?->copy()->addHours(2);
+            $startUtc = $start ? $start->copy()->utc()->format('Ymd\THis\Z') : null;
+            $endUtc = $end ? $end->copy()->utc()->format('Ymd\THis\Z') : null;
+            $gc = $startUtc && $endUtc ? ('https://calendar.google.com/calendar/render?action=TEMPLATE&text=' . urlencode($event?->title ?? 'Event') . '&dates='.$startUtc.'/'.$endUtc.'&details=' . urlencode($event?->public_url ?? url('/')) . ($event?->venue ? ('&location='.urlencode($event->venue)) : '')) : null;
+          @endphp
+          <div class="mt-6">
+            <h2 class="text-sm uppercase tracking-widest text-zinc-400">Promote this event</h2>
+            <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+              <a href="https://wa.me/?text={{ urlencode(($event?->title ?? 'Event').' — '.$event?->public_url) }}" target="_blank" class="px-3 py-1.5 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20">WhatsApp</a>
+              <a href="https://twitter.com/intent/tweet?text={{ urlencode($event?->title ?? 'Event') }}&url={{ urlencode($event?->public_url) }}" target="_blank" class="px-3 py-1.5 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20">Share on X</a>
+              <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($event?->public_url) }}" target="_blank" class="px-3 py-1.5 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20">Facebook</a>
+              <button id="copy-link" class="px-3 py-1.5 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20" data-url="{{ $event?->public_url }}">Copy link</button>
+            </div>
+          </div>
+          <div class="mt-6">
+            <h2 class="text-sm uppercase tracking-widest text-zinc-400">Add to calendar</h2>
+            <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+              @if($gc)
+                <a href="{{ $gc }}" target="_blank" class="px-3 py-1.5 rounded-full bg-white text-black hover:bg-zinc-100">Google Calendar</a>
+              @endif
+              <a href="{{ route('events.ics', $event) }}" class="px-3 py-1.5 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20">Apple/Outlook (.ics)</a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <script>
+      document.getElementById('copy-link')?.addEventListener('click', async (e) => {
+        const url = e.currentTarget.getAttribute('data-url');
+        try { await navigator.clipboard.writeText(url); e.currentTarget.textContent = 'Copied!'; setTimeout(()=>e.currentTarget.textContent='Copy link', 1500);} catch(_) { alert(url); }
+      });
+    </script>
   </div>
 </section>
 <script>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -33,7 +34,7 @@ class EventController extends Controller
         return response()->json(['id' => $event->id, 'is_published' => $event->is_published]);
     }
 
-    protected function validated(Request $request): array
+    protected function validated(Request $request, ?Event $event = null): array
     {
         $data = $request->validate([
             'title' => ['required','string','max:255'],
@@ -46,14 +47,27 @@ class EventController extends Controller
             'capacity' => ['nullable','integer','min:1'],
             'early_bird_price' => ['nullable','numeric','min:0'],
             'early_bird_ends_at' => ['nullable','date'],
-            'is_published' => ['sometimes','boolean'],
-            'image' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
+'is_published' => ['sometimes','boolean'],
+            'pass_fees_to_buyer' => ['sometimes','boolean'],
+'image' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
+            'use_custom_slug' => ['sometimes','boolean'],
+            'slug' => [\Illuminate\Validation\Rule::requiredIf(fn() => $request->boolean('use_custom_slug')), 'nullable','string','max:120','regex:/^[a-z0-9-]+$/', \Illuminate\Validation\Rule::unique('events','slug')->ignore($event?->id)],
         ]);
 
         // Sanitize string inputs
         $data['title'] = trim(strip_tags($data['title']));
         $data['description'] = $data['description'] ? trim($data['description']) : null;
         $data['venue'] = $data['venue'] ? trim(strip_tags($data['venue'])) : null;
+
+        // Normalize slug
+        $data['use_custom_slug'] = $request->boolean('use_custom_slug');
+        if (! $data['use_custom_slug']) {
+            $data['slug'] = null;
+        } else {
+            $slug = $request->input('slug');
+            $slug = $slug ? Str::slug($slug) : Str::slug((string) ($data['title'] ?? ''));
+            $data['slug'] = $slug ?: null;
+        }
 
         return $data;
     }
@@ -81,8 +95,9 @@ class EventController extends Controller
     public function store(Request $request)
     {
         try {
-            $data = $this->validated($request);
-            $data['is_published'] = $request->boolean('is_published');
+            $data = $this->validated($request, null);
+$data['is_published'] = $request->boolean('is_published');
+            $data['pass_fees_to_buyer'] = $request->boolean('pass_fees_to_buyer');
 
             if ($request->hasFile('image')) {
                 try {
@@ -155,8 +170,9 @@ class EventController extends Controller
     public function update(Request $request, Event $event)
     {
         try {
-            $data = $this->validated($request);
-            $data['is_published'] = $request->boolean('is_published');
+            $data = $this->validated($request, $event);
+$data['is_published'] = $request->boolean('is_published');
+            $data['pass_fees_to_buyer'] = $request->boolean('pass_fees_to_buyer');
 
             if ($request->hasFile('image')) {
                 // Optionally delete old image (local)

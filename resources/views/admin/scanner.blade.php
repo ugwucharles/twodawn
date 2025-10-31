@@ -2,7 +2,7 @@
   <div id="page-content" class="py-6">
     <div class="max-w-6xl mx-auto px-6">
       <div class="mb-6 flex items-center">
-        <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-rose-400 bg-clip-text text-transparent">QR Scanner</h1>
+<h1 class="text-3xl font-extrabold tracking-tight text-white">QR Scanner</h1>
       </div>
 
       <div class="grid lg:grid-cols-2 gap-6 items-start">

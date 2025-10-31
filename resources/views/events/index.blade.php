@@ -30,7 +30,7 @@
     $items[] = [
       '@type' => 'ListItem',
       'position' => $i + 1 + (($events->currentPage() - 1) * $events->perPage()),
-      'url' => route('events.show', $e),
+'url' => $e->public_url,
       'name' => $e->title,
     ];
   }
@@ -84,8 +84,8 @@
   <div class="max-w-7xl mx-auto px-6">
     <div class="mb-6 flex items-end justify-between gap-4 flex-wrap">
       <div>
-        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">All Events</h1>
-        <p class="mt-2 text-zinc-400">Browse upcoming shows and parties</p>
+        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">Discover events</h1>
+        <p class="mt-2 text-zinc-400">Find trending, free, and this weekend’s vibes.</p>
       </div>
       <form method="GET" action="{{ route('events.index') }}" class="w-full sm:w-auto flex items-center gap-2">
         @if(request('mood'))
@@ -95,6 +95,136 @@
         <button class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-100">Search</button>
       </form>
     </div>
+
+    @if(!empty($showCurated))
+      <div class="mb-6">
+        <h2 class="text-center text-4xl sm:text-5xl md:text-6xl font-extrabold mb-8 sm:mb-10">What are you looking for?</h2>
+        <div class="fade-x overflow-x-auto no-scrollbar">
+          <ul class="flex items-center justify-center gap-3 sm:gap-4 min-w-max text-zinc-300 text-xl sm:text-2xl tracking-wider">
+            @php $items = collect(config('moods.list', ['Rave','Romantic','Amapiano','Afrobeats','Hip‑Hop','House','Live Band','Jazz','Techno','Gospel','Comedy','Networking'])); @endphp
+            @foreach($items as $i => $m)
+              <li class="flex items-center">
+                <a href="{{ route('events.index', ['mood' => $m]) }}" class="px-2 sm:px-3 py-1 uppercase hover:text-white whitespace-nowrap">{{ $m }}</a>
+                @if($i < (($items instanceof \Illuminate\Support\Collection ? $items->count() : count($items)) - 1))
+                  <span aria-hidden class="mx-1 sm:mx-2 opacity-40">|</span>
+                @endif
+              </li>
+            @endforeach
+          </ul>
+        </div>
+        <p class="mt-8 sm:mt-10 text-center text-zinc-400 text-base sm:text-lg">We've got you</p>
+      </div>
+
+      @if(($trendingEvents ?? collect())->count())
+        <div class="mb-10">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-2xl font-bold">Trending</h2>
+            <a href="{{ route('events.index') }}" class="text-sm text-zinc-300 hover:text-white">View all →</a>
+          </div>
+          <div class="overflow-x-auto no-scrollbar">
+            <div class="min-w-max flex gap-4">
+              @foreach(($trendingEvents ?? []) as $event)
+                <a href="{{ $event->public_url }}" class="w-64 shrink-0 group relative rounded-2xl overflow-hidden ring-1 ring-white/10 hover:ring-white/20">
+                  <div class="relative" style="padding-top: 56%">
+                    @if($event->image_url)
+                      <img src="{{ $event->image_url }}" alt="{{ $event->title }}" class="absolute inset-0 h-full w-full object-cover group-hover:scale-105 duration-500" />
+                    @else
+                      <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-rose-500"></div>
+                    @endif
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                    <div class="absolute inset-x-0 bottom-0 p-3">
+                      <div class="text-white font-semibold truncate">{{ $event->title }}</div>
+                      <div class="text-xs text-zinc-300 truncate">{{ optional($event->starts_at)->format('M j, g:i A') }} @if($event->venue) • {{ $event->venue }} @endif</div>
+                    </div>
+                  </div>
+                </a>
+              @endforeach
+            </div>
+          </div>
+        </div>
+      @endif
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        @if(($weekendEvents ?? collect())->count())
+          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+            <div class="flex items-center justify-between mb-3"><h3 class="text-xl font-bold">This weekend</h3><a href="{{ route('events.index') }}" class="text-sm text-zinc-300 hover:text-white">All events</a></div>
+            <ul class="space-y-3">
+              @foreach(($weekendEvents ?? []) as $e)
+                <li class="flex items-center gap-3">
+                  <div class="h-10 w-14 rounded overflow-hidden bg-white/10 ring-1 ring-white/10">
+                    @if($e->image_url) <img src="{{ $e->image_url }}" class="h-full w-full object-cover"/> @endif
+                  </div>
+                  <a href="{{ $e->public_url }}" class="flex-1 hover:underline">{{ $e->title }}</a>
+                  <div class="text-xs text-zinc-400">{{ optional($e->starts_at)->format('D, g:i A') }}</div>
+                </li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+        @if(($newWeekEvents ?? collect())->count())
+          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+            <div class="flex items-center justify-between mb-3"><h3 class="text-xl font-bold">New this week</h3><a href="{{ route('events.index') }}" class="text-sm text-zinc-300 hover:text-white">All events</a></div>
+            <ul class="space-y-3">
+              @foreach(($newWeekEvents ?? []) as $e)
+                <li class="flex items-center gap-3">
+                  <div class="h-10 w-14 rounded overflow-hidden bg-white/10 ring-1 ring-white/10">
+                    @if($e->image_url) <img src="{{ $e->image_url }}" class="h-full w-full object-cover"/> @endif
+                  </div>
+                  <a href="{{ $e->public_url }}" class="flex-1 hover:underline">{{ $e->title }}</a>
+                  <div class="text-xs text-zinc-400">{{ optional($e->starts_at)->format('M j') }}</div>
+                </li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+        @if(($freeEvents ?? collect())->count())
+          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+            <div class="flex items-center justify-between mb-3"><h3 class="text-xl font-bold">Free & budget‑friendly</h3><a href="{{ route('events.index') }}" class="text-sm text-zinc-300 hover:text-white">All events</a></div>
+            <ul class="space-y-3">
+              @foreach(($freeEvents ?? []) as $e)
+                <li class="flex items-center gap-3">
+                  <div class="h-10 w-14 rounded overflow-hidden bg-white/10 ring-1 ring-white/10">
+                    @if($e->image_url) <img src="{{ $e->image_url }}" class="h-full w-full object-cover"/> @endif
+                  </div>
+                  <a href="{{ $e->public_url }}" class="flex-1 hover:underline">{{ $e->title }}</a>
+                  <span class="text-xs text-emerald-300">Free</span>
+                </li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+      </div>
+    @endif
+
+    @if(!empty($showCurated) && !empty($moodSections))
+      <div class="mb-10">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-2xl font-bold">By mood</h2>
+          <a href="{{ route('events.index') }}" class="text-sm text-zinc-300 hover:text-white">All events →</a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @foreach($moodSections as $mm => $list)
+            <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg font-semibold">{{ $mm }}</h3>
+                <a href="{{ route('events.index', ['mood' => $mm]) }}" class="text-xs text-zinc-300 hover:text-white">View all</a>
+              </div>
+              <ul class="space-y-3">
+                @foreach($list as $e)
+                  <li class="flex items-center gap-3">
+                    <div class="h-10 w-14 rounded overflow-hidden bg-white/10 ring-1 ring-white/10">
+                      @if($e->image_url) <img src="{{ $e->image_url }}" class="h-full w-full object-cover" loading="lazy"/> @endif
+                    </div>
+                    <a href="{{ $e->public_url }}" class="flex-1 hover:underline">{{ $e->title }}</a>
+                    <div class="text-xs text-zinc-400">{{ optional($e->starts_at)->format('M j') }}</div>
+                  </li>
+                @endforeach
+              </ul>
+            </div>
+          @endforeach
+        </div>
+      </div>
+    @endif
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       @forelse ($events as $event)
@@ -108,7 +238,7 @@
           $duration = $minutes ? (int) floor($minutes/60).'h '.($minutes%60).'m' : null;
         @endphp
         <div class="group relative rounded-3xl overflow-hidden ring-1 ring-white/10 hover:ring-white/20 transition ticket-notch" data-tilt data-tilt-max="6">
-          <a href="{{ route('events.show', $event) }}" class="absolute inset-0 z-10">
+<a href="{{ $event->public_url }}" class="absolute inset-0 z-10">
             <span class="sr-only">Open {{ $event->title }}</span>
           </a>
 <div class="relative" style="padding-top: calc(62.5% + 120px);">

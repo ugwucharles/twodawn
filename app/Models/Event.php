@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Event extends Model
 {
@@ -18,8 +19,11 @@ class Event extends Model
         'early_bird_ends_at',
         'capacity',
         'is_published',
-'image_path',
+        'pass_fees_to_buyer',
+        'image_path',
         'mood',
+        'use_custom_slug',
+        'slug',
     ];
 
     protected function casts(): array
@@ -27,7 +31,9 @@ class Event extends Model
         return [
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
-            'is_published' => 'boolean',
+'is_published' => 'boolean',
+'pass_fees_to_buyer' => 'boolean',
+            'use_custom_slug' => 'boolean',
             'price' => 'decimal:2',
             'early_bird_price' => 'decimal:2',
         ];
@@ -36,6 +42,14 @@ class Event extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function getPublicUrlAttribute(): string
+    {
+        if ($this->use_custom_slug && $this->slug) {
+            try { return route('events.slug', $this->slug); } catch (\Throwable $e) { return url('/event/' . $this->slug); }
+        }
+        try { return route('events.show', $this); } catch (\Throwable $e) { return url('/events/'.$this->id); }
     }
 
     public function getImageUrlAttribute(): ?string

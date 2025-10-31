@@ -12,7 +12,8 @@
         @endif
       </div>
       <div>
-        <h1 class="text-3xl font-extrabold">Buy Tickets — {{ $event->title }}</h1>
+        @php $isFree = ((float)($event->early_bird_price ?? $event->price ?? 0)) <= 0; @endphp
+        <h1 class="text-3xl font-extrabold">{{ $isFree ? 'Get Tickets' : 'Buy Tickets' }} — {{ $event->title }}</h1>
         <div class="mt-2 text-zinc-300">{{ optional($event->starts_at)->format('D, M j, Y g:i A') }} @if($event->venue) • {{ $event->venue }} @endif</div>
       </div>
     </div>
@@ -27,6 +28,16 @@
           </ul>
         </div>
       @endif
+
+      @php
+        $now = now();
+        $unitPrice = (float) ($event->price ?? 0);
+        $isEarly = false;
+        if (!is_null($event->early_bird_price) && !is_null($event->early_bird_ends_at) && $now->lte($event->early_bird_ends_at)) {
+          $unitPrice = (float) $event->early_bird_price;
+          $isEarly = true;
+        }
+      @endphp
 
       <form method="POST" action="{{ route('orders.create', $event, false) }}" class="space-y-4 rounded-2xl bg-white/5 ring-1 ring-white/10 p-6" id="payment-form">
         @csrf
@@ -49,19 +60,40 @@
             <label class="block text-sm text-zinc-300" for="quantity">Quantity</label>
             <input id="quantity" name="quantity" type="number" min="1" step="1" required value="{{ old('quantity', 1) }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
           </div>
+          @if($unitPrice > 0)
           <div>
             <label class="block text-sm text-zinc-300" for="coupon">Coupon (optional)</label>
             <input id="coupon" name="coupon" type="text" value="{{ old('coupon') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
+            <div id="coupon-msg" class="mt-1 text-xs"></div>
+          </div>
+          @endif
+        </div>
+
+        <!-- Cost summary -->
+        <div class="rounded-lg bg-black/20 border border-white/10 p-4 text-sm">
+          <div class="flex justify-between"><span>Price</span><span>@if($unitPrice <= 0) Free @else ₦{{ number_format($unitPrice, 0) }} @if($isEarly)<span class="text-xs text-emerald-300 ml-1">(early-bird)</span>@endif @endif</span></div>
+          @if($event->pass_fees_to_buyer && $unitPrice > 0)
+          <div class="flex justify-between text-zinc-300"><span>Platform fee per ticket</span><span>5% + ₦50</span></div>
+          @endif
+          <div class="mt-3 space-y-1">
+            <div class="flex justify-between"><span>Subtotal</span><span id="sum-subtotal">₦0</span></div>
+            @if($event->pass_fees_to_buyer)
+            <div class="flex justify-between"><span>Fees</span><span id="sum-fees">₦0</span></div>
+            @endif
+            <div class="pt-1 mt-1 border-t border-white/10 flex justify-between font-semibold"><span>Total</span><span id="sum-total">₦0</span></div>
           </div>
         </div>
 
         <button type="submit" class="w-full inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-black font-semibold hover:bg-zinc-100 transition disabled:opacity-50 disabled:cursor-not-allowed" id="payment-button">
-          <span id="button-text">Proceed to Paystack</span>
+          <span id="button-text">{{ $unitPrice <= 0 ? 'Get Ticket' : 'Proceed to Paystack' }}</span>
           <svg id="button-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-black hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
         </button>
+<a href="{{ $event->public_url }}" class="block text-center text-zinc-400 hover:text-white text-sm">Cancel</a>
+      </form>
+    </div>
         <a href="{{ route('events.show', $event) }}" class="block text-center text-zinc-400 hover:text-white text-sm">Cancel</a>
       </form>
     </div>
@@ -70,6 +102,61 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const UNIT_PRICE = parseFloat(@json(number_format($unitPrice, 2, '.', '')));
+    const FEES_ON = (UNIT_PRICE > 0) && @json((bool) $event->pass_fees_to_buyer);
+    const FEE_PER_TICKET_K = FEES_ON ? (Math.round(UNIT_PRICE * 0.05 * 100) + 5000) : 0; // 5% + ₦50
+    const QUOTE_URL = UNIT_PRICE > 0 ? @json(route('orders.quote', $event)) : null;
+
+    const qtyEl = document.getElementById('quantity');
+    const sumSubtotal = document.getElementById('sum-subtotal');
+    const sumFees = document.getElementById('sum-fees');
+    const sumTotal = document.getElementById('sum-total');
+
+    function fmtKoboToNaira(k){ return new Intl.NumberFormat('en-NG').format(Math.round(k/100)); }
+
+    function recalc(){
+      let q = parseInt(qtyEl.value || '1', 10); if (!Number.isFinite(q) || q < 1) q = 1;
+      const subK = Math.round(UNIT_PRICE * 100) * q;
+      const feeK = FEE_PER_TICKET_K * q;
+      const totK = subK + feeK;
+      if (sumSubtotal) sumSubtotal.textContent = '₦' + fmtKoboToNaira(subK);
+      if (sumFees) sumFees.textContent = '₦' + fmtKoboToNaira(feeK);
+      if (sumTotal) sumTotal.textContent = '₦' + fmtKoboToNaira(totK);
+      const btnText = document.getElementById('button-text');
+      if (btnText) btnText.textContent = (totK <= 0 ? 'Get Ticket' : ('Pay ₦' + fmtKoboToNaira(totK) + ' via Paystack'));
+    }
+
+    function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+
+    async function quote(){
+      if (!QUOTE_URL) return; // no quote for free events
+      try{
+        const q = parseInt(qtyEl.value||'1',10)||1;
+        const c = (document.getElementById('coupon')?.value || '').trim();
+        const resp = await fetch(QUOTE_URL + '?quantity=' + encodeURIComponent(q) + (c?('&coupon='+encodeURIComponent(c)):'') , { headers: { 'Accept':'application/json' } });
+        if (!resp.ok) return; const data = await resp.json();
+        if (!data || !data.ok) return;
+        if (sumSubtotal) sumSubtotal.textContent = '₦' + fmtKoboToNaira(data.subtotal_kobo||0);
+        if (sumFees && typeof data.fees_kobo === 'number') sumFees.textContent = '₦' + fmtKoboToNaira(data.fees_kobo||0);
+        if (sumTotal) sumTotal.textContent = '₦' + fmtKoboToNaira(data.total_kobo||0);
+        const btnText = document.getElementById('button-text');
+        if (btnText) btnText.textContent = (data.total_kobo <= 0 ? 'Get Ticket' : ('Pay ₦' + fmtKoboToNaira(data.total_kobo) + ' via Paystack'));
+        const msg = document.getElementById('coupon-msg');
+        if (msg){
+          if (c && data.coupon_valid){ msg.textContent = 'Coupon applied'; msg.className='mt-1 text-xs text-emerald-300'; }
+          else if (c && !data.coupon_valid){ msg.textContent = 'Invalid or expired coupon'; msg.className='mt-1 text-xs text-red-300'; }
+          else { msg.textContent=''; msg.className='mt-1 text-xs'; }
+        }
+      }catch(_){ /* ignore */ }
+    }
+
+    const onChange = debounce(()=>{ recalc(); quote(); }, 250);
+    qtyEl.addEventListener('input', onChange);
+    const couponEl = document.getElementById('coupon');
+    if (couponEl) couponEl.addEventListener('input', onChange);
+
+    recalc();
+    quote();
     const form = document.getElementById('payment-form');
     const button = document.getElementById('payment-button');
     const buttonText = document.getElementById('button-text');
@@ -135,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             isSubmitting = false;
             button.disabled = false;
-            buttonText.textContent = 'Proceed to Paystack';
+            recalc();
             buttonSpinner.classList.add('hidden');
         }, 30000);
         
@@ -144,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isSubmitting) {
                 isSubmitting = false;
                 button.disabled = false;
-                buttonText.textContent = 'Proceed to Paystack';
+                recalc();
                 buttonSpinner.classList.add('hidden');
             }
         }, 5000);

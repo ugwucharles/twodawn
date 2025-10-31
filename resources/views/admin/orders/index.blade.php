@@ -13,9 +13,20 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div>
+                            <label class="block text-sm text-zinc-300">From</label>
+                            <input type="date" name="from" value="{{ request('from') }}" class="mt-1 block rounded-md bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 text-white px-3 py-2" />
+                        </div>
+                        <div>
+                            <label class="block text-sm text-zinc-300">To</label>
+                            <input type="date" name="to" value="{{ request('to') }}" class="mt-1 block rounded-md bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 text-white px-3 py-2" />
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
                             <button class="inline-flex items-center px-4 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Apply</button>
-                            <a href="{{ route('admin.orders.export', ['event_id' => request('event_id')]) }}" class="inline-flex items-center px-4 py-2 bg-white/10 ring-1 ring-white/10 rounded-md text-sm hover:bg-white/20">Export CSV</a>
+                            <a href="{{ route('admin.orders.export', ['event_id' => request('event_id'), 'from' => request('from'), 'to' => request('to')]) }}" class="inline-flex items-center px-4 py-2 bg-white/10 ring-1 ring-white/10 rounded-md text-sm hover:bg-white/20">Export orders CSV</a>
+<a href="{{ route('admin.orders.export.summary', ['event_id' => request('event_id'), 'from' => request('from'), 'to' => request('to')]) }}" class="inline-flex items-center px-4 py-2 bg-white/10 ring-1 ring-white/10 rounded-md text-sm hover:bg-white/20">Export sales summary</a>
+                            <a href="{{ route('admin.orders.export.summaryDaily', ['event_id' => request('event_id'), 'from' => request('from'), 'to' => request('to')]) }}" class="inline-flex items-center px-4 py-2 bg-white/10 ring-1 ring-white/10 rounded-md text-sm hover:bg-white/20">Export daily breakdown</a>
+                            <a href="{{ route('admin.checkins.export', ['event_id' => request('event_id'), 'from' => request('from'), 'to' => request('to')]) }}" class="inline-flex items-center px-4 py-2 bg-white/10 ring-1 ring-white/10 rounded-md text-sm hover:bg-white/20">Export check-ins</a>
                         </div>
                     </form>
                     <div class="overflow-x-auto">

@@ -1,6 +1,7 @@
 @extends('layouts.public')
 
 @section('title', 'Host Panel')
+@section('chat','off')
 @section('robots', 'noindex, nofollow')
 
 @section('content')
@@ -22,7 +23,15 @@
           <div class="text-zinc-400 text-sm mt-1">Token: {{ $host->label ?? 'Link' }} • Expires {{ optional($host->expires_at)->diffForHumans() }}</div>
         </div>
       </div>
-      <div class="hidden"></div>
+      <div>
+        <form method="GET" class="flex items-center gap-2 flex-wrap">
+          <input type="date" name="from" value="{{ request('from') }}" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm" />
+          <input type="date" name="to" value="{{ request('to') }}" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm" />
+<button formaction="{{ route('host.sales.export', $host->token) }}" class="inline-flex items-center px-4 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Export sales</button>
+          <button formaction="{{ route('host.sales.exportDaily', $host->token) }}" class="inline-flex items-center px-4 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Export daily sales</button>
+          <button formaction="{{ route('host.people.export', $host->token) }}" class="inline-flex items-center px-4 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Export check-ins</button>
+        </form>
+      </div>
     </div>
 
     <!-- Desktop fixed left sidebar -->

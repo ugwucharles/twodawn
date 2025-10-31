@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\OrderCheckin;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Carbon\Carbon;
 
 class TicketScanController extends Controller
 {
@@ -16,8 +19,7 @@ class TicketScanController extends Controller
     // Verify order QR or reference (no mutation)
     public function verify(Request $request)
     {
-        $text = (string) $request->input('text', '');
-        $text = trim($text);
+        $text = trim((string) $request->input('text', ''));
         $ref = null;
         if (preg_match('/(PA_[A-Za-z0-9]{6,})/', $text, $m)) { $ref = $m[1]; } else { $ref = $text; }
 
@@ -82,5 +84,40 @@ class TicketScanController extends Controller
             'buyer' => [ 'name' => $order->buyer_name, 'email' => $order->buyer_email ],
             'quantity' => $order->quantity,
         ]);
+    }
+
+    public function export(Request $request): StreamedResponse
+    {
+        $eventId = $request->integer('event_id');
+        $from = $request->date('from');
+        $to = $request->date('to');
+        $checkins = OrderCheckin::with([
+                'order' => function($q){ $q->select('id','buyer_name','buyer_email','paystack_reference','event_id'); },
+                'order.event' => function($q){ $q->select('id','title'); }
+            ])
+            ->when($eventId, function($q) use ($eventId){ $q->whereHas('order', fn($qq)=>$qq->where('event_id',$eventId)); })
+            ->when($from, fn($q) => $q->where('created_at', '>=', Carbon::parse($from)->startOfDay()))
+            ->when($to, fn($q) => $q->where('created_at', '<=', Carbon::parse($to)->endOfDay()))
+            ->orderByDesc('created_at')
+            ->get();
+
+        $filename = 'checkins'.($eventId ? ('_event_'.$eventId) : '').'_'.now()->format('Ymd_His').'.csv';
+        $headers = [ 'Content-Type' => 'text/csv', 'Content-Disposition' => "attachment; filename=\"$filename\"" ];
+        return response()->streamDownload(function () use ($checkins) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Time','Event','Buyer Name','Buyer Email','Reference','Count','Source']);
+            foreach ($checkins as $c) {
+                fputcsv($out, [
+                    optional($c->created_at)->format('Y-m-d H:i'),
+                    optional($c->order?->event)->title,
+                    $c->order?->buyer_name,
+                    $c->order?->buyer_email,
+                    $c->order?->paystack_reference,
+                    (int) $c->count,
+                    $c->source,
+                ]);
+            }
+            fclose($out);
+        }, $filename, $headers);
     }
 }
