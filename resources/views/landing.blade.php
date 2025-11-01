@@ -265,8 +265,8 @@
               <!-- Left: offer list + headline -->
               <div class="flex flex-col justify-between h-full min-h-[460px]">
                 <h3 class="mt-4 text-4xl sm:text-5xl font-extrabold">Get in touch with us!</h3>
-                <p class="mt-3 text-zinc-300">We’ll handle ticketing, payments, and check‑ins so you can focus on the vibe.</p>
-                <ul class="mt-6 space-y-2 text-sm text-zinc-300">
+                <p class="mt-1 sm:mt-2 md:mt-3 text-zinc-300">We’ll handle ticketing, payments, and check‑ins so you can focus on the vibe.</p>
+                <ul class="mt-3 sm:mt-4 md:mt-6 space-y-2 text-sm text-zinc-300">
                   <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Instant payouts with Paystack</li>
                   <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>QR tickets & capacity protection</li>
                   <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Analytics, coupons, exports</li>

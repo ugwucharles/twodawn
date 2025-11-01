@@ -1,7 +1,7 @@
 @php $mode = $showMode ?? 'after-host'; @endphp
-<div id="chat-root" class="fixed bottom-4 right-4 z-[999] print:hidden" x-data="chatWidget()" x-init="init()" data-chat-start="{{ route('chat.start') }}" data-chat-base="{{ url('/chat') }}" data-chat-show="{{ $mode }}" style="position:fixed; bottom:16px; right:16px; z-index:9999; pointer-events:auto; display:block;">
+<div id="chat-root" x-cloak class="fixed bottom-4 right-4 z-[999] print:hidden" x-data="chatWidget()" x-init="init()" data-chat-start="{{ route('chat.start') }}" data-chat-base="{{ url('/chat') }}" data-chat-show="{{ $mode }}" style="position:fixed; bottom:16px; right:16px; z-index:9999; pointer-events:auto;">
   <!-- Closed chat button (Messenger style) -->
-  <button x-show="headVisible && !open" @click="toggle()" @pointerdown.prevent="startDrag($event)" class="h-14 w-14 rounded-full bg-blue-600 text-white shadow-lg ring-4 ring-blue-500/30 flex items-center justify-center touch-none select-none cursor-pointer" title="Chat with us">
+  <button x-cloak x-show="headVisible && !open" @click="toggle()" @pointerdown.prevent="startDrag($event)" class="h-14 w-14 rounded-full bg-blue-600 text-white shadow-lg ring-4 ring-blue-500/30 flex items-center justify-center touch-none select-none cursor-pointer" title="Chat with us">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7">
       <path d="M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-6l-5 4v-4H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>
     </svg>
