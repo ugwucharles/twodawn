@@ -59,14 +59,38 @@
             </div>
           </div>
           <div class="mt-6">
-            <h2 class="text-sm uppercase tracking-widest text-zinc-400">Add to calendar</h2>
+            <h2 class="text-sm uppercase tracking-widest text-zinc-400">Set reminder</h2>
             <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
-              @if($gc)
-                <a href="{{ $gc }}" target="_blank" class="px-3 py-1.5 rounded-full bg-white text-black hover:bg-zinc-100">Google Calendar</a>
-              @endif
-              <a href="{{ route('events.ics', $event) }}" class="px-3 py-1.5 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20">Apple/Outlook (.ics)</a>
+              <button id="set-reminder" class="px-3 py-1.5 rounded-full bg-white text-black hover:bg-zinc-100">Set reminder</button>
+              <div class="relative" x-data="{open:false}">
+                <button type="button" data-more-reminders @click="open=!open" class="px-3 py-1.5 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20">More options</button>
+                <div x-cloak x-show="open" @click.away="open=false" class="absolute mt-2 w-56 rounded-xl bg-zinc-900 ring-1 ring-white/10 p-2 z-10">
+                  @if($gc)
+                    <a href="{{ $gc }}" target="_blank" class="block px-3 py-2 rounded hover:bg-white/5">Google Calendar</a>
+                  @endif
+                  <a href="{{ route('events.ics', $event) }}?alarm=60" class="block px-3 py-2 rounded hover:bg-white/5">Apple/Outlook (.ics)</a>
+                </div>
+              </div>
             </div>
           </div>
+
+          <script>
+            document.getElementById('set-reminder')?.addEventListener('click', function(){
+              var ua = navigator.userAgent || '';
+              var isiOS = /iP(hone|ad|od)/i.test(ua);
+              var isMac = /Macintosh/.test(ua);
+              var isAndroid = /Android/i.test(ua);
+              var icsUrl = @json(route('events.ics', $event) . '?alarm=60');
+              var gcal = @json($gc);
+              if (isiOS || isMac) {
+                window.location.href = icsUrl;
+              } else if (isAndroid && gcal) {
+                window.open(gcal, '_blank');
+              } else {
+                if (gcal) { window.open(gcal, '_blank'); } else { window.location.href = icsUrl; }
+              }
+            });
+          </script>
         </div>
       </div>
     </div>

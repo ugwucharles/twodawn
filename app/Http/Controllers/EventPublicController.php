@@ -177,6 +177,19 @@ class EventPublicController extends Controller
         $dtEnd = $end ? $end->format('Ymd\THis\Z') : now()->addHours(2)->utc()->format('Ymd\THis\Z');
         $uid = 'event-'.$event->id.'@'.parse_url(config('app.url', url('/')), PHP_URL_HOST);
         $url = $event->public_url;
+        // Optional alarm (minutes before start), default 60
+        $alarmMin = (int) request()->query('alarm', 60);
+        if (!in_array($alarmMin, [5,10,15,30,60,120,1440])) { $alarmMin = 60; }
+        $alarmLines = [];
+        if ($alarmMin > 0) {
+            $alarmLines = [
+                'BEGIN:VALARM',
+                'ACTION:DISPLAY',
+                'DESCRIPTION:Reminder',
+                'TRIGGER:-PT' . $alarmMin . 'M',
+                'END:VALARM',
+            ];
+        }
         $lines = [
             'BEGIN:VCALENDAR',
             'VERSION:2.0',
@@ -192,6 +205,7 @@ class EventPublicController extends Controller
             $desc ? ('DESCRIPTION:'.$desc) : null,
             $loc ? ('LOCATION:'.$loc) : null,
             'URL:'.$url,
+            ...$alarmLines,
             'END:VEVENT',
             'END:VCALENDAR',
         ];
