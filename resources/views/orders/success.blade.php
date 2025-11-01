@@ -62,15 +62,6 @@
             <h2 class="text-sm uppercase tracking-widest text-zinc-400">Set reminder</h2>
             <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
               <button id="set-reminder" class="px-3 py-1.5 rounded-full bg-white text-black hover:bg-zinc-100">Set reminder</button>
-              <div class="relative" x-data="{open:false}">
-                <button type="button" data-more-reminders @click="open=!open" class="px-3 py-1.5 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20">More options</button>
-                <div x-cloak x-show="open" @click.away="open=false" class="absolute mt-2 w-56 rounded-xl bg-zinc-900 ring-1 ring-white/10 p-2 z-10">
-                  @if($gc)
-                    <a href="{{ $gc }}" target="_blank" class="block px-3 py-2 rounded hover:bg-white/5">Google Calendar</a>
-                  @endif
-                  <a href="{{ route('events.ics', $event) }}?alarm=60" class="block px-3 py-2 rounded hover:bg-white/5">Apple/Outlook (.ics)</a>
-                </div>
-              </div>
             </div>
           </div>
 

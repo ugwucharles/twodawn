@@ -126,12 +126,8 @@
               $endUtc = $end ? $end->copy()->utc()->format('Ymd\THis\Z') : null;
               $gc = $startUtc && $endUtc ? ('https://calendar.google.com/calendar/render?action=TEMPLATE&text=' . urlencode($event?->title ?? 'Event') . '&dates='.$startUtc.'/'.$endUtc.'&details=' . urlencode($event->public_url) . ($event?->venue ? ('&location='.urlencode($event->venue)) : '')) : null;
             @endphp
-            <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
-              <span class="text-zinc-400 uppercase tracking-widest">Calendar:</span>
-              @if($gc)
-                <a href="{{ $gc }}" target="_blank" class="px-2.5 py-1 rounded-full bg-white text-black hover:bg-zinc-100">Google</a>
-              @endif
-              <a href="{{ route('events.ics', $event) }}" class="px-2.5 py-1 rounded-full bg-white/10 ring-1 ring-white/10 hover:bg-white/20">Apple/Outlook (.ics)</a>
+            <div class="mt-2">
+              <button id="set-reminder-ev" class="px-2.5 py-1 rounded-full bg-white text-black hover:bg-zinc-100 text-xs">Set reminder</button>
             </div>
           </div>
 
@@ -140,6 +136,26 @@
               const url = e.currentTarget.getAttribute('data-url');
               try { await navigator.clipboard.writeText(url); e.currentTarget.textContent = 'Copied!'; setTimeout(()=>e.currentTarget.textContent='Copy link', 1500);} catch(_) { alert(url); }
             });
+          </script>
+          <script>
+            (function(){
+              var btn=document.getElementById('set-reminder-ev'); if(!btn) return;
+              btn.addEventListener('click', function(){
+                var ua = navigator.userAgent || '';
+                var isiOS = /iP(hone|ad|od)/i.test(ua);
+                var isMac = /Macintosh/.test(ua);
+                var isAndroid = /Android/i.test(ua);
+                var icsUrl = @json(route('events.ics', $event) . '?alarm=60');
+                var gcal = @json($gc);
+                if (isiOS || isMac) {
+                  window.location.href = icsUrl;
+                } else if (isAndroid && gcal) {
+                  window.open(gcal, '_blank');
+                } else {
+                  if (gcal) { window.open(gcal, '_blank'); } else { window.location.href = icsUrl; }
+                }
+              });
+            })();
           </script>
 
           @if ($errors->any())
