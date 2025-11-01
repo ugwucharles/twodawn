@@ -50,6 +50,7 @@ class EventController extends Controller
 'is_published' => ['sometimes','boolean'],
             'pass_fees_to_buyer' => ['sometimes','boolean'],
 'image' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
+            'gallery.*' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:4096'],
             'use_custom_slug' => ['sometimes','boolean'],
             'slug' => [\Illuminate\Validation\Rule::requiredIf(fn() => $request->boolean('use_custom_slug')), 'nullable','string','max:120','regex:/^[a-z0-9-]+$/', \Illuminate\Validation\Rule::unique('events','slug')->ignore($event?->id)],
         ]);
@@ -130,6 +131,21 @@ $data['is_published'] = $request->boolean('is_published');
                 }
             }
 
+            // Handle gallery uploads (multiple)
+            $galPaths = [];
+            if ($request->hasFile('gallery')) {
+                foreach ((array) $request->file('gallery') as $file) {
+                    if (!$file) continue;
+                    try {
+                        $upload = Cloudinary::uploadFile($file->getRealPath(), ['folder' => '2dawn/events/gallery']);
+                        $galPaths[] = $upload->getSecurePath();
+                    } catch (\Throwable $e) {
+                        $galPaths[] = $file->storePublicly('events', 'public');
+                    }
+                }
+            }
+            if (!empty($galPaths)) { $data['gallery'] = $galPaths; }
+
             Event::create($data);
             return redirect()->route('admin.events.index')->with('status', 'Event created successfully!');
             
@@ -192,6 +208,22 @@ $data['is_published'] = $request->boolean('is_published');
                     // Fallback to local public storage (symlink public/storage required)
                     $data['image_path'] = $request->file('image')->storePublicly('events', 'public');
                 }
+            }
+
+            // Handle gallery uploads (append to existing)
+            if ($request->hasFile('gallery')) {
+                $existing = is_array($event->gallery ?? null) ? $event->gallery : [];
+                $galNew = [];
+                foreach ((array) $request->file('gallery') as $file) {
+                    if (!$file) continue;
+                    try {
+                        $upload = Cloudinary::uploadFile($file->getRealPath(), ['folder' => '2dawn/events/gallery']);
+                        $galNew[] = $upload->getSecurePath();
+                    } catch (\Throwable $e) {
+                        $galNew[] = $file->storePublicly('events', 'public');
+                    }
+                }
+                if (!empty($galNew)) { $data['gallery'] = array_values(array_filter(array_merge($existing, $galNew))); }
             }
 
             $event->update($data);

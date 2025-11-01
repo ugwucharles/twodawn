@@ -114,7 +114,7 @@
 </div>
 
 <div>
-    <x-input-label for="image" :value="__('Flyer')" />
+<x-input-label for="image" :value="__('Flyer (primary)')" />
 
     <script>
       // Simple slug sync
@@ -138,4 +138,17 @@
             <img src="{{ $event->image_url }}" alt="Flyer" class="h-24 rounded" />
         </div>
     @endif
+</div>
+
+<div class="mt-4">
+  <x-input-label for="gallery" :value="__('Additional flyers (optional)')" />
+  <input id="gallery" name="gallery[]" type="file" accept="image/*" multiple class="mt-1 block w-full rounded-md shadow-sm border-white/20 bg-zinc-900/70 text-white file:text-white file:bg-zinc-800 file:border-0 focus:border-indigo-400 focus:ring-indigo-400/30" />
+  @php $gal = $event->gallery_urls ?? []; @endphp
+  @if (!empty($gal))
+    <div class="mt-2 grid grid-cols-4 gap-2">
+      @foreach ($gal as $u)
+        <img src="{{ $u }}" class="h-20 w-full object-cover rounded" alt="Flyer" />
+      @endforeach
+    </div>
+  @endif
 </div>

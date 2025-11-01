@@ -20,7 +20,8 @@ class Event extends Model
         'capacity',
         'is_published',
         'pass_fees_to_buyer',
-        'image_path',
+'image_path',
+        'gallery',
         'mood',
         'use_custom_slug',
         'slug',
@@ -35,7 +36,8 @@ class Event extends Model
 'pass_fees_to_buyer' => 'boolean',
             'use_custom_slug' => 'boolean',
             'price' => 'decimal:2',
-            'early_bird_price' => 'decimal:2',
+'early_bird_price' => 'decimal:2',
+            'gallery' => 'array',
         ];
     }
 
@@ -90,5 +92,25 @@ class Event extends Model
                 return url('storage/' . $this->image_path);
             }
         }
+    }
+
+    public function getGalleryUrlsAttribute(): array
+    {
+        $out = [];
+        $items = is_array($this->gallery ?? null) ? $this->gallery : [];
+        foreach ($items as $p) {
+            if (!$p) continue;
+            if (str_starts_with($p, 'http')) { $out[] = $p; continue; }
+            try {
+                if (Storage::disk('public')->exists($p)) {
+                    $out[] = url('storage/' . ltrim($p, '/'));
+                } else {
+                    $out[] = url('storage/' . ltrim($p, '/'));
+                }
+            } catch (\Throwable $e) {
+                $out[] = url('storage/' . ltrim($p, '/'));
+            }
+        }
+        return $out;
     }
 }

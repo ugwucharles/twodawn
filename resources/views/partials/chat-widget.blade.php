@@ -35,6 +35,12 @@
 
     <!-- Messages -->
     <div x-cloak x-show="token" class="h-72 overflow-y-auto no-scrollbar px-3 py-3 space-y-3" x-ref="list">
+      <template x-if="closed">
+        <div class="rounded-lg bg-white/5 ring-1 ring-white/10 p-3 text-sm text-zinc-300 flex items-center justify-between">
+          <span>Chat ended.</span>
+          <button @click="newChat()" class="px-3 py-1.5 rounded-md bg-white text-black text-xs font-medium hover:bg-zinc-100">Start new chat</button>
+        </div>
+      </template>
       <template x-for="m in msgs" :key="m.id">
         <div class="flex items-end" :class="m.sender==='admin' ? 'justify-start' : 'justify-end'">
           <div class="flex items-end gap-2 max-w-[85%]" :class="m.sender==='admin' ? '' : 'flex-row-reverse'">

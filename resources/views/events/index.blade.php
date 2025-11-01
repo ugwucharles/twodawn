@@ -237,13 +237,21 @@
           $minutes = ($event->starts_at && $event->ends_at) ? $event->starts_at->diffInMinutes($event->ends_at) : null;
           $duration = $minutes ? (int) floor($minutes/60).'h '.($minutes%60).'m' : null;
         @endphp
-        <div class="group relative rounded-3xl overflow-hidden ring-1 ring-white/10 hover:ring-white/20 transition ticket-notch" data-tilt data-tilt-max="6">
+        <div class="group relative rounded-3xl overflow-hidden ring-1 ring-white/10 hover:ring-white/20 transition ticket-notch">
 <a href="{{ $event->public_url }}" class="absolute inset-0 z-10">
             <span class="sr-only">Open {{ $event->title }}</span>
           </a>
 <div class="relative" style="padding-top: calc(62.5% + 120px);">
-            @if($event->image_url)
-              <img src="{{ $event->image_url }}" alt="{{ $event->title }}" class="absolute inset-0 h-full w-full object-cover group-hover:scale-105 duration-500 ease-out"/>
+            @php $gal = $event->gallery_urls ?? []; @endphp
+            @if(!empty($gal) && count($gal) >= 2)
+              <style>
+                @keyframes fadeSwapA { 0%{opacity:1} 49%{opacity:1} 50%{opacity:0} 100%{opacity:0} }
+                @keyframes fadeSwapB { 0%{opacity:0} 49%{opacity:0} 50%{opacity:1} 100%{opacity:1} }
+              </style>
+              <img src="{{ $gal[0] }}" alt="{{ $event->title }}" class="absolute inset-0 h-full w-full object-cover" style="animation: fadeSwapA 14s ease-in-out infinite;"/>
+              <img src="{{ $gal[1] }}" alt="{{ $event->title }}" class="absolute inset-0 h-full w-full object-cover" style="animation: fadeSwapB 14s ease-in-out infinite;"/>
+            @elseif($event->image_url)
+              <img src="{{ $event->image_url }}" alt="{{ $event->title }}" class="absolute inset-0 h-full w-full object-cover"/>
             @else
               <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-rose-500"></div>
             @endif

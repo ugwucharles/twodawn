@@ -76,7 +76,7 @@
           $minutes = ($event->starts_at && $event->ends_at) ? $event->starts_at->diffInMinutes($event->ends_at) : null;
           $duration = $minutes ? (int) floor($minutes/60).'h '.($minutes%60).'m' : null;
         @endphp
-        <div class="group relative rounded-3xl overflow-hidden ring-1 ring-white/10 hover:ring-white/20 transition ticket-notch" data-tilt data-tilt-max="6">
+        <div class="group relative rounded-3xl overflow-hidden ring-1 ring-white/10 hover:ring-white/20 transition ticket-notch">
 <a href="{{ $event->public_url }}" class="absolute inset-0 z-10">
             <span class="sr-only">Open {{ $event->title }}</span>
           </a>

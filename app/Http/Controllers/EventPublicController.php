@@ -66,7 +66,8 @@ class EventPublicController extends Controller
                     $like = '%'.str_replace(['%','_'], ['\\%','\\_'], $term).'%';
                     $qq->where('title', 'like', $like)
                        ->orWhere('venue', 'like', $like)
-                       ->orWhere('description', 'like', $like);
+                       ->orWhere('description', 'like', $like)
+                       ->orWhere('mood', 'like', $like);
                 });
             })
             ->orderBy('starts_at')
