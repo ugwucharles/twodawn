@@ -95,6 +95,12 @@
             $now = now();
             $isPast = ($event->ends_at && $event->ends_at->lt($now)) || (!$event->ends_at && $event->starts_at && $event->starts_at->lt($now));
             $remaining = is_null($event->capacity) ? null : max(0, (int)$event->capacity);
+            // Determine free vs paid based on effective unit price (consider early-bird)
+            $unitPrice = (float) ($event->price ?? 0);
+            if (!is_null($event->early_bird_price) && !is_null($event->early_bird_ends_at) && $now->lte($event->early_bird_ends_at)) {
+              $unitPrice = (float) $event->early_bird_price;
+            }
+            $isFree = $unitPrice <= 0;
           @endphp
           <div class="mt-6 pt-4 border-t border-white/10">
             <div class="flex items-center justify-between">
@@ -109,7 +115,7 @@
               @if($isPast || ($remaining !== null && $remaining <= 0))
                 <button disabled class="inline-flex items-center px-4 py-2 rounded-xl bg-zinc-700/50 text-zinc-300 text-sm font-semibold cursor-not-allowed">Sales closed</button>
               @else
-                <a href="{{ route('events.buy', $event) }}" class="inline-flex items-center px-4 py-2 rounded-xl bg-white text-black text-sm font-semibold hover:bg-zinc-100 transition">Buy ticket</a>
+                <a href="{{ route('events.buy', $event) }}" class="inline-flex items-center px-4 py-2 rounded-xl bg-white text-black text-sm font-semibold hover:bg-zinc-100 transition">{{ $isFree ? 'Get ticket' : 'Buy ticket' }}</a>
               @endif
             </div>
             <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
@@ -169,32 +175,34 @@
           @endif
 
           @if(!($isPast || ($remaining !== null && $remaining <= 0)))
-          <div class="mt-6 pt-4 border-t border-white/10">
-            <h2 class="text-sm uppercase tracking-widest text-zinc-400">Or buy for a friend</h2>
-            <form method="POST" action="{{ route('orders.create', $event, false) }}" class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              @csrf
-              <div class="sm:col-span-1">
-                <label class="block text-xs text-zinc-400" for="friend_name">Friend's name</label>
-                <input id="friend_name" name="buyer_name" type="text" placeholder="Jane Doe" value="{{ old('buyer_name') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
-              </div>
-              <div class="sm:col-span-1">
-                <label class="block text-xs text-zinc-400" for="friend_email">Friend's email</label>
-                <input id="friend_email" name="buyer_email" type="email" placeholder="friend@example.com" value="{{ old('buyer_email') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
-              </div>
-              <div class="sm:col-span-1">
-                <label class="block text-xs text-zinc-400" for="friend_quantity">Quantity</label>
-                <input id="friend_quantity" name="quantity" type="number" min="1" step="1" value="{{ old('quantity', 1) }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
-              </div>
-              <div class="sm:col-span-1">
-                <label class="block text-xs text-zinc-400" for="friend_coupon">Coupon (optional)</label>
-                <input id="friend_coupon" name="coupon" type="text" value="{{ old('coupon') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
-              </div>
-              <input type="hidden" name="buyer_phone" value="{{ old('buyer_phone') }}" />
-              <div class="sm:col-span-2">
-                <button class="w-full inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-black font-semibold hover:bg-zinc-100 transition">Proceed to Paystack for friend</button>
-              </div>
-            </form>
-          </div>
+            @if(!($isFree))
+            <div class="mt-6 pt-4 border-t border-white/10">
+              <h2 class="text-sm uppercase tracking-widest text-zinc-400">Or buy for a friend</h2>
+              <form method="POST" action="{{ route('orders.create', $event, false) }}" class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                @csrf
+                <div class="sm:col-span-1">
+                  <label class="block text-xs text-zinc-400" for="friend_name">Friend's name</label>
+                  <input id="friend_name" name="buyer_name" type="text" placeholder="Jane Doe" value="{{ old('buyer_name') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
+                </div>
+                <div class="sm:col-span-1">
+                  <label class="block text-xs text-zinc-400" for="friend_email">Friend's email</label>
+                  <input id="friend_email" name="buyer_email" type="email" placeholder="friend@example.com" value="{{ old('buyer_email') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
+                </div>
+                <div class="sm:col-span-1">
+                  <label class="block text-xs text-zinc-400" for="friend_quantity">Quantity</label>
+                  <input id="friend_quantity" name="quantity" type="number" min="1" step="1" value="{{ old('quantity', 1) }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
+                </div>
+                <div class="sm:col-span-1">
+                  <label class="block text-xs text-zinc-400" for="friend_coupon">Coupon (optional)</label>
+                  <input id="friend_coupon" name="coupon" type="text" value="{{ old('coupon') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
+                </div>
+                <input type="hidden" name="buyer_phone" value="{{ old('buyer_phone') }}" />
+                <div class="sm:col-span-2">
+                  <button class="w-full inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-black font-semibold hover:bg-zinc-100 transition">Proceed to Paystack for friend</button>
+                </div>
+              </form>
+            </div>
+            @endif
           @else
           <div class="mt-6 p-3 bg-amber-500/10 text-amber-300 rounded ring-1 ring-amber-500/30">Ticket sales are closed for this event.</div>
           @endif
