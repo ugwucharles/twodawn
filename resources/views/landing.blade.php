@@ -261,60 +261,64 @@
             <div class="absolute inset-0" style="background-image:radial-gradient(80rem_40rem_at_-10%_-10%,rgba(59,130,246,0.15),transparent),radial-gradient(70rem_35rem_at_110%_110%,rgba(236,72,153,0.12),transparent),radial-gradient(60rem_30rem_at_50%_120%,rgba(16,185,129,0.10),transparent);"></div>
             <div class="absolute inset-0" style="background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');opacity:.06;mix-blend:overlay;"></div>
           </div>
-          <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
-            <!-- Left: offer list + headline -->
-            <div class="flex flex-col justify-between h-full min-h-[460px]">
-              <h3 class="mt-4 text-4xl sm:text-5xl font-extrabold">Get in touch with us!</h3>
-              <p class="mt-3 text-zinc-300">We’ll handle ticketing, payments, and check‑ins so you can focus on the vibe.</p>
-              <ul class="mt-6 space-y-2 text-sm text-zinc-300">
-                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Instant payouts with Paystack</li>
-                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>QR tickets & capacity protection</li>
-                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Analytics, coupons, exports</li>
-              </ul>
-              <div class="mt-auto pt-8 flex justify-start self-start">
-                <button type="submit" form="host-form-el" class="inline-flex items-center justify-center rounded-full text-white border border-white/70 hover:bg-white/10 text-base font-medium focus:outline-none focus:ring-0" style="padding:7px 15px; min-width:180px; text-align:center">Submit</button>
+            <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
+              <!-- Left: offer list + headline -->
+              <div class="flex flex-col justify-between h-full min-h-[460px]">
+                <h3 class="mt-4 text-4xl sm:text-5xl font-extrabold">Get in touch with us!</h3>
+                <p class="mt-3 text-zinc-300">We’ll handle ticketing, payments, and check‑ins so you can focus on the vibe.</p>
+                <ul class="mt-6 space-y-2 text-sm text-zinc-300">
+                  <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Instant payouts with Paystack</li>
+                  <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>QR tickets & capacity protection</li>
+                  <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Analytics, coupons, exports</li>
+                </ul>
+                <div class="mt-auto pt-8 hidden lg:flex justify-start self-start">
+                  <button type="submit" form="host-form-el" class="inline-flex items-center justify-center rounded-full text-white border border-white/70 hover:bg-white/10 text-base font-medium focus:outline-none focus:ring-0" style="padding:7px 15px; min-width:180px; text-align:center">Submit</button>
+                </div>
+              </div>
+
+              <!-- Right: dark inner card with minimal form -->
+              <div>
+                <div id="host-form" class="rounded-2xl bg-black ring-1 ring-white/10 p-6 sm:p-8 lg:p-10">
+                  <h4 class="text-xl font-semibold mb-6">Contact Us</h4>
+                  <form id="host-form-el" method="POST" action="{{ route('host.request.store') }}" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    @csrf
+                    <div>
+                      <label class="block text-xs uppercase tracking-widest text-zinc-400" for="name">Full name</label>
+                      <input id="name" name="name" type="text" required value="{{ old('name') }}" class="mt-2 block w-full bg-transparent border-0 border-b border-white/10 px-0 py-3 focus:border-white/30 focus:ring-0" />
+                    </div>
+                    <div>
+                      <label class="block text-xs uppercase tracking-widest text-zinc-400" for="email">Email</label>
+                      <input id="email" name="email" type="email" required value="{{ old('email') }}" class="mt-2 block w-full bg-transparent border-0 border-b border-white/10 px-0 py-3 focus:border-white/30 focus:ring-0" />
+                    </div>
+                    <div class="sm:col-span-2">
+                      <label class="block text-xs uppercase tracking-widest text-zinc-400" for="event_title">Event idea / title</label>
+                      <input id="event_title" name="event_title" type="text" required value="{{ old('event_title') }}" class="mt-2 block w-full bg-transparent border-0 border-b border-white/10 px-0 py-3 focus:border-white/30 focus:ring-0" />
+                    </div>
+                    <div class="sm:col-span-2">
+                      <label class="block text-xs uppercase tracking-widest text-zinc-400" for="message">Message (optional)</label>
+                      <textarea id="message" name="message" rows="4" class="mt-2 block w-full bg-transparent border-0 border-b border-white/10 px-0 py-3 focus:border-white/30 focus:ring-0">{{ old('message') }}</textarea>
+                    </div>
+                    <!-- Mobile submit button under the form -->
+                    <div class="sm:col-span-2 lg:hidden">
+                      <button type="submit" class="mt-2 inline-flex items-center justify-center w-full rounded-full text-white border border-white/70 hover:bg-white/10 text-base font-medium focus:outline-none focus:ring-0" style="padding:10px 18px; min-width:180px; text-align:center">Submit</button>
+                    </div>
+                  </form>
+
+                  @if (session('status'))
+                    <div class="mt-6 rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-300 px-3 py-2">{{ session('status') }}</div>
+                  @endif
+                  @if ($errors->any())
+                    <div class="mt-4 rounded-lg bg-red-500/10 ring-1 ring-red-500/20 text-red-300 px-3 py-2">
+                      <ul class="list-disc list-inside">
+                        @foreach ($errors->all() as $error)
+                          <li>{{ $error }}</li>
+                        @endforeach
+                      </ul>
+                    </div>
+                  @endif
+                </div>
               </div>
             </div>
-
-            <!-- Right: dark inner card with minimal form -->
-            <div>
-              <div id="host-form" class="rounded-2xl bg-black ring-1 ring-white/10 p-6 sm:p-8 lg:p-10">
-                <h4 class="text-xl font-semibold mb-6">Contact Us</h4>
-                <form id="host-form-el" method="POST" action="{{ route('host.request.store') }}" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  @csrf
-                  <div>
-                    <label class="block text-xs uppercase tracking-widest text-zinc-400" for="name">Full name</label>
-                    <input id="name" name="name" type="text" required value="{{ old('name') }}" class="mt-2 block w-full bg-transparent border-0 border-b border-white/10 px-0 py-3 focus:border-white/30 focus:ring-0" />
-                  </div>
-                  <div>
-                    <label class="block text-xs uppercase tracking-widest text-zinc-400" for="email">Email</label>
-                    <input id="email" name="email" type="email" required value="{{ old('email') }}" class="mt-2 block w-full bg-transparent border-0 border-b border-white/10 px-0 py-3 focus:border-white/30 focus:ring-0" />
-                  </div>
-                  <div class="sm:col-span-2">
-                    <label class="block text-xs uppercase tracking-widest text-zinc-400" for="event_title">Event idea / title</label>
-                    <input id="event_title" name="event_title" type="text" required value="{{ old('event_title') }}" class="mt-2 block w-full bg-transparent border-0 border-b border-white/10 px-0 py-3 focus:border-white/30 focus:ring-0" />
-                  </div>
-                  <div class="sm:col-span-2">
-                    <label class="block text-xs uppercase tracking-widest text-zinc-400" for="message">Message (optional)</label>
-                    <textarea id="message" name="message" rows="4" class="mt-2 block w-full bg-transparent border-0 border-b border-white/10 px-0 py-3 focus:border-white/30 focus:ring-0">{{ old('message') }}</textarea>
-                  </div>
-                </form>
-
-                @if (session('status'))
-                  <div class="mt-6 rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-300 px-3 py-2">{{ session('status') }}</div>
-                @endif
-                @if ($errors->any())
-                  <div class="mt-4 rounded-lg bg-red-500/10 ring-1 ring-red-500/20 text-red-300 px-3 py-2">
-                    <ul class="list-disc list-inside">
-                      @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                      @endforeach
-                    </ul>
-                  </div>
-                @endif
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
