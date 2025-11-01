@@ -6,132 +6,82 @@
 
 @section('content')
 <section id="page-content" class="py-8 sm:py-10">
-  <style>
-    @media (min-width: 1024px){ /* desktop only */
-      #host-desktop-sidebar{ display:block !important; position:fixed; left:16px; top:1rem; bottom:1.5rem; width:16rem; z-index:40; }
-      .host-desktop-content{ margin-left: 18rem !important; margin-right: 1.5rem !important; }
-    }
-  </style>
-  <div class="max-w-6xl mx-auto px-6 host-desktop-content">
-    <div class="flex items-start justify-between gap-6 mb-6">
-      <div class="flex items-center gap-3">
-<button id="host-menu-btn" class="md:hidden inline-flex items-center justify-center w-10 h-10 text-white">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-        </button>
-        <div>
-          <h1 class="text-2xl font-extrabold">{{ $event->title }} — Host Panel</h1>
-          <div class="text-zinc-400 text-sm mt-1">Token: {{ $host->label ?? 'Link' }} • Expires {{ optional($host->expires_at)->diffForHumans() }}</div>
-        </div>
-      </div>
+  <div class="max-w-6xl mx-auto px-6">
+    <!-- Header -->
+    <div class="flex items-start justify-between gap-4 flex-wrap">
       <div>
-        <form method="GET" class="flex items-center gap-2 flex-wrap">
+        <h1 class="text-2xl font-extrabold">{{ $event->title }} — Host Panel</h1>
+        <div class="text-zinc-400 text-sm mt-1">{{ $host->label ? ('Token: '.$host->label.' • ') : '' }}Expires {{ optional($host->expires_at)->diffForHumans() }}</div>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <form method="GET" class="flex items-center gap-2">
           <input type="date" name="from" value="{{ request('from') }}" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm" />
           <input type="date" name="to" value="{{ request('to') }}" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm" />
-<button formaction="{{ route('host.sales.export', $host->token) }}" class="inline-flex items-center px-4 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Export sales</button>
-          <button formaction="{{ route('host.sales.exportDaily', $host->token) }}" class="inline-flex items-center px-4 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Export daily sales</button>
-          <button formaction="{{ route('host.people.export', $host->token) }}" class="inline-flex items-center px-4 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Export check-ins</button>
+          <button formaction="{{ route('host.sales.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Export sales</button>
+          <button formaction="{{ route('host.sales.exportDaily', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Daily sales</button>
+          <button formaction="{{ route('host.people.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Check-ins CSV</button>
         </form>
+        <a href="{{ route('host.people', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">View people</a>
+        <button type="button" data-copy-link class="inline-flex items-center px-3 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Copy link</button>
       </div>
     </div>
 
-    <!-- Desktop fixed left sidebar -->
-    <aside id="host-desktop-sidebar" class="hidden">
-      <div class="h-full rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 overflow-auto">
-        <div class="text-xs text-zinc-400 mb-2">Menu</div>
-        <div class="grid grid-cols-3 gap-3 text-center mb-3">
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-2"><div class="text-[11px] text-zinc-400">Sold</div><div class="text-xl font-bold">{{ $sold }}</div></div>
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-2"><div class="text-[11px] text-zinc-400">Checked</div><div class="text-xl font-bold menu-checked">{{ $checked }}</div></div>
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-2"><div class="text-[11px] text-zinc-400">Remain</div><div class="text-xl font-bold menu-remaining">{{ $remaining }}</div></div>
+    <!-- Stats -->
+    <div class="mt-6 grid grid-cols-3 gap-3 sm:gap-4">
+      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+        <div class="text-xs text-zinc-400">Sold</div>
+        <div class="mt-1 text-2xl font-bold">{{ $sold }}</div>
+      </div>
+      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+        <div class="text-xs text-zinc-400">Checked in</div>
+        <div class="mt-1 text-2xl font-bold"><span id="stat-checked" class="menu-checked">{{ $checked }}</span></div>
+      </div>
+      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+        <div class="text-xs text-zinc-400">Remaining</div>
+        <div class="mt-1 text-2xl font-bold"><span id="stat-remaining" class="menu-remaining">{{ $remaining }}</span></div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="mt-6 grid lg:grid-cols-2 gap-6 items-start">
+      <!-- Scanner -->
+      <div id="scan" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-sm text-zinc-300">Camera scanner</div>
+          <div class="text-xs text-zinc-400">Auto-start</div>
         </div>
-        <nav class="grid gap-2 text-sm">
-          <a href="#scan" data-goto="#scan" class="rounded px-3 py-2 hover:bg-white/5">Scan</a>
-          <a href="{{ route('host.people', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5">Scanned people</a>
-          <button data-copy-link class="text-left rounded px-3 py-2 hover:bg-white/5">Copy my link</button>
-        </nav>
-      </div>
-    </aside>
-
-    <!-- Mobile side menu -->
-    <div id="host-menu-overlay" class="hidden fixed inset-0 bg-black/50 z-50"></div>
-    <aside id="host-menu" class="hidden fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-zinc-950/95 ring-1 ring-white/10 z-50 p-6">
-      <div class="flex items-center justify-between mb-4">
-        <div class="font-semibold">Host Panel</div>
-        <button id="host-menu-close" class="text-zinc-400 hover:text-white">Close</button>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center mb-4">
-        <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3"><div class="text-xs text-zinc-400">Sold</div><div class="text-2xl font-bold">{{ $sold }}</div></div>
-        <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3"><div class="text-xs text-zinc-400">Checked</div><div class="text-2xl font-bold menu-checked">{{ $checked }}</div></div>
-        <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-3"><div class="text-xs text-zinc-400">Remaining</div><div class="text-2xl font-bold menu-remaining">{{ $remaining }}</div></div>
-      </div>
-      <nav class="grid gap-2 text-sm">
-        <a href="#scan" data-goto="#scan" class="rounded px-3 py-2 hover:bg-white/5">Scan</a>
-        <a href="#manual" data-goto="#manual" class="rounded px-3 py-2 hover:bg-white/5">Manual entry</a>
-        <a href="#recent-card" data-goto="#recent-card" class="rounded px-3 py-2 hover:bg-white/5">Recent scans</a>
-        <a href="{{ route('host.people', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5">Scanned people</a>
-        <button data-copy-link class="text-left rounded px-3 py-2 hover:bg-white/5">Copy my link</button>
-      </nav>
-    </aside>
-
-
-    <div class="md:flex md:gap-6">
-      <!-- Desktop sidebar -->
-      <aside class="hidden md:block w-64 shrink-0 md:sticky md:top-24">
-        <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
-          <div class="text-xs text-zinc-400 mb-2">Menu</div>
-          <div class="grid grid-cols-3 gap-3 text-center mb-3">
-            <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-2"><div class="text-[11px] text-zinc-400">Sold</div><div class="text-xl font-bold">{{ $sold }}</div></div>
-            <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-2"><div class="text-[11px] text-zinc-400">Checked</div><div class="text-xl font-bold menu-checked">{{ $checked }}</div></div>
-            <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-2"><div class="text-[11px] text-zinc-400">Remain</div><div class="text-xl font-bold menu-remaining">{{ $remaining }}</div></div>
-          </div>
-          <nav class="grid gap-2 text-sm">
-            <a href="#scan" data-goto="#scan" class="rounded px-3 py-2 hover:bg-white/5">Scan</a>
-            <a href="{{ route('host.people', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5">Scanned people</a>
-            <button data-copy-link class="text-left rounded px-3 py-2 hover:bg-white/5">Copy my link</button>
-          </nav>
+        <div id="qr-reader" class="rounded-xl overflow-hidden bg-black relative" style="width:100%; height:60vh; max-height:480px; min-height:280px">
+          <div id="scan-error" class="absolute inset-0 hidden items-center justify-center text-center text-sm text-red-300 px-4"></div>
         </div>
-      </aside>
+        <div class="mt-3 text-xs text-zinc-400">Tip: Allow camera permissions and use the rear camera on mobile.</div>
+      </div>
 
-      <!-- Main content -->
-      <div class="flex-1">
-        <div class="grid lg:grid-cols-2 gap-6 items-start">
-          <div id="scan" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
-            <div class="flex items-center justify-between mb-3">
-              <div class="text-sm text-zinc-300">Camera scan</div>
-              <div class="text-xs text-zinc-400">Auto-start</div>
-            </div>
-            <div id="qr-reader" class="rounded-xl overflow-hidden bg-black relative" style="width:100%; height:60vh; max-height:480px; min-height:280px">
-              <div id="scan-error" class="absolute inset-0 hidden items-center justify-center text-center text-sm text-red-300 px-4"></div>
-            </div>
-            <div class="mt-3 text-xs text-zinc-400">Grant camera permission; on mobile use the rear camera.</div>
+      <!-- Manual + Recent -->
+      <div class="space-y-6">
+        <div id="manual" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+          <div class="text-sm text-zinc-300 mb-2">Enter code manually</div>
+          <form class="flex gap-2" onsubmit="return false;">
+            <input id="manual-code" type="text" placeholder="Order reference (PA_...)" class="flex-1 rounded-md bg-black/30 border border-white/10 px-3 py-2 focus:border-white/30 focus:ring-0" />
+            <button id="manual-submit" class="rounded-md px-4 py-2 bg-white text-black text-sm hover:bg-zinc-100">Verify</button>
+          </form>
+          <div id="result" class="mt-4 hidden">
+            <div id="status-badge" class="inline-flex items-center px-2 py-1 rounded text-xs"></div>
+            <div class="mt-2 text-sm" id="result-text"></div>
           </div>
-
-          <!-- manual entry section kept -->
-          <div id="manual" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 lg:col-start-1">
-            <div class="text-sm text-zinc-300 mb-2">Enter code manually</div>
-            <form class="flex gap-2" onsubmit="return false;">
-              <input id="manual-code" type="text" placeholder="Order ref (PA_...)" class="flex-1 rounded-md bg-black/30 border border-white/10 px-3 py-2 focus:border-white/30 focus:ring-0" />
-              <button id="manual-submit" class="rounded-md px-4 py-2 bg-white text-black text-sm hover:bg-zinc-100">Verify</button>
-            </form>
-            <div id="result" class="mt-4 hidden">
-              <div id="status-badge" class="inline-flex items-center px-2 py-1 rounded text-xs"></div>
-              <div class="mt-2 text-sm" id="result-text"></div>
-            </div>
+        </div>
+        <div id="recent-card" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-sm text-zinc-300">Recent scans</div>
+            <button id="clear-recent" class="text-xs text-zinc-400 hover:text-white">Clear</button>
           </div>
-
-          <!-- Recent scans -->
-          <div id="recent-card" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 lg:col-start-2">
-            <div class="flex items-center justify-between mb-2">
-              <div class="text-sm text-zinc-300">Recent scans</div>
-              <button id="clear-recent" class="text-xs text-zinc-400 hover:text-white">Clear</button>
-            </div>
-            <ul id="recent" class="mt-1 text-sm text-zinc-300 space-y-1"></ul>
-            <div class="mt-2 text-xs text-zinc-500">Latest results on this device only.</div>
-          </div>
+          <ul id="recent" class="mt-1 text-sm text-zinc-300 space-y-1"></ul>
+          <div class="mt-2 text-xs text-zinc-500">Latest results on this device only.</div>
         </div>
       </div>
     </div>
   </div>
-  <!-- Scan result modal -->
+
+  <!-- Result modal -->
   <div id="scan-modal" class="fixed inset-0 z-50 hidden">
     <style>
       @keyframes bounceIn { 0%{transform:scale(.92);opacity:.0} 60%{transform:scale(1.04);opacity:1} 100%{transform:scale(1)} }
@@ -270,8 +220,8 @@ if (!res.ok){ setBadge('err', data?.message || 'Link expired or invalid'); openS
     if (!data.valid){ const kind = data.already?'warn':'err'; setBadge(kind, data.already?`Already checked in • ${data.event?.title} • ${data.buyer?.name}`:'Invalid ticket'); openScanModal(kind,{ title: data.already? 'Already checked in' : 'Invalid ticket', sub: `${data.buyer?.name || ''} • ${data.event?.title || ''}`, last: data.last_checkin_at }); addRecent(kind, data.already?`Already • ${data.buyer?.name || ''}`:'Invalid'); notify(kind); return; }
     setBadge('ok', `Valid • ${data.event?.title} • ${data.buyer?.name}`); openScanModal('ok',{ title:'Valid ticket', sub:`${data.buyer?.name} • ${data.event?.title}`, remaining: data.remaining, last: data.last_checkin_at }); notify('ok');
     const rem = parseInt(data.remaining || 0,10);
-    statChecked.textContent = String(parseInt(statChecked.textContent||'0',10) + 1);
-    statRemaining.textContent = String(rem >= 0 ? rem : 0);
+    if (statChecked) statChecked.textContent = String(parseInt((statChecked.textContent||'0').replace(/\D/g,''),10) + 1);
+    if (statRemaining) statRemaining.textContent = String(rem >= 0 ? rem : 0);
     document.querySelectorAll('.menu-checked').forEach(el => { try { el.textContent = String(parseInt(el.textContent||'0',10) + 1); } catch(_) { el.textContent = '—'; } });
     document.querySelectorAll('.menu-remaining').forEach(el => { el.textContent = String(rem >= 0 ? rem : 0); });
     addRecent('ok', `OK • ${data.buyer?.name}`);
@@ -311,14 +261,14 @@ async function startScanner(){
       const devices = await Html5Qrcode.getCameras();
       if (devices && devices.length) {
         let id = devices.find(d=>/back|rear|environment/i.test(d.label||''))?.id || (devices[0].id);
-    const r = box.getBoundingClientRect(); const size = Math.round(Math.min(r.width, (r.height||r.width)) * 0.8);
-    await scanner.start(
-      id,
-      { fps: 10, qrbox: Math.max(180, Math.min(320, size)) }, // responsive box
+        const r = box.getBoundingClientRect(); const size = Math.round(Math.min(r.width, (r.height||r.width)) * 0.8);
+        await scanner.start(
+          id,
+          { fps: 10, qrbox: Math.max(180, Math.min(320, size)) },
           (txt)=>{ verify(txt,'camera'); },
           ()=>{}
         );
-        return; // success
+        return;
       }
     }
   } catch (_) { /* fall back below */ }
@@ -335,7 +285,7 @@ async function startScanner(){
       let last='';
       const tick=async()=>{ try{ const codes=await det.detect(v); if(codes&&codes.length){ const t=codes[0].rawValue; if(t && t!==last){ last=t; verify(t,'camera'); setTimeout(()=>last='',1200); } } }catch{} requestAnimationFrame(tick); };
       requestAnimationFrame(tick);
-      return; // success
+      return;
     }
   }catch{}
 
@@ -365,32 +315,20 @@ async function startScanner(){
   if (errBox){ errBox.textContent = 'Camera unavailable. Allow permission or try another device.'; errBox.classList.remove('hidden'); errBox.classList.add('flex'); }
 }
 
-// (No demo rows for manual code card as requested)
-
-// Mobile menu controls
-const menu = document.getElementById('host-menu');
-const overlay = document.getElementById('host-menu-overlay');
-const openBtn = document.getElementById('host-menu-btn');
-const closeBtn = document.getElementById('host-menu-close');
-function openMenu(){ menu.classList.remove('hidden'); overlay.classList.remove('hidden'); document.body.style.overflow='hidden'; }
-function closeMenu(){ menu.classList.add('hidden'); overlay.classList.add('hidden'); document.body.style.overflow=''; }
-openBtn?.addEventListener('click', openMenu); closeBtn?.addEventListener('click', closeMenu); overlay?.addEventListener('click', closeMenu);
-window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeMenu(); });
-Array.from(document.querySelectorAll('[data-goto]')).forEach(a=>{
-  a.addEventListener('click', (e)=>{ e.preventDefault(); const id=a.getAttribute('data-goto'); const el=document.querySelector(id); if(el){ el.scrollIntoView({behavior:'smooth', block:'start'}); } closeMenu(); });
-});
-
-document.querySelectorAll('[data-copy-link]')?.forEach(el=>{
-  el.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(location.href); alert('Link copied'); } catch{ alert(location.href); } });
-});
-
+// Start scanner immediately
 startScanner();
 
-// Clear buttons
+// Clear recent
  document.getElementById('clear-recent')?.addEventListener('click', ()=>{ recent.innerHTML=''; });
 
-document.getElementById('manual-submit').addEventListener('click', ()=>{
+// Manual verify
+ document.getElementById('manual-submit').addEventListener('click', ()=>{
   const v = document.getElementById('manual-code').value.trim(); if(v) verify(v,'manual');
+});
+
+// Copy link
+Array.from(document.querySelectorAll('[data-copy-link]')).forEach(el=>{
+  el.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(location.href); alert('Link copied'); } catch{ alert(location.href); } });
 });
 </script>
 @endsection
