@@ -92,4 +92,16 @@ class ChatController extends Controller
             });
         return response()->json(['ok' => true, 'closed' => (bool) $conv->closed_at, 'messages' => $items]);
     }
+
+    public function update(Request $request, string $token)
+    {
+        $conv = Conversation::where('token', $token)->firstOrFail();
+        $data = $request->validate([
+            'name' => ['nullable','string','max:120'],
+            'email' => ['nullable','email','max:255'],
+        ]);
+        $conv->fill($data);
+        $conv->save();
+        return response()->json(['ok' => true]);
+    }
 }

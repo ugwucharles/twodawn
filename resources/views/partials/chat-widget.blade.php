@@ -23,8 +23,18 @@
       </button>
     </div>
 
+    <!-- Pre-chat form (collect name/email) -->
+    <div x-cloak x-show="!token" class="px-3 pt-3 pb-2 border-b border-white/10">
+      <div class="text-xs text-zinc-400 mb-1">Tell us how to reach you</div>
+      <form @submit.prevent="startWithIdentity()" class="space-y-2">
+        <input x-model="name" x-ref="name" type="text" autocomplete="name" placeholder="Full name" class="block w-full bg-transparent border-0 ring-1 ring-white/10 rounded-lg px-3 py-2 text-sm focus:ring-white/20 focus:outline-none" />
+        <input x-model="email" type="email" autocomplete="email" placeholder="Email" class="block w-full bg-transparent border-0 ring-1 ring-white/10 rounded-lg px-3 py-2 text-sm focus:ring-white/20 focus:outline-none" />
+        <button type="submit" :disabled="sending || !hasIdentity()" class="w-full inline-flex items-center justify-center px-3 py-2 rounded-lg bg-blue-600 text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed">Start chat</button>
+      </form>
+    </div>
+
     <!-- Messages -->
-    <div class="h-72 overflow-y-auto no-scrollbar px-3 py-3 space-y-3" x-ref="list">
+    <div x-cloak x-show="token" class="h-72 overflow-y-auto no-scrollbar px-3 py-3 space-y-3" x-ref="list">
       <template x-for="m in msgs" :key="m.id">
         <div class="flex items-end" :class="m.sender==='admin' ? 'justify-start' : 'justify-end'">
           <div class="flex items-end gap-2 max-w-[85%]" :class="m.sender==='admin' ? '' : 'flex-row-reverse'">
@@ -46,14 +56,14 @@
     </div>
 
     <!-- Composer -->
-    <form @submit.prevent="send()" class="p-3 border-t border-white/10">
+    <form x-cloak x-show="token" @submit.prevent="send()" class="p-3 border-t border-white/10">
       <div class="flex items-center bg-zinc-900/60 ring-1 ring-white/10 rounded-full px-2">
-        <input x-model="body" x-ref="input" :disabled="closed" type="text" autocomplete="off" aria-label="Message" :placeholder="closed ? 'Chat closed' : 'Aa'" class="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 px-3 py-2 text-sm placeholder:text-zinc-500">
+        <input x-model="body" x-ref="input" :disabled="closed || !token" type="text" autocomplete="off" aria-label="Message" :placeholder="!token ? 'Enter your name and email to start' : (closed ? 'Chat closed' : 'Aa')" class="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 px-3 py-2 text-sm placeholder:text-zinc-500">
         <input x-ref="file" type="file" accept="image/*" class="hidden" @change="if($event.target.files[0]) sendImage($event.target.files[0]); $event.target.value=''">
-        <button type="button" @click="$refs.file.click()" :disabled="closed || sending" class="p-2 rounded-full text-zinc-300 hover:text-white disabled:opacity-50" aria-label="Attach image">
+        <button type="button" @click="$refs.file.click()" :disabled="closed || sending || !token" class="p-2 rounded-full text-zinc-300 hover:text-white disabled:opacity-50" aria-label="Attach image">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5"><path d="M7 7a5 5 0 015-5h0a5 5 0 015 5v8a7 7 0 11-14 0V9a3 3 0 116 0v6a1 1 0 11-2 0V9a1 1 0 112 0v6a3 3 0 106 0V7a3 3 0 10-6 0v8"/></svg>
         </button>
-        <button type="submit" :disabled="closed || sending || !body.trim()" class="ml-1 p-2 rounded-full bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-500 transition-colors" aria-label="Send">
+        <button type="submit" :disabled="closed || sending || !body.trim() || !token" class="ml-1 p-2 rounded-full bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-500 transition-colors" aria-label="Send">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
       </div>

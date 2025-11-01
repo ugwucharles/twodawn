@@ -61,6 +61,7 @@ Route::get('/events', [EventPublicController::class, 'index'])->name('events.ind
 
 // Native chat (public)
 Route::post('/chat/start', [ChatController::class, 'start'])->name('chat.start')->middleware('throttle:6,1');
+Route::patch('/chat/{token}', [ChatController::class, 'update'])->name('chat.update')->middleware('throttle:6,1');
 Route::get('/chat/{token}/messages', [ChatController::class, 'messages'])->name('chat.messages');
 Route::post('/chat/{token}/messages', [ChatController::class, 'postMessage'])->name('chat.messages.post')->middleware('throttle:12,1');
 Route::get('/discover', [EventPublicController::class, 'index'])->name('events.discover');
