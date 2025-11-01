@@ -44,39 +44,45 @@
 
     <!-- Main -->
     <div class="mt-6 grid lg:grid-cols-2 gap-6 items-start">
-      <!-- Scanner -->
-      <div id="scan" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+      <!-- Scanner (full width) -->
+      <div id="scan" class="lg:col-span-2 rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
         <div class="flex items-center justify-between mb-3">
           <div class="text-sm text-zinc-300">Camera scanner</div>
           <div class="text-xs text-zinc-400">Auto-start</div>
         </div>
-        <div id="qr-reader" class="rounded-xl overflow-hidden bg-black relative" style="width:100%; height:60vh; max-height:480px; min-height:280px">
+        <div id="qr-reader" class="rounded-xl overflow-hidden bg-black relative" style="width:100%; height:60vh; max-height:520px; min-height:300px">
           <div id="scan-error" class="absolute inset-0 hidden items-center justify-center text-center text-sm text-red-300 px-4"></div>
         </div>
-        <div class="mt-3 text-xs text-zinc-400">Tip: Allow camera permissions and use the rear camera on mobile.</div>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button id="btn-switch" class="px-3 py-1.5 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Switch camera</button>
+          <button id="btn-pause" class="px-3 py-1.5 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Pause</button>
+          <button id="btn-resume" class="hidden px-3 py-1.5 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Resume</button>
+          <button id="btn-copy" class="px-3 py-1.5 rounded-md bg-white text-black text-sm hover:bg-zinc-100" data-copy-link>Copy link</button>
+        </div>
+        <div class="mt-2 text-xs text-zinc-400">Tips: Use the rear camera • Hold steady • Clean lens for faster scans.</div>
       </div>
 
-      <!-- Manual + Recent -->
-      <div class="space-y-6">
-        <div id="manual" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
-          <div class="text-sm text-zinc-300 mb-2">Enter code manually</div>
-          <form class="flex gap-2" onsubmit="return false;">
-            <input id="manual-code" type="text" placeholder="Order reference (PA_...)" class="flex-1 rounded-md bg-black/30 border border-white/10 px-3 py-2 focus:border-white/30 focus:ring-0" />
-            <button id="manual-submit" class="rounded-md px-4 py-2 bg-white text-black text-sm hover:bg-zinc-100">Verify</button>
-          </form>
-          <div id="result" class="mt-4 hidden">
-            <div id="status-badge" class="inline-flex items-center px-2 py-1 rounded text-xs"></div>
-            <div class="mt-2 text-sm" id="result-text"></div>
-          </div>
+      <!-- Manual entry -->
+      <div id="manual" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+        <div class="text-sm text-zinc-300 mb-2">Enter code manually</div>
+        <form class="flex gap-2" onsubmit="return false;">
+          <input id="manual-code" type="text" placeholder="Order reference (PA_...)" class="flex-1 rounded-md bg-black/30 border border-white/10 px-3 py-2 focus:border-white/30 focus:ring-0" />
+          <button id="manual-submit" class="rounded-md px-4 py-2 bg-white text-black text-sm hover:bg-zinc-100">Verify</button>
+        </form>
+        <div id="result" class="mt-4 hidden">
+          <div id="status-badge" class="inline-flex items-center px-2 py-1 rounded text-xs"></div>
+          <div class="mt-2 text-sm" id="result-text"></div>
         </div>
-        <div id="recent-card" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
-          <div class="flex items-center justify-between mb-2">
-            <div class="text-sm text-zinc-300">Recent scans</div>
-            <button id="clear-recent" class="text-xs text-zinc-400 hover:text-white">Clear</button>
-          </div>
-          <ul id="recent" class="mt-1 text-sm text-zinc-300 space-y-1"></ul>
-          <div class="mt-2 text-xs text-zinc-500">Latest results on this device only.</div>
+      </div>
+
+      <!-- Recent scans -->
+      <div id="recent-card" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-sm text-zinc-300">Recent scans</div>
+          <button id="clear-recent" class="text-xs text-zinc-400 hover:text-white">Clear</button>
         </div>
+        <ul id="recent" class="mt-1 text-sm text-zinc-300 space-y-1"></ul>
+        <div class="mt-2 text-xs text-zinc-500">Latest results on this device only.</div>
       </div>
     </div>
   </div>
@@ -110,6 +116,12 @@ const verifyUrl = @json(url('/h/'.$host->token.'/verify'));
 const statChecked = document.getElementById('stat-checked');
 const statRemaining = document.getElementById('stat-remaining');
 const recent = document.getElementById('recent');
+
+// Scanner control refs
+let scannerRef = null;
+let cameraDevices = [];
+let cameraIndex = 0;
+let scanningPaused = false;
 
 function clearDemo(){ recent.querySelectorAll('[data-demo]')?.forEach(el=>el.remove()); }
 function addRecent(kind, text){
@@ -253,21 +265,40 @@ async function startScanner(){
   const box = document.getElementById('qr-reader');
   const errBox = document.getElementById('scan-error');
 
+  async function startWithDevice(deviceId){
+    const r = box.getBoundingClientRect();
+    const size = Math.round(Math.min(r.width, (r.height||r.width)) * 0.8);
+    await scannerRef.start(
+      deviceId,
+      { fps: 10, qrbox: Math.max(180, Math.min(340, size)) },
+      (txt)=>{ verify(txt,'camera'); },
+      ()=>{}
+    );
+  }
+
   // Prefer the same library as Admin: html5-qrcode
   try {
     const ok = await ensureHtml5Qrcode();
     if (ok && window.Html5Qrcode) {
-      const scanner = new Html5Qrcode('qr-reader');
-      const devices = await Html5Qrcode.getCameras();
-      if (devices && devices.length) {
-        let id = devices.find(d=>/back|rear|environment/i.test(d.label||''))?.id || (devices[0].id);
-        const r = box.getBoundingClientRect(); const size = Math.round(Math.min(r.width, (r.height||r.width)) * 0.8);
-        await scanner.start(
-          id,
-          { fps: 10, qrbox: Math.max(180, Math.min(320, size)) },
-          (txt)=>{ verify(txt,'camera'); },
-          ()=>{}
-        );
+      scannerRef = new Html5Qrcode('qr-reader');
+      cameraDevices = await Html5Qrcode.getCameras();
+      if (cameraDevices && cameraDevices.length) {
+        cameraIndex = Math.max(0, cameraDevices.findIndex(d=>/back|rear|environment/i.test(d.label||'')));
+        if (cameraIndex < 0) cameraIndex = 0;
+        await startWithDevice(cameraDevices[cameraIndex].id);
+        // Wire toolbar buttons
+        document.getElementById('btn-switch')?.addEventListener('click', async ()=>{
+          try{
+            if (!cameraDevices.length) return;
+            cameraIndex = (cameraIndex + 1) % cameraDevices.length;
+            await scannerRef.stop().catch(()=>{});
+            await startWithDevice(cameraDevices[cameraIndex].id);
+          }catch(_){/* ignore */}
+        });
+        const btnPause = document.getElementById('btn-pause');
+        const btnResume = document.getElementById('btn-resume');
+        btnPause?.addEventListener('click', ()=>{ try { scannerRef.pause(true); scanningPaused=true; btnPause.classList.add('hidden'); btnResume.classList.remove('hidden'); } catch(_){}});
+        btnResume?.addEventListener('click', ()=>{ try { scannerRef.resume(); scanningPaused=false; btnResume.classList.add('hidden'); btnPause.classList.remove('hidden'); } catch(_){}});
         return;
       }
     }
