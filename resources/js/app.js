@@ -53,11 +53,8 @@ window.chatWidget = function () {
       this.open = !this.open;
       if (this.open) {
         if (!this.token) {
-          if (this.hasIdentity()) {
-            this.startWithIdentity();
-          } else {
-            this.$nextTick(() => { try { this.$refs.name && this.$refs.name.focus(); } catch (_) {} });
-          }
+          // Always show pre-chat form first; user must click "Start chat" to proceed
+          this.$nextTick(() => { try { (this.name? this.$refs.email : this.$refs.name)?.focus(); } catch (_) {} });
         } else {
           this.$nextTick(() => { this.scroll(); try { this.$refs.input && this.$refs.input.focus(); } catch (_) {} });
         }
