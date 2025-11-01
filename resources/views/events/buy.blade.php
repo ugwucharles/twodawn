@@ -38,11 +38,12 @@
           $isEarly = true;
         }
       @endphp
+      @php $unitPriceStr = number_format($unitPrice ?? 0, 2, '.', ''); @endphp
 
       <form method="POST" action="{{ route('orders.create', $event, false) }}" class="space-y-4 rounded-2xl bg-white/5 ring-1 ring-white/10 p-6" id="payment-form">
         @csrf
         <!-- Security token to prevent double submissions -->
-        <input type="hidden" name="submission_token" value="{{ Str::random(32) }}" id="submission-token">
+        <input type="hidden" name="submission_token" value="{{ \Illuminate\Support\Str::random(32) }}" id="submission-token">
         <div>
           <label class="block text-sm text-zinc-300" for="buyer_name">Full name</label>
           <input id="buyer_name" name="buyer_name" type="text" required value="{{ old('buyer_name') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
@@ -99,7 +100,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const UNIT_PRICE = parseFloat(@json(number_format($unitPrice, 2, '.', '')));
+    const UNIT_PRICE = parseFloat(@json($unitPriceStr));
     const FEES_ON = (UNIT_PRICE > 0) && @json((bool) $event->pass_fees_to_buyer);
     const FEE_PER_TICKET_K = FEES_ON ? (Math.round(UNIT_PRICE * 0.05 * 100) + 5000) : 0; // 5% + ₦50
     const QUOTE_URL = UNIT_PRICE > 0 ? @json(route('orders.quote', $event)) : null;
