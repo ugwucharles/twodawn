@@ -61,8 +61,8 @@ class HostPanelController extends Controller
     public function exportCheckins(string $token): StreamedResponse
     {
         $host = \App\Models\HostToken::with('event')->where('token', $token)->firstOrFail();
-        $from = request()->date('from');
-        $to = request()->date('to');
+        $from = request()->date('from') ?: now()->subMonth();
+        $to = request()->date('to') ?: now();
         if (! $host->active || ($host->expires_at && now()->gt($host->expires_at))) {
             abort(410, 'This link has expired.');
         }
