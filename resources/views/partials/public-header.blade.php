@@ -48,9 +48,9 @@
     </div>
     @if (request()->routeIs('host.*'))
       <nav class="mt-6 grid gap-2 text-sm text-zinc-200">
-        <a href="#scan" class="rounded px-3 py-2 hover:bg-white/5" @click.prevent="open=false; setTimeout(()=>{ const el=document.getElementById('scan'); if(el){ const y=el.getBoundingClientRect().top + window.scrollY - 70; window.scrollTo({top:y, behavior:'smooth'}); } }, 50);">Scanner</a>
-        <a href="#manual" class="rounded px-3 py-2 hover:bg-white/5" @click.prevent="open=false; setTimeout(()=>{ const el=document.getElementById('manual'); if(el){ const y=el.getBoundingClientRect().top + window.scrollY - 70; window.scrollTo({top:y, behavior:'smooth'}); } }, 50);">Manual entry</a>
-        <a href="#recent-card" class="rounded px-3 py-2 hover:bg-white/5" @click.prevent="open=false; setTimeout(()=>{ const el=document.getElementById('recent-card'); if(el){ const y=el.getBoundingClientRect().top + window.scrollY - 70; window.scrollTo({top:y, behavior:'smooth'}); } }, 50);">Recent scans</a>
+        <a href="{{ route('host.panel', $host->token) }}#scan" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Scanner</a>
+        <a href="{{ route('host.panel', $host->token) }}#manual" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Manual entry</a>
+        <a href="{{ route('host.panel', $host->token) }}#recent-card" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Recent scans</a>
         @if(isset($host))
           <a href="{{ route('host.people', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">People</a>
           <a href="{{ route('host.sales.export', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Export sales</a>
