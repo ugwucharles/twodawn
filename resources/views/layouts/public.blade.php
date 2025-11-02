@@ -138,7 +138,7 @@
       @include('partials.public-header')
     @endunless
     @php
-      $mainTop = request()->routeIs('home') ? '' : (request()->routeIs('host.*') ? 'pt-3 sm:pt-4' : 'pt-20 sm:pt-24');
+      $mainTop = request()->routeIs('home') ? '' : (request()->routeIs('host.*') ? 'pt-2' : 'pt-20 sm:pt-24');
     @endphp
     <main class="flex-1 {{ $mainTop }}">
       @yield('content')
