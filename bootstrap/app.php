@@ -12,20 +12,20 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'admin' => \\App\\Http\\Middleware\\AdminMiddleware::class,
-            'security.headers' => \\App\\Http\\Middleware\\SecurityHeaders::class,
-            'tenant' => \\App\\Http\\Middleware\\TenantMiddleware::class,
-            'daily' => \\App\\Http\\Middleware\\DailyTasks::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'security.headers' => \App\Http\Middleware\SecurityHeaders::class,
+            'tenant' => \App\Http\Middleware\TenantMiddleware::class,
+            'daily' => \App\Http\Middleware\DailyTasks::class,
         ]);
         
         // Apply security headers globally and swap CSRF for custom exclusions
         $middleware->web(
 remove: [\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class],
             append: [
-                \\App\\Http\\Middleware\\VerifyCsrfToken::class,
-                \\App\\Http\\Middleware\\TenantMiddleware::class,
-                \\App\\Http\\Middleware\\SecurityHeaders::class,
-                \\App\\Http\\Middleware\\DailyTasks::class,
+                \App\Http\Middleware\VerifyCsrfToken::class,
+                \App\Http\Middleware\TenantMiddleware::class,
+                \App\Http\Middleware\SecurityHeaders::class,
+                \App\Http\Middleware\DailyTasks::class,
             ]
         );
     })
