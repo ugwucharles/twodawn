@@ -1,4 +1,4 @@
-<header class="absolute inset-x-0 top-3 z-50" x-data="{ open:false }" x-init="window.addEventListener('pageshow', () => open = false); window.addEventListener('popstate', () => open = false);" @keydown.window.escape="open=false">
+<header class="{{ request()->routeIs('host.*') ? 'relative mt-3 z-50' : 'absolute inset-x-0 top-3 z-50' }}" x-data="{ open:false }" x-init="window.addEventListener('pageshow', () => open = false); window.addEventListener('popstate', () => open = false);" @keydown.window.escape="open=false">
   @php $logoOnly = request()->routeIs('admin.login'); @endphp
   <div class="mx-auto max-w-7xl px-6">
     <div class="relative h-14 flex items-center justify-between">
