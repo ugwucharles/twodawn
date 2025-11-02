@@ -19,9 +19,8 @@ class DailyTasks
                 $key = 'daily_tasks_'.now()->format('Ymd');
                 if (! Cache::get($key)) {
                     Cache::put($key, 1, now()->endOfDay());
-                    // Run a quick DB-only backup and monitor in-process
-                    try { Artisan::call('backup:run', ['--only-db' => true]); } catch (\Throwable $e) { Log::warning('backup:run failed: '.$e->getMessage()); }
-                    try { Artisan::call('backup:monitor'); } catch (\Throwable $e) { /* ignore */ }
+// Run a quick DB-only backup
+                    try { \\App\\Services\\BackupService::run(true); } catch (\\Throwable $e) { Log::warning('daily backup failed: '.$e->getMessage()); }
                 }
             }
         } catch (\Throwable $e) { /* never block the request */ }

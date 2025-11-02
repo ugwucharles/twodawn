@@ -126,7 +126,7 @@ Route::get('orders/export-summary-daily', [AdminOrderController::class, 'exportS
     Route::post('scanner/redeem', [\App\Http\Controllers\Admin\TicketScanController::class, 'redeem'])->name('scanner.redeem');
 
     // On-demand backups (admin)
-    Route::post('ops/backup', function(){ try{ \Illuminate\Support\Facades\Artisan::call('backup:run'); return back()->with('status','Backup started'); }catch(\Throwable $e){ return back()->withErrors(['backup'=>$e->getMessage()]); } })->name('ops.backup');
+Route::post('ops/backup', function(){ try{ \\App\\Services\\BackupService::run(false); return back()->with('status','Backup created'); }catch(\\Throwable $e){ return back()->withErrors(['backup'=>$e->getMessage()]); } })->name('ops.backup');
 
     // Admin chat
     Route::get('chat', [\App\Http\Controllers\Admin\ChatAdminController::class, 'index'])->name('chat.index');
