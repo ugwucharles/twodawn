@@ -14,14 +14,14 @@
         <div class="text-zinc-400 text-sm mt-1">{{ $host->label ? ('Token: '.$host->label.' • ') : '' }}Expires {{ optional($host->expires_at)->diffForHumans() }}</div>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
-        <form method="GET" class="flex items-center gap-2">
+        <form method="GET" class="flex items-center gap-2 flex-wrap w-full sm:w-auto">
           <label for="from" class="sr-only">From date</label>
           <input id="from" type="date" name="from" value="{{ request('from') }}" placeholder="From date" aria-label="From date" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm placeholder:text-zinc-500 w-40 sm:w-48" />
           <label for="to" class="sr-only">To date</label>
           <input id="to" type="date" name="to" value="{{ request('to') }}" placeholder="To date" aria-label="To date" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm placeholder:text-zinc-500 w-40 sm:w-48" />
-          <button formaction="{{ route('host.sales.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Export sales</button>
-          <button formaction="{{ route('host.sales.exportDaily', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Daily sales</button>
-          <button formaction="{{ route('host.people.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Check-ins CSV</button>
+          <button formaction="{{ route('host.sales.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100 whitespace-nowrap">Export sales</button>
+          <button formaction="{{ route('host.sales.exportDaily', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20 whitespace-nowrap">Daily sales</button>
+          <button formaction="{{ route('host.people.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20 whitespace-nowrap">Check-ins CSV</button>
         </form>
         <a href="{{ route('host.people', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">View people</a>
         <button type="button" data-copy-link class="inline-flex items-center px-3 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Copy link</button>
