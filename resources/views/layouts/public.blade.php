@@ -95,6 +95,26 @@
     @if($jsSrc)
       <script type="module" src="{{ $jsSrc }}"></script>
     @endif
+
+    @if (env('SENTRY_JS_DSN'))
+      <script src="https://browser.sentry-cdn.com/7.114.0/bundle.tracing.replay.min.js" crossorigin="anonymous"></script>
+      <script>
+        (function(){
+          try{
+            var dsn = @json(env('SENTRY_JS_DSN'));
+            if(!dsn) return;
+            Sentry.init({
+              dsn: dsn,
+              integrations: [new Sentry.BrowserTracing(), new Sentry.Replay()],
+              tracesSampleRate: 0.1,
+              replaysSessionSampleRate: 0.05,
+              replaysOnErrorSampleRate: 1.0,
+              environment: @json(app()->environment()),
+            });
+          }catch(e){/* ignore */}
+        })();
+      </script>
+    @endif
     <style>
       :root{ --font-ui: 'Manrope', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; @if(!empty($tenant?->brand_color)) --brand: {{ $tenant->brand_color }}; @endif }
       body{ font-family: var(--font-ui); }
