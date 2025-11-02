@@ -1,6 +1,18 @@
 <x-app-layout>
   <div class="py-6">
     <div class="max-w-7xl mx-auto px-6">
+      @if (session('status'))
+        <div class="mb-4 p-3 bg-emerald-500/10 text-emerald-300 rounded ring-1 ring-emerald-500/30">{{ session('status') }}</div>
+      @endif
+      @if ($errors->any())
+        <div class="mb-4 p-3 bg-red-500/10 text-red-300 rounded ring-1 ring-red-500/30">
+          <ul class="list-disc list-inside">
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
       <!-- Stat cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-5">
@@ -23,7 +35,7 @@
       </div>
 
       <!-- Quick links -->
-      <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div class="mt-8 grid grid-cols-1 sm:grid-cols-4 gap-6">
         <a href="{{ route('admin.events.create') }}" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/10 transition">
           <div class="text-lg font-semibold">Create Event</div>
           <div class="text-zinc-400 text-sm mt-1">Add a new event to your lineup.</div>
@@ -36,6 +48,12 @@
           <div class="text-lg font-semibold">View Orders</div>
           <div class="text-zinc-400 text-sm mt-1">See sales and order details.</div>
         </a>
+        <form method="POST" action="{{ route('admin.ops.backup') }}" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6">
+          @csrf
+          <div class="text-lg font-semibold">Run Backup</div>
+          <div class="text-zinc-400 text-sm mt-1">Starts a full app + DB backup now.</div>
+          <button class="mt-3 inline-flex items-center px-4 py-2 rounded-md bg-white text-black text-sm font-semibold hover:bg-zinc-100">Run backup</button>
+        </form>
       </div>
 
       <!-- Sales chart -->
