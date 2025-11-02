@@ -137,7 +137,10 @@
     @unless (request()->routeIs('home'))
       @include('partials.public-header')
     @endunless
-    <main class="flex-1 {{ request()->routeIs('home') ? '' : 'pt-20 sm:pt-24' }}">
+    @php
+      $mainTop = request()->routeIs('home') ? '' : (request()->routeIs('host.*') ? 'pt-3 sm:pt-4' : 'pt-20 sm:pt-24');
+    @endphp
+    <main class="flex-1 {{ $mainTop }}">
       @yield('content')
     </main>
     @include('partials.footer')

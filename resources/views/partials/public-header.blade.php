@@ -1,5 +1,5 @@
 <header class="absolute inset-x-0 top-3 z-50" x-data="{ open:false }" x-init="window.addEventListener('pageshow', () => open = false); window.addEventListener('popstate', () => open = false);" @keydown.window.escape="open=false">
-  @php $logoOnly = request()->routeIs('host.*') || request()->routeIs('admin.login'); @endphp
+  @php $logoOnly = request()->routeIs('admin.login'); @endphp
   <div class="mx-auto max-w-7xl px-6">
     <div class="relative h-14 flex items-center justify-between">
       <!-- Brand -->
@@ -7,6 +7,7 @@
 
       @unless($logoOnly)
       <!-- Center nav (desktop only, absolutely centered) -->
+      @unless (request()->routeIs('host.*'))
       <nav class="hidden md:flex absolute inset-0 items-center justify-center gap-6 text-sm text-zinc-200 z-10">
         <a href="{{ route('events.index') }}" class="hover:text-white">Events</a>
         <a href="{{ route('events.recent') }}" class="hover:text-white">Recent</a>
@@ -14,6 +15,7 @@
         <a href="{{ url('/#how-to-buy') }}" class="hover:text-white">How it works</a>
         <a href="{{ url('/#host') }}" class="hover:text-white">Host</a>
       </nav>
+      @endunless
       @endunless
 
       @unless($logoOnly)
