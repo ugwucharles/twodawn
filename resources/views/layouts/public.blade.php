@@ -137,7 +137,7 @@
     @unless (request()->routeIs('home'))
       @include('partials.public-header')
     @endunless
-    <main class="flex-1 pt-20 sm:pt-24">
+    <main class="flex-1 {{ request()->routeIs('home') ? '' : 'pt-20 sm:pt-24' }}">
       @yield('content')
     </main>
     @include('partials.footer')
