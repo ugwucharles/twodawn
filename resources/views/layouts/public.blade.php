@@ -134,7 +134,9 @@
     <script type="application/ld+json">{!! json_encode($siteJson, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
   </head>
   <body class="antialiased bg-black text-white min-h-screen flex flex-col">
-    @include('partials.public-header')
+    @unless (request()->routeIs('home'))
+      @include('partials.public-header')
+    @endunless
     <main class="flex-1 pt-20 sm:pt-24">
       @yield('content')
     </main>
