@@ -110,7 +110,9 @@
                 @else
                   <div class="text-sm text-zinc-300">Free</div>
                 @endif
-                <span id="slots-badge" class="hidden px-2 py-1 rounded-full text-xs bg-white/10 ring-1 ring-white/15">—</span>
+                @if(!($isPast || ($remaining !== null && $remaining <= 0)))
+                  <span id="slots-badge" class="hidden px-2 py-1 rounded-full text-xs bg-white/10 ring-1 ring-white/15">—</span>
+                @endif
               </div>
               @if($isPast || ($remaining !== null && $remaining <= 0))
                 <button disabled class="inline-flex items-center px-4 py-2 rounded-xl bg-zinc-700/50 text-zinc-300 text-sm font-semibold cursor-not-allowed">Sales closed</button>

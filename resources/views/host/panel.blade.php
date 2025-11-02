@@ -15,8 +15,6 @@
       </div>
       <div class="flex items-center gap-2 flex-wrap">
         <form method="GET" class="flex items-center gap-2">
-          <input type="date" name="from" value="{{ request('from') }}" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm" />
-          <input type="date" name="to" value="{{ request('to') }}" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm" />
           <button formaction="{{ route('host.sales.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Export sales</button>
           <button formaction="{{ route('host.sales.exportDaily', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Daily sales</button>
           <button formaction="{{ route('host.people.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Check-ins CSV</button>
@@ -27,7 +25,7 @@
     </div>
 
     <!-- Stats -->
-    <div class="mt-6 grid grid-cols-3 gap-3 sm:gap-4">
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
       <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
         <div class="text-xs text-zinc-400">Sold</div>
         <div class="mt-1 text-2xl font-bold">{{ $sold }}</div>

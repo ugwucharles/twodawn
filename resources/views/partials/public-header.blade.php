@@ -26,22 +26,39 @@
   </div>
 
   <!-- Overlay -->
-  <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 md:hidden" @click="open=false" aria-hidden="true"></div>
+  <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] md:hidden" @click="open=false" aria-hidden="true"></div>
 
   <!-- Right drawer -->
-  <aside x-cloak x-show="open" x-transition:enter="transition transform ease-out duration-150" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition transform ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" class="fixed inset-y-0 right-0 w-72 max-w-[85vw] bg-zinc-950/95 border-l border-white/10 z-70 p-6 md:hidden">
+  <aside x-cloak x-show="open" x-transition:enter="transition transform ease-out duration-150" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition transform ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" class="fixed inset-y-0 right-0 w-72 max-w-[85vw] bg-zinc-950/95 border-l border-white/10 z-[70] p-6 md:hidden">
     <div class="flex items-center justify-between">
       <span class="text-base font-extrabold text-white">Menu</span>
       <button type="button" class="text-zinc-300 hover:text-white" aria-label="Close menu" @click="open=false">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
       </button>
     </div>
-    <nav class="mt-6 grid gap-2 text-sm text-zinc-200">
-      <a href="{{ route('events.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Events</a>
-      <a href="{{ route('events.recent') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Recent</a>
-      <a href="{{ route('pricing') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Pricing</a>
-      <a href="{{ url('/#how-to-buy') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">How it works</a>
-      <a href="{{ url('/#host') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Host</a>
-    </nav>
+    @if (request()->routeIs('host.*'))
+      <nav class="mt-6 grid gap-2 text-sm text-zinc-200">
+        <a href="#scan" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Scanner</a>
+        <a href="#manual" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Manual entry</a>
+        <a href="#recent-card" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Recent scans</a>
+        @if(isset($host))
+          <a href="{{ route('host.people', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">People</a>
+          <a href="{{ route('host.sales.export', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Export sales</a>
+          <a href="{{ route('host.sales.exportDaily', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Daily sales</a>
+          <a href="{{ route('host.people.export', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Check-ins CSV</a>
+        @endif
+        @if(isset($event) && $event?->public_url)
+          <a href="{{ $event->public_url }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">View event</a>
+        @endif
+      </nav>
+    @else
+      <nav class="mt-6 grid gap-2 text-sm text-zinc-200">
+        <a href="{{ route('events.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Events</a>
+        <a href="{{ route('events.recent') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Recent</a>
+        <a href="{{ route('pricing') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Pricing</a>
+        <a href="{{ url('/#how-to-buy') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">How it works</a>
+        <a href="{{ url('/#host') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Host</a>
+      </nav>
+    @endif
   </aside>
 </header>
