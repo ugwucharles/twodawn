@@ -5,7 +5,7 @@
 @section('robots', 'noindex, nofollow')
 
 @section('content')
-<section id="page-content" class="py-8 sm:py-10">
+<section id="page-content" class="pt-24 pb-10 sm:pt-28">
   <div class="max-w-6xl mx-auto px-6">
     <!-- Header -->
     <div class="flex items-start justify-between gap-4 flex-wrap">
@@ -15,6 +15,10 @@
       </div>
       <div class="flex items-center gap-2 flex-wrap">
         <form method="GET" class="flex items-center gap-2">
+          <label for="from" class="sr-only">From date</label>
+          <input id="from" type="date" name="from" value="{{ request('from') }}" placeholder="From date" aria-label="From date" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm placeholder:text-zinc-500 w-40 sm:w-48" />
+          <label for="to" class="sr-only">To date</label>
+          <input id="to" type="date" name="to" value="{{ request('to') }}" placeholder="To date" aria-label="To date" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm placeholder:text-zinc-500 w-40 sm:w-48" />
           <button formaction="{{ route('host.sales.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Export sales</button>
           <button formaction="{{ route('host.sales.exportDaily', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Daily sales</button>
           <button formaction="{{ route('host.people.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Check-ins CSV</button>
