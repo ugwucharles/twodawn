@@ -87,7 +87,7 @@ Route::post('/events/{event}/orders', [CheckoutController::class, 'create'])
     ->name('orders.create');
 Route::get('/paystack/callback', [CheckoutController::class, 'callback'])->name('paystack.callback');
 // Paystack Webhook (server-to-server). Configure in Paystack Dashboard.
-Route::post('/paystack/webhook', \App\Http\Controllers\PaystackWebhookController::class)->name('paystack.webhook');
+Route::post('/paystack/webhook', App\Http\Controllers\PaystackWebhookController::class)->name('paystack.webhook');
 Route::get('/orders/{reference}', [CheckoutController::class, 'showByReference'])->name('orders.public');
 Route::get('/orders/{reference}/download', [CheckoutController::class, 'downloadPdf'])->middleware('signed')->name('orders.pdf');
 
@@ -106,41 +106,41 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
     Route::patch('events/{event}/toggle-json', [AdminEventController::class, 'togglePublishJson'])->name('events.toggle.json');
 
     // Host panel links
-    Route::post('events/{event}/host-tokens', [\App\Http\Controllers\Admin\HostTokenController::class, 'store'])->name('events.tokens.store');
-    Route::patch('host-tokens/{hostToken}/toggle', [\App\Http\Controllers\Admin\HostTokenController::class, 'toggle'])->name('tokens.toggle');
-    Route::delete('host-tokens/{hostToken}', [\App\Http\Controllers\Admin\HostTokenController::class, 'destroy'])->name('tokens.destroy');
+Route::post('events/{event}/host-tokens', [App\Http\Controllers\Admin\HostTokenController::class, 'store'])->name('events.tokens.store');
+Route::patch('host-tokens/{hostToken}/toggle', [App\Http\Controllers\Admin\HostTokenController::class, 'toggle'])->name('tokens.toggle');
+Route::delete('host-tokens/{hostToken}', [App\Http\Controllers\Admin\HostTokenController::class, 'destroy'])->name('tokens.destroy');
     
     // Orders admin
     Route::get('orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
 Route::get('orders/export-summary', [AdminOrderController::class, 'exportSummary'])->name('orders.export.summary');
 Route::get('orders/export-summary-daily', [AdminOrderController::class, 'exportSummaryDaily'])->name('orders.export.summaryDaily');
     Route::resource('orders', AdminOrderController::class)->only(['index','show']);
-    Route::post('orders/{order}/refunds', [\App\Http\Controllers\Admin\RefundController::class, 'store'])->name('orders.refunds.store');
-    Route::post('orders/{order}/refunds.json', [\App\Http\Controllers\Admin\RefundController::class, 'store'])->name('orders.refunds.store.json');
+Route::post('orders/{order}/refunds', [App\Http\Controllers\Admin\RefundController::class, 'store'])->name('orders.refunds.store');
+Route::post('orders/{order}/refunds.json', [App\Http\Controllers\Admin\RefundController::class, 'store'])->name('orders.refunds.store.json');
 
     // Check-ins export
-    Route::get('checkins/export', [\App\Http\Controllers\Admin\TicketScanController::class, 'export'])->name('checkins.export');
+Route::get('checkins/export', [App\Http\Controllers\Admin\TicketScanController::class, 'export'])->name('checkins.export');
 
     // Ticket scanner
-    Route::get('scanner', [\App\Http\Controllers\Admin\TicketScanController::class, 'index'])->name('scanner.index');
-    Route::post('scanner/redeem', [\App\Http\Controllers\Admin\TicketScanController::class, 'redeem'])->name('scanner.redeem');
+Route::get('scanner', [App\Http\Controllers\Admin\TicketScanController::class, 'index'])->name('scanner.index');
+Route::post('scanner/redeem', [App\Http\Controllers\Admin\TicketScanController::class, 'redeem'])->name('scanner.redeem');
 
     // On-demand backups (admin)
-Route::post('ops/backup', function(){ try{ \\App\\Services\\BackupService::run(false); return back()->with('status','Backup created'); }catch(\\Throwable $e){ return back()->withErrors(['backup'=>$e->getMessage()]); } })->name('ops.backup');
+Route::post('ops/backup', function(){ try{ App\Services\BackupService::run(false); return back()->with('status','Backup created'); }catch(\Throwable $e){ return back()->withErrors(['backup'=>$e->getMessage()]); } })->name('ops.backup');
 
     // Admin chat
-    Route::get('chat', [\App\Http\Controllers\Admin\ChatAdminController::class, 'index'])->name('chat.index');
-    Route::get('chat/{conversation}', [\App\Http\Controllers\Admin\ChatAdminController::class, 'show'])->name('chat.show');
-    Route::get('chat/{conversation}/messages', [\App\Http\Controllers\Admin\ChatAdminController::class, 'messages'])->name('chat.messages');
-    Route::post('chat/{conversation}/reply', [\App\Http\Controllers\Admin\ChatAdminController::class, 'reply'])->name('chat.reply');
-    Route::post('chat/{conversation}/close', [\App\Http\Controllers\Admin\ChatAdminController::class, 'close'])->name('chat.close');
-    Route::post('chat/{conversation}/reopen', [\App\Http\Controllers\Admin\ChatAdminController::class, 'reopen'])->name('chat.reopen');
+Route::get('chat', [App\Http\Controllers\Admin\ChatAdminController::class, 'index'])->name('chat.index');
+Route::get('chat/{conversation}', [App\Http\Controllers\Admin\ChatAdminController::class, 'show'])->name('chat.show');
+Route::get('chat/{conversation}/messages', [App\Http\Controllers\Admin\ChatAdminController::class, 'messages'])->name('chat.messages');
+Route::post('chat/{conversation}/reply', [App\Http\Controllers\Admin\ChatAdminController::class, 'reply'])->name('chat.reply');
+Route::post('chat/{conversation}/close', [App\Http\Controllers\Admin\ChatAdminController::class, 'close'])->name('chat.close');
+Route::post('chat/{conversation}/reopen', [App\Http\Controllers\Admin\ChatAdminController::class, 'reopen'])->name('chat.reopen');
 
     // Admin assets proxy (bypass CSP/CDN blocks)
-    Route::get('assets/html5-qrcode.js', [\App\Http\Controllers\Admin\AssetsController::class, 'html5qrcode'])->name('assets.h5qrcode');
+Route::get('assets/html5-qrcode.js', [App\Http\Controllers\Admin\AssetsController::class, 'html5qrcode'])->name('assets.h5qrcode');
 
     // Tenants (multi-tenant/white-label)
-    Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class)->except(['show']);
+Route::resource('tenants', App\Http\Controllers\Admin\TenantController::class)->except(['show']);
 
     // Host requests
     Route::resource('host-requests', AdminHostRequestController::class)->only(['index','show','update']);
@@ -152,21 +152,21 @@ Route::post('ops/backup', function(){ try{ \\App\\Services\\BackupService::run(f
 });
 
 // Ticket verification endpoint (admin-only)
-Route::post('/verify-ticket', [\App\Http\Controllers\Admin\TicketScanController::class, 'verify'])
+Route::post('/verify-ticket', [App\Http\Controllers\Admin\TicketScanController::class, 'verify'])
     ->middleware(['auth','admin'])
     ->name('tickets.verify');
 
 // Host Panel: public, token-scoped
-Route::get('/h/assets/html5-qrcode.js', [\App\Http\Controllers\Admin\AssetsController::class, 'html5qrcode'])->name('host.assets.h5qrcode');
-Route::get('/h/{token}', [\App\Http\Controllers\HostPanelController::class, 'show'])->name('host.panel');
-Route::get('/h/{token}/people', [\App\Http\Controllers\HostPanelController::class, 'people'])->name('host.people');
-Route::get('/h/{token}/scan', [\App\Http\Controllers\HostPanelController::class, 'scan'])->name('host.scan');
-Route::get('/h/{token}/checkins.csv', [\App\Http\Controllers\HostPanelController::class, 'exportCheckins'])->name('host.people.export');
-Route::get('/h/{token}/sales.csv', [\App\Http\Controllers\HostPanelController::class, 'exportSales'])->name('host.sales.export');
-Route::get('/h/{token}/sales_daily.csv', [\App\Http\Controllers\HostPanelController::class, 'exportSalesDaily'])->name('host.sales.exportDaily');
-Route::post('/h/{token}/verify', [\App\Http\Controllers\HostPanelController::class, 'verify'])
+Route::get('/h/assets/html5-qrcode.js', [App\Http\Controllers\Admin\AssetsController::class, 'html5qrcode'])->name('host.assets.h5qrcode');
+Route::get('/h/{token}', [App\Http\Controllers\HostPanelController::class, 'show'])->name('host.panel');
+Route::get('/h/{token}/people', [App\Http\Controllers\HostPanelController::class, 'people'])->name('host.people');
+Route::get('/h/{token}/scan', [App\Http\Controllers\HostPanelController::class, 'scan'])->name('host.scan');
+Route::get('/h/{token}/checkins.csv', [App\Http\Controllers\HostPanelController::class, 'exportCheckins'])->name('host.people.export');
+Route::get('/h/{token}/sales.csv', [App\Http\Controllers\HostPanelController::class, 'exportSales'])->name('host.sales.export');
+Route::get('/h/{token}/sales_daily.csv', [App\Http\Controllers\HostPanelController::class, 'exportSalesDaily'])->name('host.sales.exportDaily');
+Route::post('/h/{token}/verify', [App\Http\Controllers\HostPanelController::class, 'verify'])
     ->middleware('throttle:10,1')
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class, \App\Http\Middleware\VerifyCsrfToken::class]);
+->withoutMiddleware([Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class, App\Http\Middleware\VerifyCsrfToken::class]);
 
 // General health endpoint for uptime monitoring
 Route::get('/health', function(){ return response()->json(['ok'=>true,'time'=>now()->toIso8601String()], 200); });
@@ -197,11 +197,11 @@ Route::get('/sitemap.xml', function () {
                 ->each(function ($event) use (&$push) {
                     $push($event->public_url, optional($event->updated_at)->toAtomString(), 'weekly', '0.8');
                 });
-        } catch (\Throwable $e) { /* ignore */ }
+} catch (Throwable $e) { /* ignore */ }
 
         $xml = view('sitemap.xml', ['urls' => $urls])->render();
         return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
-    } catch (\Throwable $e) {
+} catch (Throwable $e) {
         // Absolute last-resort minimal sitemap (never 500)
         $base = rtrim((string) request()->getSchemeAndHttpHost(), '/');
         $fallback = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"><url><loc>{$base}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url></urlset>";
@@ -214,7 +214,7 @@ Route::get('/paystack/health', PaystackHealthController::class)->name('paystack.
 
 // Public API v1 (read-only)
 Route::prefix('api/v1')->middleware('throttle:60,1')->group(function(){
-    Route::get('/events', [\App\Http\Controllers\Api\PublicApiController::class, 'events']);
+Route::get('/events', [App\Http\Controllers\Api\PublicApiController::class, 'events']);
 });
 
 require __DIR__.'/auth.php';
