@@ -165,6 +165,9 @@ Route::post('/h/{token}/verify', [\App\Http\Controllers\HostPanelController::cla
     ->middleware('throttle:10,1')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class, \App\Http\Middleware\VerifyCsrfToken::class]);
 
+// General health endpoint for uptime monitoring
+Route::get('/health', function(){ return response()->json(['ok'=>true,'time'=>now()->toIso8601String()], 200); });
+
 // Sitemap
 Route::get('/sitemap.xml', function () {
     try {

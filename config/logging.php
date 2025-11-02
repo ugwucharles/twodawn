@@ -52,9 +52,9 @@ return [
 
     'channels' => [
 
-        'stack' => [
+'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            'channels' => explode(',', (string) env('LOG_STACK', 'single,sentry')),
             'ignore_exceptions' => false,
         ],
 
@@ -123,8 +123,13 @@ return [
             'handler' => NullHandler::class,
         ],
 
-        'emergency' => [
+'emergency' => [
             'path' => storage_path('logs/laravel.log'),
+        ],
+
+        'sentry' => [
+            'driver' => 'sentry',
+            'level' => env('SENTRY_LEVEL', 'warning'),
         ],
 
         // Custom log channels for better organization
