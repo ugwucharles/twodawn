@@ -196,15 +196,30 @@ modalEl.addEventListener('touchmove', preventScroll, { passive:false });
 function notify(kind){
   try {
     if (navigator.vibrate) {
-      if (kind==='ok') navigator.vibrate([30]);
-      else if (kind==='warn') navigator.vibrate([20,40,20]);
-      else navigator.vibrate([30,30,30]);
+      if (kind==='ok') navigator.vibrate([20,40]);
+      else if (kind==='warn') navigator.vibrate([40,50,40]);
+      else navigator.vibrate([60,60,60]);
     }
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-    const ctx = new AC(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination);
-    o.type='sine'; const now=ctx.currentTime; const freq = (kind==='ok')?880:(kind==='warn')?520:240; o.frequency.setValueAtTime(freq, now);
-    g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(0.12, now+0.02);
-    const dur = (kind==='ok')?0.12:(kind==='warn')?0.18:0.22; o.start(); o.stop(now+dur); o.onended=()=>ctx.close();
+    const ctx = new AC();
+    const g = ctx.createGain();
+    g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.7, ctx.currentTime); // loud
+    function tone(freq, start, dur, type='square'){
+      const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(freq, ctx.currentTime + start); o.connect(g); o.start(ctx.currentTime + start); o.stop(ctx.currentTime + start + dur);
+    }
+    if (kind==='ok') { // bright double beep
+      tone(1400, 0.00, 0.10, 'square');
+      tone(1700, 0.12, 0.14, 'square');
+    } else if (kind==='warn') { // triple medium beeps
+      tone(700, 0.00, 0.12, 'sawtooth');
+      tone(700, 0.16, 0.12, 'sawtooth');
+      tone(700, 0.32, 0.12, 'sawtooth');
+    } else { // error: two low long buzzes
+      tone(220, 0.00, 0.22, 'triangle');
+      tone(180, 0.26, 0.26, 'triangle');
+    }
+    setTimeout(()=>{ try{ ctx.close(); }catch(_){} }, 1200);
   } catch(_) {}
 }
 

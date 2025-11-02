@@ -203,5 +203,13 @@
       </form>
     </x-modal>
 
+    <script>
+      // Always start pages at top on navigation (but respect anchor links)
+      (function(){
+        try{
+          window.addEventListener('pageshow', function(){ if (!location.hash) requestAnimationFrame(()=>window.scrollTo(0,0)); });
+        }catch(_){}
+      })();
+    </script>
   </body>
 </html>
