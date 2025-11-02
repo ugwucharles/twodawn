@@ -135,7 +135,7 @@
   </head>
   <body class="antialiased bg-black text-white min-h-screen flex flex-col">
     @include('partials.public-header')
-    <main class="flex-1">
+    <main class="flex-1 pt-20 sm:pt-24">
       @yield('content')
     </main>
     @include('partials.footer')

@@ -261,10 +261,10 @@
               <div class="mt-1 text-zinc-300 text-xs sm:text-sm truncate">
                 {{ $year ?? '—' }}@if($event->venue) • {{ $event->venue }}@endif @if($duration) • {{ $duration }}@endif
               </div>
-              <div class="mt-3 flex items-center justify-between">
-                <div class="flex items-center gap-2">
+              <div class="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                  <span class="slots-badge hidden px-2 py-0.5 rounded-full text-[10px] sm:text-xs bg-white/10 ring-1 ring-white/15 whitespace-nowrap" data-remaining-url="{{ route('events.remaining', $event) }}">—</span>
                   <a id="buy-{{ $event->id }}" data-buy class="inline-flex items-center px-4 py-2 rounded-full bg-pink-500 text-white text-xs sm:text-sm font-medium hover:bg-pink-400 transition" href="{{ route('events.buy', $event) }}">Buy Tickets</a>
-                  <span class="slots-badge hidden px-2 py-0.5 rounded-full text-[10px] sm:text-xs bg-white/10 ring-1 ring-white/15" data-remaining-url="{{ route('events.remaining', $event) }}">—</span>
                 </div>
                 <div class="flex items-center gap-1 text-sm text-white">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-amber-400">

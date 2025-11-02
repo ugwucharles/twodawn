@@ -103,7 +103,7 @@
             $isFree = $unitPrice <= 0;
           @endphp
           <div class="mt-6 pt-4 border-t border-white/10">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div class="flex items-center gap-3">
                 @if(!is_null($priceToShow))
                   <div class="text-sm text-zinc-300">From <span class="text-white font-bold">₦{{ number_format($priceToShow, 2) }}</span></div>
@@ -111,7 +111,7 @@
                   <div class="text-sm text-zinc-300">Free</div>
                 @endif
                 @if(!($isPast || ($remaining !== null && $remaining <= 0)))
-                  <span id="slots-badge" class="hidden px-2 py-1 rounded-full text-xs bg-white/10 ring-1 ring-white/15">—</span>
+                  <span id="slots-badge" class="hidden px-2 py-1 rounded-full text-xs bg-white/10 ring-1 ring-white/15 whitespace-nowrap">—</span>
                 @endif
               </div>
               @if($isPast || ($remaining !== null && $remaining <= 0))
