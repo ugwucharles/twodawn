@@ -2,11 +2,11 @@
 FROM composer:2 AS composer_deps
 WORKDIR /app
 COPY composer.json composer.lock ./
-RUN composer update --no-dev --prefer-dist --no-interaction --no-scripts --no-progress
+RUN composer require spatie/laravel-backup:^8.0 sentry/sentry-laravel:^3.5 --no-dev --prefer-dist --no-interaction --no-progress --ignore-platform-req=ext-pcntl
 COPY . .
 # Ensure cache directories exist before Composer runs scripts that bootstrap Laravel
 RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views bootstrap/cache \
-&& composer update --no-dev --prefer-dist --no-interaction --no-progress
+&& composer install --no-dev --prefer-dist --no-interaction --no-progress --ignore-platform-req=ext-pcntl
 
 FROM node:22-alpine AS assets
 WORKDIR /app
