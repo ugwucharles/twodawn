@@ -158,6 +158,20 @@ class HostPanelController extends Controller
         }, $filename, $headers);
     }
 
+    public function scan(string $token)
+    {
+        $host = HostToken::with('event')->where('token', $token)->firstOrFail();
+        if (! $host->active || ($host->expires_at && now()->gt($host->expires_at))) {
+            abort(410, 'This link has expired.');
+        }
+        $event = $host->event;
+        // Optional stats for header or future use
+        $sold = Order::where('event_id', $event->id)->where('status','paid')->sum('quantity');
+        $checked = OrderCheckin::whereHas('order', function($q) use($event){ $q->where('event_id',$event->id)->where('status','paid'); })->sum('count');
+        $remaining = max(0, (int) $sold - (int) $checked);
+        return view('host.scan', compact('host','event','sold','checked','remaining'));
+    }
+
     public function verify(string $token, Request $request)
     {
         $host = HostToken::with('event')->where('token', $token)->first();

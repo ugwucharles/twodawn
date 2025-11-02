@@ -157,6 +157,7 @@ Route::post('/verify-ticket', [\App\Http\Controllers\Admin\TicketScanController:
 Route::get('/h/assets/html5-qrcode.js', [\App\Http\Controllers\Admin\AssetsController::class, 'html5qrcode'])->name('host.assets.h5qrcode');
 Route::get('/h/{token}', [\App\Http\Controllers\HostPanelController::class, 'show'])->name('host.panel');
 Route::get('/h/{token}/people', [\App\Http\Controllers\HostPanelController::class, 'people'])->name('host.people');
+Route::get('/h/{token}/scan', [\App\Http\Controllers\HostPanelController::class, 'scan'])->name('host.scan');
 Route::get('/h/{token}/checkins.csv', [\App\Http\Controllers\HostPanelController::class, 'exportCheckins'])->name('host.people.export');
 Route::get('/h/{token}/sales.csv', [\App\Http\Controllers\HostPanelController::class, 'exportSales'])->name('host.sales.export');
 Route::get('/h/{token}/sales_daily.csv', [\App\Http\Controllers\HostPanelController::class, 'exportSalesDaily'])->name('host.sales.exportDaily');

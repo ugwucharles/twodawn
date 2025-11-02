@@ -5,7 +5,7 @@
 @section('robots', 'noindex, nofollow')
 
 @section('content')
-<section id="page-content" class="pt-4 pb-10 sm:pt-6">
+<section id="page-content" class="mt-[9px] pb-10">
   <div class="max-w-6xl mx-auto px-6">
     <!-- Header -->
     <div class="flex items-start justify-between gap-4 flex-wrap">
@@ -16,9 +16,9 @@
       <div class="flex items-center gap-2 flex-wrap">
         <form method="GET" class="flex items-center gap-2 flex-wrap w-full sm:w-auto">
           <label for="from" class="sr-only">From date</label>
-          <input id="from" type="date" name="from" value="{{ request('from') }}" placeholder="From date" aria-label="From date" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm placeholder:text-zinc-500 w-40 sm:w-48" />
+<input id="from" type="date" name="from" value="{{ request('from', now()->subMonth()->toDateString()) }}" placeholder="From date" aria-label="From date" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm placeholder:text-zinc-500 w-40 sm:w-48" />
           <label for="to" class="sr-only">To date</label>
-          <input id="to" type="date" name="to" value="{{ request('to') }}" placeholder="To date" aria-label="To date" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm placeholder:text-zinc-500 w-40 sm:w-48" />
+<input id="to" type="date" name="to" value="{{ request('to', now()->toDateString()) }}" placeholder="To date" aria-label="To date" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm placeholder:text-zinc-500 w-40 sm:w-48" />
           <button formaction="{{ route('host.sales.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100 whitespace-nowrap">Export sales</button>
           <button formaction="{{ route('host.sales.exportDaily', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20 whitespace-nowrap">Daily sales</button>
           <button formaction="{{ route('host.people.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20 whitespace-nowrap">Check-ins CSV</button>
@@ -46,23 +46,6 @@
 
     <!-- Main -->
     <div class="mt-6 grid lg:grid-cols-2 gap-6 items-start">
-      <!-- Scanner (full width) -->
-      <div id="scan" class="lg:col-span-2 rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
-        <div class="flex items-center justify-between mb-3">
-          <div class="text-sm text-zinc-300">Camera scanner</div>
-          <div class="text-xs text-zinc-400">Auto-start</div>
-        </div>
-        <div id="qr-reader" class="rounded-xl overflow-hidden bg-black relative" style="width:100%; height:60vh; max-height:520px; min-height:300px">
-          <div id="scan-error" class="absolute inset-0 hidden items-center justify-center text-center text-sm text-red-300 px-4"></div>
-        </div>
-        <div class="mt-3 flex flex-wrap gap-2">
-          <button id="btn-switch" class="px-3 py-1.5 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Switch camera</button>
-          <button id="btn-pause" class="px-3 py-1.5 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Pause</button>
-          <button id="btn-resume" class="hidden px-3 py-1.5 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Resume</button>
-          <button id="btn-copy" class="px-3 py-1.5 rounded-md bg-white text-black text-sm hover:bg-zinc-100" data-copy-link>Copy link</button>
-        </div>
-        <div class="mt-2 text-xs text-zinc-400">Tips: Use the rear camera • Hold steady • Clean lens for faster scans.</div>
-      </div>
 
       <!-- Manual entry -->
       <div id="manual" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
@@ -125,9 +108,9 @@ let cameraDevices = [];
 let cameraIndex = 0;
 let scanningPaused = false;
 
-function clearDemo(){ recent.querySelectorAll('[data-demo]')?.forEach(el=>el.remove()); }
+function clearDemo(){ if(!recent) return; recent.querySelectorAll('[data-demo]')?.forEach(el=>el.remove()); }
 function addRecent(kind, text){
-  clearDemo();
+  clearDemo(); if(!recent) return;
   const li=document.createElement('li');
   li.className='flex items-center gap-2';
   const dot=document.createElement('span');
@@ -349,7 +332,7 @@ async function startScanner(){
 }
 
 // Start scanner immediately
-startScanner();
+if (document.getElementById('qr-reader')) startScanner();
 
 // Clear recent
  document.getElementById('clear-recent')?.addEventListener('click', ()=>{ recent.innerHTML=''; });
