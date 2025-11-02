@@ -102,6 +102,11 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
 
     // Events
     Route::resource('events', AdminEventController::class);
+
+    // Backups (list/download/delete)
+    Route::get('backups', [App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backups.index');
+    Route::get('backups/{file}', [App\Http\Controllers\Admin\BackupController::class, 'download'])->name('backups.download');
+    Route::delete('backups/{file}', [App\Http\Controllers\Admin\BackupController::class, 'destroy'])->name('backups.destroy');
     Route::patch('events/{event}/toggle', [AdminEventController::class, 'togglePublish'])->name('events.toggle');
     Route::patch('events/{event}/toggle-json', [AdminEventController::class, 'togglePublishJson'])->name('events.toggle.json');
 

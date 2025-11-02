@@ -52,7 +52,10 @@
           @csrf
           <div class="text-lg font-semibold">Run Backup</div>
           <div class="text-zinc-400 text-sm mt-1">Starts a full app + DB backup now.</div>
-          <button class="mt-3 inline-flex items-center px-4 py-2 rounded-md bg-white text-black text-sm font-semibold hover:bg-zinc-100">Run backup</button>
+          <div class="mt-3 flex items-center gap-2">
+            <button class="inline-flex items-center px-4 py-2 rounded-md bg-white text-black text-sm font-semibold hover:bg-zinc-100">Run backup</button>
+            <a href="{{ route('admin.backups.index') }}" class="inline-flex items-center px-4 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">View backups</a>
+          </div>
         </form>
       </div>
 
