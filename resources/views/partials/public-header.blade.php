@@ -1,9 +1,11 @@
 <header class="absolute inset-x-0 top-3 z-50" x-data="{ open:false }" x-init="window.addEventListener('pageshow', () => open = false); window.addEventListener('popstate', () => open = false);" @keydown.window.escape="open=false">
+  @php $logoOnly = request()->routeIs('host.*') || request()->routeIs('admin.login'); @endphp
   <div class="mx-auto max-w-7xl px-6">
     <div class="relative h-14 flex items-center justify-between">
       <!-- Brand -->
       <a href="{{ url('/') }}" class="relative z-20 inline-flex items-center h-14 leading-none text-lg font-extrabold tracking-tight text-white">2<span class="text-indigo-400">DAWN</span></a>
 
+      @unless($logoOnly)
       <!-- Center nav (desktop only, absolutely centered) -->
       <nav class="hidden md:flex absolute inset-0 items-center justify-center gap-6 text-sm text-zinc-200 z-10">
         <a href="{{ route('events.index') }}" class="hover:text-white">Events</a>
@@ -12,7 +14,9 @@
         <a href="{{ url('/#how-to-buy') }}" class="hover:text-white">How it works</a>
         <a href="{{ url('/#host') }}" class="hover:text-white">Host</a>
       </nav>
+      @endunless
 
+      @unless($logoOnly)
       <!-- Right: search icon + hamburger on mobile -->
       <div class="relative z-20 flex items-center h-14 gap-4" :class="{ 'invisible pointer-events-none': open }">
         @unless (request()->routeIs('host.*'))
@@ -24,9 +28,11 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 align-middle" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
       </div>
+      @endunless
     </div>
   </div>
 
+  @unless($logoOnly)
   <!-- Overlay -->
   <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] md:hidden" @click="open=false" aria-hidden="true"></div>
 
@@ -40,9 +46,9 @@
     </div>
     @if (request()->routeIs('host.*'))
       <nav class="mt-6 grid gap-2 text-sm text-zinc-200">
-        <a href="#scan" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Scanner</a>
-        <a href="#manual" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Manual entry</a>
-        <a href="#recent-card" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Recent scans</a>
+        <a href="#scan" class="rounded px-3 py-2 hover:bg-white/5" @click.prevent="open=false; setTimeout(()=>{ const el=document.getElementById('scan'); if(el){ const y=el.getBoundingClientRect().top + window.scrollY - 70; window.scrollTo({top:y, behavior:'smooth'}); } }, 50);">Scanner</a>
+        <a href="#manual" class="rounded px-3 py-2 hover:bg-white/5" @click.prevent="open=false; setTimeout(()=>{ const el=document.getElementById('manual'); if(el){ const y=el.getBoundingClientRect().top + window.scrollY - 70; window.scrollTo({top:y, behavior:'smooth'}); } }, 50);">Manual entry</a>
+        <a href="#recent-card" class="rounded px-3 py-2 hover:bg-white/5" @click.prevent="open=false; setTimeout(()=>{ const el=document.getElementById('recent-card'); if(el){ const y=el.getBoundingClientRect().top + window.scrollY - 70; window.scrollTo({top:y, behavior:'smooth'}); } }, 50);">Recent scans</a>
         @if(isset($host))
           <a href="{{ route('host.people', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">People</a>
           <a href="{{ route('host.sales.export', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Export sales</a>
@@ -63,4 +69,5 @@
       </nav>
     @endif
   </aside>
+  @endunless
 </header>

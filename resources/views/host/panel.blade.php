@@ -5,7 +5,7 @@
 @section('robots', 'noindex, nofollow')
 
 @section('content')
-<section id="page-content" class="pt-24 pb-10 sm:pt-28">
+<section id="page-content" class="pt-4 pb-10 sm:pt-6">
   <div class="max-w-6xl mx-auto px-6">
     <!-- Header -->
     <div class="flex items-start justify-between gap-4 flex-wrap">
