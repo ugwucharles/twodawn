@@ -13,6 +13,8 @@
         <td style="padding:8px; background:#fff; border:1px solid #e5e7eb; border-radius:8px;">
           @if(!empty($qrSrc))
           <img src="{{ $qrSrc }}" alt="Ticket QR" width="220" height="220" style="display:block; width:220px; height:220px; object-fit:contain;" />
+          @elseif(!empty($qrRemote))
+          <img src="{{ $qrRemote }}" alt="Ticket QR" width="220" height="220" style="display:block; width:220px; height:220px; object-fit:contain;" />
           @elseif(!empty($qrData))
           <img src="{{ $qrData }}" alt="Ticket QR" width="220" height="220" style="display:block; width:220px; height:220px; object-fit:contain;" />
           @else

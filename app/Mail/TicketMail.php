@@ -21,22 +21,22 @@ class TicketMail extends Mailable
         $order = $this->order->load('event');
 
         $qrCid = null; // inline image src (cid:...)
-        $qrData = null; // fallback data URI (SVG) if inline fails (many clients block it)
+        $qrData = null; // fallback data URI (SVG)
+        $qrRemote = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' . urlencode($order->paystack_reference);
 
         // Prefer PNG (supported by all major email clients)
         try {
+            // Try Imagick back-end first (if available in bacon-qr-code + ext-imagick)
             $renderer = new \BaconQrCode\Renderer\ImageRenderer(
                 new \BaconQrCode\Renderer\RendererStyle\RendererStyle(300),
-                new \BaconQrCode\Renderer\Image\GdImageBackEnd()
+                new \BaconQrCode\Renderer\Image\ImagickImageBackEnd()
             );
             $writer = new \BaconQrCode\Writer($renderer);
             $png = $writer->writeString($order->paystack_reference); // binary PNG
-
-            // Embed inline and also attach as a downloadable file
             $qrCid = $this->embedData($png, 'ticket-qr.png', 'image/png');
             $this->attachData($png, 'ticket-qr.png', ['mime' => 'image/png']);
         } catch (\Throwable $e) {
-            // Fallback to SVG as attachment only (some clients won't display inline SVG)
+            // Fallback to SVG attachment; many clients block inline SVG
             try {
                 $renderer = new \BaconQrCode\Renderer\ImageRenderer(
                     new \BaconQrCode\Renderer\RendererStyle\RendererStyle(300),
@@ -54,11 +54,27 @@ class TicketMail extends Mailable
 
         $pdfUrl = URL::temporarySignedRoute('orders.pdf', now()->addDays(7), ['reference' => $order->paystack_reference]);
 
+        // Disable SendGrid click/open tracking via SMTP header to avoid urlXXX subdomain rewrites
+        $this->withSymfonyMessage(function ($message) {
+            try {
+                $host = (string) env('MAIL_HOST');
+                if (str_contains(strtolower($host), 'sendgrid')) {
+                    $message->getHeaders()->addTextHeader('X-SMTPAPI', json_encode([
+                        'filters' => [
+                            'clicktrack' => ['settings' => ['enable' => 0]],
+                            'opentrack'  => ['settings' => ['enable' => 0]],
+                        ],
+                    ]));
+                }
+            } catch (\Throwable $e) { /* ignore */ }
+        });
+
         return $this->subject('Your ticket - '.$order->paystack_reference)
             ->view('emails.ticket', [
                 'order' => $order,
                 'qrSrc' => $qrCid,
                 'qrData' => $qrData,
+                'qrRemote' => $qrRemote,
                 'publicUrl' => route('orders.public', $order->paystack_reference),
                 'pdfUrl' => $pdfUrl,
             ]);
