@@ -117,14 +117,15 @@ Route::delete('host-tokens/{hostToken}', [App\Http\Controllers\Admin\HostTokenCo
     
     // Orders admin
     Route::get('orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
-Route::get('orders/export-summary', [AdminOrderController::class, 'exportSummary'])->name('orders.export.summary');
-Route::get('orders/export-summary-daily', [AdminOrderController::class, 'exportSummaryDaily'])->name('orders.export.summaryDaily');
+    Route::get('orders/export-summary', [AdminOrderController::class, 'exportSummary'])->name('orders.export.summary');
+    Route::get('orders/export-summary-daily', [AdminOrderController::class, 'exportSummaryDaily'])->name('orders.export.summaryDaily');
     Route::resource('orders', AdminOrderController::class)->only(['index','show']);
-Route::post('orders/{order}/refunds', [App\Http\Controllers\Admin\RefundController::class, 'store'])->name('orders.refunds.store');
-Route::post('orders/{order}/refunds.json', [App\Http\Controllers\Admin\RefundController::class, 'store'])->name('orders.refunds.store.json');
+    Route::post('orders/{order}/resend', [AdminOrderController::class, 'resend'])->name('orders.resend');
+    Route::post('orders/{order}/refunds', [App\Http\Controllers\Admin\RefundController::class, 'store'])->name('orders.refunds.store');
+    Route::post('orders/{order}/refunds.json', [App\Http\Controllers\Admin\RefundController::class, 'store'])->name('orders.refunds.store.json');
 
     // Check-ins export
-Route::get('checkins/export', [App\Http\Controllers\Admin\TicketScanController::class, 'export'])->name('checkins.export');
+    Route::get('checkins/export', [App\Http\Controllers\Admin\TicketScanController::class, 'export'])->name('checkins.export');
 
     // Ticket scanner
 Route::get('scanner', [App\Http\Controllers\Admin\TicketScanController::class, 'index'])->name('scanner.index');

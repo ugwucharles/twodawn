@@ -9,6 +9,13 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 space-y-2">
+                    @if (session('status'))
+                        <div class="mb-3 p-2 rounded bg-green-50 text-green-700 text-sm">{{ session('status') }}</div>
+                    @endif
+                    @if ($errors->has('mail'))
+                        <div class="mb-3 p-2 rounded bg-red-50 text-red-700 text-sm">{{ $errors->first('mail') }}</div>
+                    @endif
+
                     <div><span class="text-gray-600">Reference:</span> <span class="font-mono">{{ $order->paystack_reference }}</span></div>
                     <div><span class="text-gray-600">Status:</span> <span class="uppercase">{{ $order->status }}</span></div>
                     <div><span class="text-gray-600">Date:</span> {{ $order->created_at->format('Y-m-d H:i') }}</div>
@@ -32,6 +39,10 @@
                         <h3 class="font-semibold">Payment</h3>
                         <div>Quantity: {{ $order->quantity }}</div>
                         <div>Amount: ₦{{ number_format($order->amount / 100, 2) }}</div>
+                        <form method="POST" action="{{ route('admin.orders.resend', $order) }}" class="mt-3">
+                            @csrf
+                            <button class="inline-flex px-4 py-2 rounded bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500">Resend ticket email</button>
+                        </form>
                     </div>
 
                     <!-- Refunds -->

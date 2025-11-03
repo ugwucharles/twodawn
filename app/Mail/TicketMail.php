@@ -4,11 +4,11 @@ namespace App\Mail;
 
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
-use Illuminate\\Mail\\Mailable;
-use Illuminate\\Queue\\SerializesModels;
-use Illuminate\\Contracts\\Queue\\ShouldQueue;
+use Illuminate\Mail\Mailable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\URL;
 
-class TicketMail extends Mailable implements ShouldQueue
+class TicketMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -30,12 +30,14 @@ class TicketMail extends Mailable implements ShouldQueue
             $qrData = null;
         }
 
+        $pdfUrl = URL::temporarySignedRoute('orders.pdf', now()->addDays(7), ['reference' => $order->paystack_reference]);
+
         return $this->subject('Your ticket - '.$order->paystack_reference)
             ->view('emails.ticket', [
                 'order' => $order,
                 'qrData' => $qrData,
                 'publicUrl' => route('orders.public', $order->paystack_reference),
-                'pdfUrl' => route('orders.pdf', $order->paystack_reference),
+                'pdfUrl' => $pdfUrl,
             ]);
     }
 }

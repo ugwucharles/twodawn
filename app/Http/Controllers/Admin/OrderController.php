@@ -7,6 +7,8 @@ use App\Models\Order;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TicketMail;
 
 class OrderController extends Controller
 {
@@ -78,6 +80,7 @@ class OrderController extends Controller
     {
         //
     }
+
     public function export(Request $request): StreamedResponse
     {
         $eventId = $request->integer('event_id');
@@ -192,5 +195,15 @@ class OrderController extends Controller
             }
             fclose($out);
         }, $filename, $headers);
+    }
+
+    public function resend(Order $order)
+    {
+        try {
+            Mail::to($order->buyer_email)->send(new TicketMail($order));
+            return back()->with('status', 'Ticket email resent to '.$order->buyer_email);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['mail' => 'Resend failed: '.$e->getMessage()]);
+        }
     }
 }
