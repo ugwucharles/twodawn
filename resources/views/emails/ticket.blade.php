@@ -22,6 +22,15 @@
 
     <p style="margin:0 0 8px 0;"><strong>Order ref:</strong> {{ $order->paystack_reference }}</p>
     <p style="margin:0 0 8px 0;"><strong>Event:</strong> {{ $order->event?->title ?? '—' }}</p>
+    @php
+      $start = optional($order->event?->starts_at);
+      $end = optional($order->event?->ends_at) ?: optional($order->event?->starts_at)?->copy()->addHours(2);
+    @endphp
+    <p style="margin:0 0 8px 0;"><strong>Date:</strong> {{ $start ? $start->format('D, M j, Y') : '—' }}</p>
+    <p style="margin:0 0 8px 0;"><strong>Time:</strong> {{ $start ? $start->format('g:ia') : '—' }} @if($end) – {{ $end->format('g:ia') }} @endif</p>
+    @if(!empty($order->event?->venue))
+      <p style="margin:0 0 8px 0;"><strong>Location:</strong> {{ $order->event->venue }}</p>
+    @endif
     <p style="margin:0 0 8px 0;"><strong>Quantity:</strong> {{ $order->quantity }}</p>
 
     <p style="margin:14px 0;">

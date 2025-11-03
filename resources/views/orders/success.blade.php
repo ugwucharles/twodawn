@@ -3,20 +3,17 @@
 @section('content')
 <section class="py-10">
   <div class="max-w-3xl mx-auto px-6">
-    <div class="mb-6 flex items-center justify-between print:hidden">
-      <a href="{{ url('/') }}" class="text-sm text-zinc-300 hover:text-white underline underline-offset-4">Home</a>
-      <a href="{{ route('events.index') }}" class="text-sm text-zinc-300 hover:text-white underline underline-offset-4">All events</a>
-    </div>
+    {{-- Removed Home/All events links on success page per request --}}
 
     @php
       $event = $order->event;
       $payload = $order->paystack_reference; // scanned by admin
       try {
-        $renderer = new \BaconQrCode\Renderer\ImageRenderer(new \BaconQrCode\Renderer\RendererStyle\RendererStyle(300), new \BaconQrCode\Renderer\Image\SvgImageBackEnd());
-        $writer = new \BaconQrCode\Writer($renderer);
+        $renderer = new \\BaconQrCode\\Renderer\\ImageRenderer(new \\BaconQrCode\\Renderer\\RendererStyle\\RendererStyle(300), new \\BaconQrCode\\Renderer\\Image\\SvgImageBackEnd());
+        $writer = new \\BaconQrCode\\Writer($renderer);
         $svg = $writer->writeString($payload);
         $qrData = 'data:image/svg+xml;base64,' . base64_encode($svg);
-      } catch (\Throwable $e) { $qrData = null; }
+      } catch (\\Throwable $e) { $qrData = null; }
     @endphp
 
     <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-6">
