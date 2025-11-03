@@ -386,9 +386,9 @@ class CheckoutController extends Controller
             return false;
         }
 
-        // Send ticket email (round-robin mailer if configured)
+        // Send ticket email immediately (avoid queue reliance on shared hosting)
         try {
-            Mail::to($order->buyer_email)->queue(new TicketMail($order));
+            Mail::to($order->buyer_email)->send(new TicketMail($order));
         } catch (\Throwable $e) { /* swallow mail errors */ }
         return true;
     }
@@ -416,9 +416,9 @@ class CheckoutController extends Controller
             return; // stop on failure
         }
 
-        // For free orders, email the ticket as well
+        // For free orders, email the ticket as well (send immediately)
         try {
-            Mail::to($order->buyer_email)->queue(new TicketMail($order));
+            Mail::to($order->buyer_email)->send(new TicketMail($order));
         } catch (\Throwable $e) { /* swallow mail errors */ }
     }
 

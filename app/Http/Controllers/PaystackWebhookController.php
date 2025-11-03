@@ -82,7 +82,7 @@ class PaystackWebhookController extends Controller
             return response()->json(['ok' => true]);
         }
 
-        try { Mail::to($order->buyer_email)->queue(new TicketMail($order)); } catch (\Throwable $e) {}
+        try { Mail::to($order->buyer_email)->send(new TicketMail($order)); } catch (\Throwable $e) {}
 
         return response()->json(['ok' => true]);
     }
