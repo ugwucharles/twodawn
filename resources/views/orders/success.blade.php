@@ -9,11 +9,11 @@
       $event = $order->event;
       $payload = $order->paystack_reference; // scanned by admin
       try {
-        $renderer = new \\BaconQrCode\\Renderer\\ImageRenderer(new \\BaconQrCode\\Renderer\\RendererStyle\\RendererStyle(300), new \\BaconQrCode\\Renderer\\Image\\SvgImageBackEnd());
-        $writer = new \\BaconQrCode\\Writer($renderer);
+        $renderer = new \BaconQrCode\Renderer\ImageRenderer(new \BaconQrCode\Renderer\RendererStyle\RendererStyle(300), new \BaconQrCode\Renderer\Image\SvgImageBackEnd());
+        $writer = new \BaconQrCode\Writer($renderer);
         $svg = $writer->writeString($payload);
         $qrData = 'data:image/svg+xml;base64,' . base64_encode($svg);
-      } catch (\\Throwable $e) { $qrData = null; }
+      } catch (\Throwable $e) { $qrData = null; }
     @endphp
 
     <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-6">
