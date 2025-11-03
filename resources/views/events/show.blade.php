@@ -49,10 +49,7 @@
 
 @section('content')
 <section class="py-10">
-  <div class="max-w-7xl mx-auto px-6 mb-4 flex justify-between">
-    <a href="{{ url('/') }}" class="text-sm text-zinc-300 hover:text-white hover:underline underline-offset-4">Home</a>
-    <a href="{{ route('events.index') }}" class="text-sm text-zinc-300 hover:text-white hover:underline underline-offset-4">All Events</a>
-  </div>
+  <!-- Removed top Home/All Events links per request -->
   <div class="max-w-7xl mx-auto px-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
       <!-- Left: Flyer -->
