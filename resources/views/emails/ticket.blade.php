@@ -7,6 +7,7 @@
   <body style="font-family:Arial,Helvetica,sans-serif; color:#111;">
     <h2 style="margin:0 0 6px 0;">Payment successful</h2>
     <p style="margin:0 0 12px 0;">Show this QR at the gate.</p>
+    <p style="margin:8px 0; font-size:12px; color:#b91c1c;"><strong>Keep it safe:</strong> Do not share your QR code or order reference. It grants entry and can be used once.</p>
 
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:12px 0;">
       <tr>

@@ -19,6 +19,9 @@
     <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-6">
       <h1 class="text-2xl font-extrabold">{{ ($order->amount ?? 0) <= 0 ? 'Ticket Confirmed' : 'Payment Successful' }}</h1>
       <p class="mt-2 text-zinc-300">Show this QR at the gate. It encodes your order reference.</p>
+      <div class="mt-3 text-sm rounded-lg bg-yellow-500/10 text-yellow-300 ring-1 ring-yellow-500/20 p-3">
+        <strong>Keep it safe:</strong> Do not share your QR code or order reference. It grants entry and can be used once.
+      </div>
 
       <div class="mt-6 grid sm:grid-cols-2 gap-6 items-start">
         <div class="rounded-xl bg-white p-4 flex items-center justify-center">

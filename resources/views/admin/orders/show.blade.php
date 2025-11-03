@@ -1,37 +1,37 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-white leading-tight">
             {{ __('Order Details') }}
         </h2>
     </x-slot>
 
     <div class="py-6">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 space-y-2">
+            <div class="bg-white/5 ring-1 ring-white/10 rounded-2xl">
+                <div class="p-6 text-white space-y-2">
                     @if (session('status'))
-                        <div class="mb-3 p-2 rounded bg-green-50 text-green-700 text-sm">{{ session('status') }}</div>
+                        <div class="mb-3 p-2 rounded bg-green-500/10 text-green-300 ring-1 ring-green-500/20 text-sm">{{ session('status') }}</div>
                     @endif
                     @if ($errors->has('mail'))
-                        <div class="mb-3 p-2 rounded bg-red-50 text-red-700 text-sm">{{ $errors->first('mail') }}</div>
+                        <div class="mb-3 p-2 rounded bg-red-500/10 text-red-300 ring-1 ring-red-500/20 text-sm">{{ $errors->first('mail') }}</div>
                     @endif
 
-                    <div><span class="text-gray-600">Reference:</span> <span class="font-mono">{{ $order->paystack_reference }}</span></div>
-                    <div><span class="text-gray-600">Status:</span> <span class="uppercase">{{ $order->status }}</span></div>
-                    <div><span class="text-gray-600">Date:</span> {{ $order->created_at->format('Y-m-d H:i') }}</div>
+                    <div><span class="text-zinc-400">Reference:</span> <span class="font-mono">{{ $order->paystack_reference }}</span></div>
+                    <div><span class="text-zinc-400">Status:</span> <span class="uppercase">{{ $order->status }}</span></div>
+                    <div><span class="text-zinc-400">Date:</span> {{ $order->created_at->format('Y-m-d H:i') }}</div>
 
                     <div class="mt-4">
                         <h3 class="font-semibold">Event</h3>
                         <div>{{ $order->event->title }}</div>
-                        <div class="text-sm text-gray-600">{{ optional($order->event->starts_at)->format('D, M j, Y g:i A') }}</div>
+                        <div class="text-sm text-zinc-400">{{ optional($order->event->starts_at)->format('D, M j, Y g:i A') }}</div>
                     </div>
 
                     <div class="mt-4">
                         <h3 class="font-semibold">Buyer</h3>
                         <div>{{ $order->buyer_name }}</div>
-                        <div class="text-sm text-gray-600">{{ $order->buyer_email }}</div>
+                        <div class="text-sm text-zinc-400">{{ $order->buyer_email }}</div>
                         @if ($order->buyer_phone)
-                            <div class="text-sm text-gray-600">{{ $order->buyer_phone }}</div>
+                            <div class="text-sm text-zinc-400">{{ $order->buyer_phone }}</div>
                         @endif
                     </div>
 
@@ -47,16 +47,16 @@
 
                     <!-- Refunds -->
                     @if ($order->status === 'paid' || $order->status === 'partially_refunded')
-                    <div class="mt-6 border-t pt-4">
+                    <div class="mt-6 border-t border-white/10 pt-4">
                         <h3 class="font-semibold">Refunds</h3>
                         <form method="POST" action="{{ route('admin.orders.refunds.store', $order) }}" class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
                             @csrf
                             <div>
-                                <label class="text-sm text-gray-600">Amount (₦)</label>
+                                <label class="text-sm text-zinc-400">Amount (₦)</label>
                                 <input name="amount" type="number" step="0.01" min="0" placeholder="Leave empty for full" class="mt-1 block w-full rounded border border-white/10 bg-black/30 px-3 py-2" />
                             </div>
                             <div class="sm:col-span-2">
-                                <label class="text-sm text-gray-600">Reason</label>
+                                <label class="text-sm text-zinc-400">Reason</label>
                                 <input name="reason" type="text" class="mt-1 block w-full rounded border border-white/10 bg-black/30 px-3 py-2" />
                             </div>
                             <div class="sm:col-span-3">
@@ -72,8 +72,8 @@
                                   <li>
                                     <span class="font-mono">₦{{ number_format($r->amount/100, 2) }}</span>
                                     — {{ $r->status }}
-                                    @if($r->reason) <span class="text-gray-600">({{ $r->reason }})</span>@endif
-                                    <span class="text-gray-500">{{ optional($r->created_at)->format('Y-m-d H:i') }}</span>
+                                    @if($r->reason) <span class="text-zinc-400">({{ $r->reason }})</span>@endif
+                                    <span class="text-zinc-500">{{ optional($r->created_at)->format('Y-m-d H:i') }}</span>
                                   </li>
                                 @endforeach
                             </ul>
@@ -83,7 +83,7 @@
                     @endif
 
                     <div class="mt-6">
-                        <a href="{{ route('admin.orders.index') }}" class="text-indigo-600 hover:underline">← Back to orders</a>
+                        <a href="{{ route('admin.orders.index') }}" class="text-indigo-300 hover:underline">← Back to orders</a>
                     </div>
                 </div>
             </div>
