@@ -6,7 +6,7 @@
   </head>
   <body style="font-family:Arial,Helvetica,sans-serif; color:#111;">
     <h2 style="margin:0 0 6px 0;">Payment successful</h2>
-    <p style="margin:0 0 12px 0;">Show this QR at the gate. You can also download the PDF ticket.</p>
+    <p style="margin:0 0 12px 0;">Show this QR at the gate.</p>
 
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:12px 0;">
       <tr>
@@ -15,8 +15,6 @@
           <img src="{{ $qrSrc }}" alt="Ticket QR" width="220" height="220" style="display:block; width:220px; height:220px; object-fit:contain;" />
           @elseif(!empty($qrRemote))
           <img src="{{ $qrRemote }}" alt="Ticket QR" width="220" height="220" style="display:block; width:220px; height:220px; object-fit:contain;" />
-          @elseif(!empty($qrData))
-          <img src="{{ $qrData }}" alt="Ticket QR" width="220" height="220" style="display:block; width:220px; height:220px; object-fit:contain;" />
           @else
           <div style="width:220px; height:220px; background:#f1f5f9; display:block;"></div>
           @endif
@@ -39,7 +37,6 @@
 
     <p style="margin:14px 0;">
       <a href="{{ $publicUrl }}" style="background:#111; color:#fff; text-decoration:none; padding:10px 14px; border-radius:8px;">View ticket</a>
-      <a href="{{ $pdfUrl }}" style="background:#e5e7eb; color:#111; text-decoration:none; padding:10px 14px; border-radius:8px; margin-left:10px;">Download PDF</a>
     </p>
 
     <p style="margin:18px 0 0 0; font-size:12px; color:#6b7280;">If you didn’t make this purchase, please ignore this email.</p>
