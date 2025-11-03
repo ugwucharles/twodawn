@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\TicketMail;
 use Illuminate\Support\Str;
 use BaconQrCode\Renderer\ImageRenderer;
@@ -388,8 +389,12 @@ class CheckoutController extends Controller
 
         // Send ticket email immediately (avoid queue reliance on shared hosting)
         try {
+            Log::info('Sending TicketMail', ['reference' => $order->paystack_reference, 'email' => $order->buyer_email]);
             Mail::to($order->buyer_email)->send(new TicketMail($order));
-        } catch (\Throwable $e) { /* swallow mail errors */ }
+            Log::info('TicketMail sent', ['reference' => $order->paystack_reference, 'email' => $order->buyer_email]);
+        } catch (\Throwable $e) {
+            Log::error('TicketMail failed', ['reference' => $order->paystack_reference, 'email' => $order->buyer_email, 'error' => $e->getMessage()]);
+        }
         return true;
     }
 
@@ -418,8 +423,12 @@ class CheckoutController extends Controller
 
         // For free orders, email the ticket as well (send immediately)
         try {
+            Log::info('Sending TicketMail (free)', ['reference' => $order->paystack_reference, 'email' => $order->buyer_email]);
             Mail::to($order->buyer_email)->send(new TicketMail($order));
-        } catch (\Throwable $e) { /* swallow mail errors */ }
+            Log::info('TicketMail sent (free)', ['reference' => $order->paystack_reference, 'email' => $order->buyer_email]);
+        } catch (\Throwable $e) {
+            Log::error('TicketMail failed (free)', ['reference' => $order->paystack_reference, 'email' => $order->buyer_email, 'error' => $e->getMessage()]);
+        }
     }
 
     public function downloadPdf(string $reference)

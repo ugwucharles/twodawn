@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\TicketMail;
 use App\Models\Order;
 
@@ -82,7 +83,13 @@ class PaystackWebhookController extends Controller
             return response()->json(['ok' => true]);
         }
 
-        try { Mail::to($order->buyer_email)->send(new TicketMail($order)); } catch (\Throwable $e) {}
+        try {
+            Log::info('Webhook sending TicketMail', ['reference' => $order->paystack_reference, 'email' => $order->buyer_email]);
+            Mail::to($order->buyer_email)->send(new TicketMail($order));
+            Log::info('Webhook TicketMail sent', ['reference' => $order->paystack_reference, 'email' => $order->buyer_email]);
+        } catch (\Throwable $e) {
+            Log::error('Webhook TicketMail failed', ['reference' => $order->paystack_reference, 'email' => $order->buyer_email, 'error' => $e->getMessage()]);
+        }
 
         return response()->json(['ok' => true]);
     }
