@@ -274,7 +274,7 @@
       <div class="max-w-7xl mx-auto px-6">
         <style>
           @media (max-width: 640px) {
-            #host .host-subline { margin-top: -10px !important; }
+            #host .host-subline { margin-top: -6px !important; }
           }
         </style>
         <div class="mb-6 sm:mb-8">
