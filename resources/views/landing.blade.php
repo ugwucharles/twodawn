@@ -18,7 +18,7 @@
         </div>
         <div class="w-full mx-auto text-center">
             <div class="max-w-4xl mx-auto">
-                <h1 class="font-black uppercase tracking-tighter text-white leading-tight text-[30px] drop-shadow-[0_3px_12px_rgba(0,0,0,0.5)]">
+                <h1 class="font-black uppercase tracking-tighter text-white leading-[0.9] text-6xl sm:text-8xl md:text-9xl drop-shadow-[0_8px_28px_rgba(0,0,0,0.6)]">
                     <span class="inline">Find the vibe,</span><br class="hidden sm:block" />
                     <span class="inline">Book in seconds</span>
                 </h1>
