@@ -53,7 +53,7 @@
 @endsection
 
 @section('content')
-<section class="relative py-12 sm:py-16">
+<section class="relative pb-12 sm:pb-16">
   <style>
     /* Responsive card aspect with extra height bump */
     .card-aspect{position:relative;padding-top:calc(62.5% + 60px);} /* base: 16:10 + 60px */
@@ -82,23 +82,10 @@
   </style>
   <div class="animated-gradient"></div>
   <div class="max-w-7xl mx-auto px-6">
-    <div class="mb-6 flex items-end justify-between gap-4 flex-wrap">
-      <div>
-        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">Discover events</h1>
-        <p class="mt-2 text-zinc-400">Find trending, free, and this weekend’s vibes.</p>
-      </div>
-      <form method="GET" action="{{ route('events.index') }}" class="w-full sm:w-auto flex items-center gap-2">
-        @if(request('mood'))
-          <input type="hidden" name="mood" value="{{ request('mood') }}" />
-        @endif
-        <input name="q" value="{{ request('q') }}" placeholder="Search events..." class="flex-1 sm:w-64 rounded-full bg-white/5 ring-1 ring-white/10 px-4 py-2 text-sm focus:outline-none focus:ring-white/30" />
-        <button class="inline-flex items-center px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-100">Search</button>
-      </form>
-    </div>
 
     @if(!empty($showCurated))
       <div class="mb-6">
-        <h2 class="text-center text-4xl sm:text-5xl md:text-6xl font-extrabold mb-8 sm:mb-10">What are you looking for?</h2>
+        <h2 class="text-center text-4xl sm:text-5xl md:text-6xl font-extrabold mb-8 sm:mb-10">Find your mood</h2>
         <div class="fade-x overflow-x-auto no-scrollbar">
           <ul class="flex items-center justify-center gap-3 sm:gap-4 min-w-max text-zinc-300 text-xl sm:text-2xl tracking-wider">
             @php $items = collect(config('moods.list', ['Rave','Romantic','Amapiano','Afrobeats','Hip‑Hop','House','Live Band','Jazz','Techno','Gospel','Comedy','Networking'])); @endphp

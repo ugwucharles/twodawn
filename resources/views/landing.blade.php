@@ -17,11 +17,22 @@
             <div class="absolute -bottom-48 -right-32 h-[40rem] w-[40rem] rounded-full blur-3xl opacity-20 bg-gradient-to-tr from-sky-500 to-emerald-400"></div>
         </div>
         <div class="w-full mx-auto text-center">
-            <h1 class="fluid-title font-extrabold tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">Find the vibe. Book in seconds.</h1>
-            <p class="mt-5 text-zinc-200 fluid-subtitle">Curated nights across the city — no accounts, instant tickets, pure vibes.</p>
-            <div class="mt-10 flex items-center justify-center text-zinc-300 text-sm">
-                @php $uc = (int) ($stats['upcoming_events_count'] ?? 0); @endphp
-                <div><span class="text-white font-semibold text-xl">{{ number_format($uc) }}</span> upcoming {{ $uc === 1 ? 'event' : 'events' }}</div>
+            <div class="max-w-4xl mx-auto">
+                <h1 class="font-black uppercase tracking-tighter text-white leading-[0.85] text-8xl sm:text-9xl md:text-[11rem] drop-shadow-[0_8px_28px_rgba(0,0,0,0.6)]">
+                    <span style="font-size: 30px">Find the vibe,</span><br class="hidden sm:block" />
+                    <span style="font-size: 30px">Book in seconds</span>
+                </h1>
+                <p class="mt-4 text-zinc-200 text-sm sm:text-base">No account required — instant tickets, pure vibes.</p>
+                <div class="mt-6 sm:mt-8 flex items-center justify-center">
+                    <a href="#upcoming" class="inline-flex items-center px-6 sm:px-8 py-3 rounded-full bg-white text-black font-semibold text-sm sm:text-base hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-white/40">
+                        GET TICKETS
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="ml-2 h-4 w-4"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 11-1.414-1.414L13.586 10H4a1 1 0 110-2h9.586l-3.293-3.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </a>
+                </div>
+                <div class="mt-4 sm:mt-6 flex items-center justify-center text-zinc-300 text-xs sm:text-sm">
+                    @php $uc = (int) ($stats['upcoming_events_count'] ?? 0); @endphp
+                    <div><span class="text-white font-semibold text-lg sm:text-xl">{{ number_format($uc) }}</span> upcoming {{ $uc === 1 ? 'event' : 'events' }}</div>
+                </div>
             </div>
         </div>
     </section>
@@ -29,7 +40,7 @@
     <!-- Mood scroller: what are you looking for? -->
     <section class="relative py-10">
       <div class="max-w-7xl mx-auto px-6">
-        <h2 class="text-center text-4xl sm:text-5xl md:text-6xl font-extrabold mb-8 sm:mb-10">What are you looking for?</h2>
+        <h2 class="text-center text-4xl sm:text-5xl md:text-6xl font-extrabold mb-8 sm:mb-10">Find your mood</h2>
         <div class="fade-x overflow-x-auto no-scrollbar">
           <ul class="flex items-center justify-center gap-3 sm:gap-4 min-w-max text-zinc-300 text-xl sm:text-2xl tracking-wider">
             @php $items = collect(config('moods.list', ['Rave','Romantic','Amapiano','Afrobeats','Hip‑Hop','House','Live Band','Jazz','Techno','Gospel','Comedy','Networking'])); @endphp
@@ -261,6 +272,11 @@
         <div class="absolute -bottom-32 -right-24 h-80 w-80 rounded-full blur-3xl opacity-10 bg-gradient-to-tr from-sky-500 to-emerald-400"></div>
       </div>
       <div class="max-w-7xl mx-auto px-6">
+        <style>
+          @media (max-width: 640px) {
+            #host .host-subline { margin-top: -30px !important; }
+          }
+        </style>
         <div class="mb-6 sm:mb-8">
           <h2 class="text-3xl sm:text-4xl font-bold">Host with us</h2>
         </div>
@@ -271,9 +287,9 @@
           </div>
             <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
               <!-- Left: offer list + headline -->
-              <div class="flex flex-col justify-between h-full min-h-[460px]">
+              <div class="flex flex-col h-full lg:justify-between lg:min-h-[460px]">
                 <h3 class="mt-4 text-4xl sm:text-5xl font-extrabold">Get in touch with us!</h3>
-                <p class="mt-1 sm:mt-1 md:mt-2 text-zinc-300">We’ll handle ticketing, payments, and check‑ins so you can focus on the vibe.</p>
+                <p class="mt-1 sm:mt-1 md:mt-2 text-zinc-300 host-subline">We’ll handle ticketing, payments, and check‑ins so you can focus on the vibe.</p>
                 <ul class="mt-2 sm:mt-3 md:mt-4 space-y-1 sm:space-y-2 text-sm text-zinc-300">
                   <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Instant payouts with Paystack</li>
                   <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>QR tickets & capacity protection</li>

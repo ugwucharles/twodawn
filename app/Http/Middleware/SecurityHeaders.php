@@ -37,12 +37,21 @@ class SecurityHeaders
         
         // Content Security Policy (production-safe)
         $csp = "default-src 'self'; " .
-               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co https://www.googletagmanager.com https://plausible.io https://cdn.jsdelivr.net; " .
+               // JS: allow Paystack, analytics, CDN, and Sentry browser SDK
+               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co https://www.googletagmanager.com https://plausible.io https://cdn.jsdelivr.net https://browser.sentry-cdn.com; " .
+               // CSS
                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net; " .
+               // Images (flyers, data URIs, etc.)
                "img-src 'self' data: https: blob:; " .
+               // Fonts
                "font-src 'self' data: https://fonts.gstatic.com https://fonts.bunny.net; " .
-               "connect-src 'self' https://api.paystack.co https://res.cloudinary.com https://www.google-analytics.com https://region1.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://plausible.io; " .
+               // XHR/fetch: Paystack, analytics, and Sentry ingest
+               "connect-src 'self' https://api.paystack.co https://res.cloudinary.com https://www.google-analytics.com https://region1.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://plausible.io https://*.sentry.io; " .
+               // Paystack checkout
                "frame-src https://js.paystack.co https://checkout.paystack.com; " .
+               // Sentry Replay/WebWorker support
+               "worker-src 'self' blob:; " .
+               // Hard restrictions
                "object-src 'none'; " .
                "base-uri 'self'; " .
                "form-action 'self' https:; " .

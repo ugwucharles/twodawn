@@ -45,11 +45,7 @@
 @endsection
 
 @section('content')
-<section class="relative py-12 sm:py-16">
-  <div class="max-w-7xl mx-auto px-6 mb-6 flex justify-between">
-    <a href="{{ url('/') }}" class="text-sm text-zinc-300 hover:text-white">Home</a>
-    <a href="{{ route('events.index') }}" class="text-sm text-zinc-300 hover:text-white">All events</a>
-  </div>
+<section class="relative pb-12 sm:pb-16">
   <style>
     /* Responsive card aspect for recent page */
     .card-aspect{position:relative;padding-top:calc(62.5% + 60px);} /* 16:10 + 60px */

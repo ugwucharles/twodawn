@@ -6,14 +6,12 @@
 
 @section('content')
 
-<!-- Hero (matches homepage style but shorter) -->
-<section class="relative min-h-[40vh] flex items-end pb-0 pt-8 sm:pt-12">
-  @include('partials.public-header')
+<!-- Top: compact header area like Events page (no extra header here) -->
+<section class="relative pb-12 sm:pb-16">
   <div class="absolute inset-0 -z-10">
     <div class="absolute -top-48 -left-32 h-[40rem] w-[40rem] rounded-full blur-3xl opacity-30 bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-rose-500"></div>
     <div class="absolute -bottom-48 -right-32 h-[40rem] w-[40rem] rounded-full blur-3xl opacity-20 bg-gradient-to-tr from-sky-500 to-emerald-400"></div>
-  </div><br>
-  <br>
+  </div>
   <div class="w-full mx-auto px-6 text-center">
     <h1 class="fluid-title font-extrabold tracking-tight">Transparent pricing</h1>
     <p class="mt-4 text-zinc-300">Only two options. No hidden fees.</p>
