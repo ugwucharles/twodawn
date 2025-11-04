@@ -18,9 +18,9 @@
         </div>
         <div class="w-full mx-auto text-center">
             <div class="max-w-4xl mx-auto">
-                <h1 class="font-black uppercase tracking-tighter text-white leading-[0.85] text-8xl sm:text-9xl md:text-[11rem] drop-shadow-[0_8px_28px_rgba(0,0,0,0.6)]">
-                    <span style="font-size: 30px">Find the vibe,</span><br class="hidden sm:block" />
-                    <span style="font-size: 30px">Book in seconds</span>
+                <h1 class="font-black uppercase tracking-tighter text-white leading-tight text-[30px] drop-shadow-[0_3px_12px_rgba(0,0,0,0.5)]">
+                    <span class="inline">Find the vibe,</span><br class="hidden sm:block" />
+                    <span class="inline">Book in seconds</span>
                 </h1>
                 <p class="mt-4 text-zinc-200 text-sm sm:text-base">No account required — instant tickets, pure vibes.</p>
                 <div class="mt-6 sm:mt-8 flex items-center justify-center">
