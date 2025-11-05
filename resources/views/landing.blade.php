@@ -274,7 +274,7 @@
       <div class="max-w-7xl mx-auto px-6">
         <style>
           @media (max-width: 640px) {
-            #host .host-subline { margin-top: -6px !important; }
+            #host .host-subline { margin-top: 5px !important; }
           }
         </style>
         <div class="mb-6 sm:mb-8">
@@ -288,10 +288,7 @@
             <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
               <!-- Left: offer list + headline -->
               <div class="flex flex-col h-full lg:justify-between lg:min-h-[460px]">
-                <h3 class="mt-4 text-4xl sm:text-5xl font-extrabold">
-                  <span class="block sm:inline">Get in touch</span>
-                  <span class="block sm:inline">with us!</span>
-                </h3>
+                <h3 class="mt-4 text-4xl sm:text-5xl font-extrabold">Get in touch with us!</h3>
                 <p class="mt-1 sm:mt-1 md:mt-2 text-zinc-300 host-subline">We’ll handle ticketing, payments, and check‑ins so you can focus on the vibe.</p>
                 <ul class="mt-2 sm:mt-3 md:mt-4 space-y-1 sm:space-y-2 text-sm text-zinc-300">
                   <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Instant payouts with Paystack</li>
