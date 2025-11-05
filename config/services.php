@@ -35,10 +35,15 @@ return [
         ],
     ],
 
-    'paystack' => [
+'paystack' => [
         'public' => env('PAYSTACK_PUBLIC_KEY'),
         'secret' => env('PAYSTACK_SECRET_KEY'),
         'callback_url' => env('PAYSTACK_CALLBACK_URL', env('APP_URL').'/paystack/callback'),
+    ],
+
+    'turnstile' => [
+        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'secret' => env('TURNSTILE_SECRET_KEY'),
     ],
 
 ];

@@ -115,8 +115,30 @@ class CheckoutController extends Controller
 
             $amountKobo = max(0, $subtotalKobo - $discountKobo + $feesKobo);
 
-            // If total is zero (free), enforce 1 free claim per hour per email
+            // For zero-cost orders, require Turnstile bot check if configured
             if ($amountKobo <= 0) {
+                $siteKey = (string) config('services.turnstile.site_key');
+                $secretKey = (string) config('services.turnstile.secret');
+                $token = (string) $request->input('cf-turnstile-response', '');
+                if ($siteKey && $secretKey) {
+                    if ($token === '') {
+                        return back()->withErrors(['general' => 'Please complete the bot check.'])->withInput();
+                    }
+                    try {
+                        $resp = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+                            'secret' => $secretKey,
+                            'response' => $token,
+                            'remoteip' => (string) $request->ip(),
+                        ]);
+                        if (!($resp->ok() && (bool) data_get($resp->json(), 'success'))) {
+                            return back()->withErrors(['general' => 'Bot check failed. Please try again.'])->withInput();
+                        }
+                    } catch (\Throwable $e) {
+                        return back()->withErrors(['general' => 'Bot check unavailable. Please try again shortly.'])->withInput();
+                    }
+                }
+
+                // If total is zero (free), enforce 1 free claim per hour per email
                 $ip = (string) $request->ip();
                 $recentFree = Order::where('created_ip', $ip)
                     ->where('event_id', $event->id)

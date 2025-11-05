@@ -44,6 +44,12 @@
         @csrf
         <!-- Security token to prevent double submissions -->
         <input type="hidden" name="submission_token" value="{{ \Illuminate\Support\Str::random(32) }}" id="submission-token">
+        @if(($unitPrice ?? 0) <= 0 && config('services.turnstile.site_key'))
+          <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+          <div class="mt-2">
+            <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}" data-theme="dark"></div>
+          </div>
+        @endif
         <div>
           <label class="block text-sm text-zinc-300" for="buyer_name">Full name</label>
           <input id="buyer_name" name="buyer_name" type="text" required value="{{ old('buyer_name') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />

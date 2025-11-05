@@ -27,7 +27,12 @@ class Coupon extends Model
     public function scopeValidFor($query, ?int $eventId)
     {
         return $query->where('active', true)
-            ->when($eventId, fn($q) => $q->whereNull('event_id')->orWhere('event_id', $eventId))
+            ->when($eventId, function ($q) use ($eventId) {
+                $q->where(function ($qq) use ($eventId) {
+                    $qq->whereNull('event_id')
+                       ->orWhere('event_id', $eventId);
+                });
+            })
             ->where(function($q){
                 $now = now();
                 $q->whereNull('starts_at')->orWhere('starts_at','<=',$now);
