@@ -37,8 +37,8 @@ class SecurityHeaders
         
         // Content Security Policy (production-safe)
         $csp = "default-src 'self'; " .
-               // JS: allow Paystack, analytics, CDN, Sentry browser SDK, and Turnstile
-               "script-src 'self' 'unsafe-inline' https://js.paystack.co https://www.googletagmanager.com https://plausible.io https://cdn.jsdelivr.net https://browser.sentry-cdn.com https://challenges.cloudflare.com; " .
+               // JS: allow Paystack, analytics, CDN, Sentry browser SDK, and Turnstile; include 'unsafe-eval' to keep Alpine/Chart working
+               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co https://www.googletagmanager.com https://plausible.io https://cdn.jsdelivr.net https://browser.sentry-cdn.com https://challenges.cloudflare.com; " .
                // CSS
                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net; " .
                // Images (flyers, data URIs, etc.)
