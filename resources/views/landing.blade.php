@@ -90,8 +90,8 @@
                                     @keyframes fadeSwapA { 0%{opacity:1} 49%{opacity:1} 50%{opacity:0} 100%{opacity:0} }
                                     @keyframes fadeSwapB { 0%{opacity:0} 49%{opacity:0} 50%{opacity:1} 100%{opacity:1} }
                                 </style>
-                                <img src="{{ $gal[0] }}" alt="{{ $event->title }}" class="absolute inset-0 h-full w-full object-cover" style="animation: fadeSwapA 14s ease-in-out infinite;"/>
-                                <img src="{{ $gal[1] }}" alt="{{ $event->title }}" class="absolute inset-0 h-full w-full object-cover" style="animation: fadeSwapB 14s ease-in-out infinite;"/>
+                                <img src="{{ $gal[0] }}" alt="{{ $event->title }}" class="absolute inset-0 h-full w-full object-cover" style="animation: fadeSwapA 60s ease-in-out infinite;"/>
+                                <img src="{{ $gal[1] }}" alt="{{ $event->title }}" class="absolute inset-0 h-full w-full object-cover" style="animation: fadeSwapB 60s ease-in-out infinite;"/>
                             @elseif($imgSrc)
                                 <img src="{{ $imgSrc }}" alt="{{ $event->title }}" class="absolute inset-0 h-full w-full object-cover"/>
                             @else
