@@ -126,6 +126,14 @@
       /* Hide scrollbars for mood scroller */
       .no-scrollbar::-webkit-scrollbar{ display:none; }
       .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
+      /* Initial splash preloader */
+      #preloader{ position:fixed; inset:0; background:#fff; display:flex; align-items:center; justify-content:center; z-index:9999; transition:opacity .8s ease, visibility .8s ease; }
+      #preloader.hidden{ opacity:0; visibility:hidden; }
+      #preloader .brand{ display:flex; flex-direction:column; align-items:center; gap:16px; }
+      #preloader .logo{ width:72px; height:72px; object-fit:contain; filter: drop-shadow(0 0 18px rgba(99,102,241,.55)); animation:pulseGlow 1.8s ease-in-out infinite; }
+      #preloader .spinner{ width:40px; height:40px; border-radius:9999px; border:3px solid rgba(0,0,0,.08); border-top-color:#111; animation:spin 1s linear infinite; }
+      @keyframes spin{ to{ transform: rotate(360deg); } }
+      @keyframes pulseGlow{ 0%,100%{ filter: drop-shadow(0 0 12px rgba(99,102,241,.45)); transform: scale(1); } 50%{ filter: drop-shadow(0 0 28px rgba(236,72,153,.55)); transform: scale(1.04); } }
     </style>
     @yield('head_links')
     @yield('jsonld')
@@ -154,6 +162,12 @@
     <script type="application/ld+json">{!! json_encode($siteJson, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
   </head>
   <body class="antialiased bg-black text-white min-h-screen flex flex-col">
+    <div id="preloader" aria-hidden="true">
+      <div class="brand">
+        <img src="{{ asset('images/Group 2.png') }}" alt="{{ $appName }}" class="logo"/>
+        <div class="spinner" role="status" aria-label="Loading"></div>
+      </div>
+    </div>
     @unless (request()->routeIs('home'))
       @include('partials.public-header')
     @endunless
@@ -228,6 +242,20 @@
       (function(){
         try{
           window.addEventListener('pageshow', function(){ if (!location.hash) requestAnimationFrame(()=>window.scrollTo(0,0)); });
+        }catch(_){}
+      })();
+    </script>
+
+    <script>
+      // Preloader: show for ~3s, then fade out smoothly
+      (function(){
+        try{
+          var el = document.getElementById('preloader');
+          if(!el) return;
+          setTimeout(function(){
+            el.classList.add('hidden');
+            setTimeout(function(){ try{ el.remove(); }catch(_){} }, 900);
+          }, 3000);
         }catch(_){}
       })();
     </script>
