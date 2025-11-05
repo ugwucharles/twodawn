@@ -127,13 +127,14 @@
       .no-scrollbar::-webkit-scrollbar{ display:none; }
       .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
       /* Initial splash preloader */
-      #preloader{ position:fixed; inset:0; background:#fff; display:flex; align-items:center; justify-content:center; z-index:9999; transition:opacity .8s ease, visibility .8s ease; }
+      #preloader{ position:fixed; inset:0; background:#000; display:flex; align-items:center; justify-content:center; z-index:9999; transition:opacity .8s ease, visibility .8s ease; }
       #preloader.hidden{ opacity:0; visibility:hidden; }
       #preloader .brand{ display:flex; flex-direction:column; align-items:center; gap:16px; }
-      #preloader .logo{ width:72px; height:72px; object-fit:contain; filter: drop-shadow(0 0 18px rgba(99,102,241,.55)); animation:pulseGlow 1.8s ease-in-out infinite; }
-      #preloader .spinner{ width:40px; height:40px; border-radius:9999px; border:3px solid rgba(0,0,0,.08); border-top-color:#111; animation:spin 1s linear infinite; }
+      #preloader .logo-text{ font-weight:800; letter-spacing:-.02em; color:#fff; font-size:clamp(24px,4.5vw,36px); text-shadow:0 0 18px rgba(96,165,250,.45); animation:pulseGlow 1.8s ease-in-out infinite; }
+      #preloader .logo-text .accent{ color: var(--brand, #60a5fa); }
+      #preloader .spinner{ width:40px; height:40px; border-radius:9999px; border:3px solid rgba(255,255,255,.15); border-top-color:#fff; animation:spin 2.2s linear infinite; }
       @keyframes spin{ to{ transform: rotate(360deg); } }
-      @keyframes pulseGlow{ 0%,100%{ filter: drop-shadow(0 0 12px rgba(99,102,241,.45)); transform: scale(1); } 50%{ filter: drop-shadow(0 0 28px rgba(236,72,153,.55)); transform: scale(1.04); } }
+      @keyframes pulseGlow{ 0%,100%{ text-shadow:0 0 12px rgba(96,165,250,.4); transform: scale(1); } 50%{ text-shadow:0 0 28px rgba(236,72,153,.6); transform: scale(1.04); } }
     </style>
     @yield('head_links')
     @yield('jsonld')
@@ -164,7 +165,7 @@
   <body class="antialiased bg-black text-white min-h-screen flex flex-col">
     <div id="preloader" aria-hidden="true">
       <div class="brand">
-        <img src="{{ asset('images/Group 2.png') }}" alt="{{ $appName }}" class="logo"/>
+        <div class="logo-text">2<span class="accent">DAWN</span></div>
         <div class="spinner" role="status" aria-label="Loading"></div>
       </div>
     </div>
