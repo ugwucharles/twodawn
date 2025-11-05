@@ -130,11 +130,24 @@
       #preloader{ position:fixed; inset:0; background:#000; display:flex; align-items:center; justify-content:center; z-index:9999; transition:opacity .8s ease, visibility .8s ease; }
       #preloader.hidden{ opacity:0; visibility:hidden; }
       #preloader .brand{ display:flex; flex-direction:column; align-items:center; gap:16px; }
-      #preloader .logo-text{ font-weight:800; letter-spacing:-.02em; color:#fff; font-size:clamp(24px,4.5vw,36px); text-shadow:0 0 18px rgba(96,165,250,.45); animation:pulseGlow 1.8s ease-in-out infinite; }
+      #preloader .logo-text{ font-weight:800; letter-spacing:-.02em; color:#fff; font-size:clamp(24px,4.5vw,36px); text-shadow:0 0 18px rgba(96,165,250,.45); animation:glowPulse 2.4s ease-in-out infinite; }
       #preloader .logo-text .accent{ color: var(--brand, #60a5fa); }
       #preloader .spinner{ width:40px; height:40px; border-radius:9999px; border:3px solid rgba(255,255,255,.15); border-top-color:#fff; animation:spin 2.2s linear infinite; }
       @keyframes spin{ to{ transform: rotate(360deg); } }
-      @keyframes pulseGlow{ 0%,100%{ text-shadow:0 0 12px rgba(96,165,250,.4); transform: scale(1); } 50%{ text-shadow:0 0 28px rgba(236,72,153,.6); transform: scale(1.04); } }
+      @keyframes glowPulse{
+        0%,100%{
+          text-shadow:
+            0 0 6px rgba(99,102,241,.25),
+            0 0 16px rgba(99,102,241,.35),
+            0 0 28px rgba(236,72,153,.30);
+        }
+        50%{
+          text-shadow:
+            0 0 10px rgba(99,102,241,.45),
+            0 0 26px rgba(236,72,153,.55),
+            0 0 52px rgba(236,72,153,.55);
+        }
+      }
     </style>
     @yield('head_links')
     @yield('jsonld')
