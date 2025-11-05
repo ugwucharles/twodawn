@@ -17,8 +17,8 @@
             <div class="absolute -bottom-48 -right-32 h-[40rem] w-[40rem] rounded-full blur-3xl opacity-20 bg-gradient-to-tr from-sky-500 to-emerald-400"></div>
         </div>
         <div class="w-full mx-auto text-center">
-            <div class="max-w-4xl mx-auto">
-                <h1 class="font-black uppercase tracking-tighter text-white leading-[0.9] text-6xl sm:text-8xl md:text-9xl drop-shadow-[0_8px_28px_rgba(0,0,0,0.6)]">
+            <div class="max-w-5xl mx-auto">
+                <h1 class="font-black uppercase tracking-tight text-white leading-[0.85] text-[64px] sm:text-[96px] md:text-[140px] drop-shadow-[0_8px_28px_rgba(0,0,0,0.6)]">
                     <span class="inline">Find the vibe,</span><br class="hidden sm:block" />
                     <span class="inline">Book in seconds</span>
                 </h1>
