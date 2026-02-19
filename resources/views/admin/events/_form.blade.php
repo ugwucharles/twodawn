@@ -61,6 +61,7 @@
     </div>
 
     <div class="flex items-start gap-2">
+        <input type="hidden" name="pass_fees_to_buyer" value="0" />
         <input id="pass_fees_to_buyer" name="pass_fees_to_buyer" type="checkbox" value="1" class="mt-1 rounded border-white/20 text-indigo-500 shadow-sm focus:ring-indigo-400/30" @checked(old('pass_fees_to_buyer', $event->pass_fees_to_buyer)) />
         <label for="pass_fees_to_buyer" class="text-sm text-zinc-300">Pass fees to buyer <span class="text-zinc-500">(adds 5% + ₦50 per ticket at checkout)</span></label>
         <x-input-error :messages="$errors->get('pass_fees_to_buyer')" class="mt-2" />
@@ -93,13 +94,22 @@
         </div>
     </div>
 
+    <div>
+        <x-input-label for="free_tickets_count" :value="__('First N tickets free')" />
+        <x-text-input id="free_tickets_count" name="free_tickets_count" type="number" step="1" min="0" class="mt-1 block w-full" :value="old('free_tickets_count', $event->free_tickets_count)" placeholder="e.g. 50" />
+        <x-input-error :messages="$errors->get('free_tickets_count')" class="mt-2" />
+        <p class="mt-1 text-xs text-zinc-400">The first N buyers get free tickets. Leave empty to disable.</p>
+    </div>
+
     <div class="flex items-center">
+        <input type="hidden" name="is_published" value="0" />
         <input id="is_published" name="is_published" type="checkbox" value="1" class="rounded border-white/20 text-indigo-500 shadow-sm focus:ring-indigo-400/30" @checked(old('is_published', $event->is_published)) />
         <label for="is_published" class="ms-2 text-sm text-zinc-300">{{ __('Published') }}</label>
         <x-input-error :messages="$errors->get('is_published')" class="mt-2" />
     </div>
 
     <div class="mt-4 flex items-start gap-2">
+        <input type="hidden" name="use_custom_slug" value="0" />
         <input id="use_custom_slug" name="use_custom_slug" type="checkbox" value="1" class="mt-1 rounded border-white/20 text-indigo-500 shadow-sm focus:ring-indigo-400/30" @checked(old('use_custom_slug', $event->use_custom_slug)) />
         <div class="flex-1">
             <label for="slug" class="text-sm text-zinc-300">Custom URL</label>

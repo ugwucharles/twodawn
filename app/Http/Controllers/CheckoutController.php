@@ -87,6 +87,22 @@ class CheckoutController extends Controller
             if (!is_null($event->early_bird_price) && !is_null($event->early_bird_ends_at) && $now->lte($event->early_bird_ends_at)) {
                 $unitPrice = (float) $event->early_bird_price;
             }
+
+            // Check if this order qualifies for "first N free" tickets
+            $isFreeTicketPromo = false;
+            if (!is_null($event->free_tickets_count) && $event->free_tickets_count > 0) {
+                // Count total tickets already sold (paid orders only)
+                $ticketsSold = Order::where('event_id', $event->id)
+                    ->where('status', 'paid')
+                    ->sum('quantity');
+                
+                // If current tickets sold + requested quantity is within the free limit
+                if (($ticketsSold + $quantity) <= $event->free_tickets_count) {
+                    $unitPrice = 0;
+                    $isFreeTicketPromo = true;
+                }
+            }
+
             $subtotalKobo = (int) round($unitPrice * $quantity * 100);
 
             // Calculate buyer fees if passed to buyer: 5% + ₦50 per ticket
@@ -148,8 +164,15 @@ class CheckoutController extends Controller
                     ->orderByDesc('created_at')
                     ->first();
                 if ($recentFree) {
-                    $mins = max(1, 60 - now()->diffInMinutes($recentFree->created_at));
-                    return back()->withErrors(['general' => 'You recently claimed a free ticket. Please try again in ~'.$mins.' minute(s).'])->withInput();
+                    $secondsLeft = max(60, 3600 - now()->diffInSeconds($recentFree->created_at));
+                    $hours = floor($secondsLeft / 3600);
+                    $minutes = ceil(($secondsLeft % 3600) / 60);
+                    if ($hours > 0) {
+                        $waitTime = $hours . ' hour' . ($hours > 1 ? 's' : '') . ' and ' . $minutes . ' minute' . ($minutes > 1 ? 's' : '');
+                    } else {
+                        $waitTime = $minutes . ' minute' . ($minutes > 1 ? 's' : '');
+                    }
+                    return back()->withErrors(['general' => 'You recently claimed a free ticket. Please try again in ' . $waitTime . '.'])->withInput();
                 }
             }
 
@@ -204,7 +227,7 @@ class CheckoutController extends Controller
             ]);
 
             $callback = config('services.paystack.callback_url') ?: route('paystack.callback');
-            $response = Http::withToken($secret)->post('https://api.paystack.co/transaction/initialize', [
+            $response = Http::withOptions(['verify' => !app()->isLocal()])->withToken($secret)->post('https://api.paystack.co/transaction/initialize', [
                 'email' => $order->buyer_email,
                 'amount' => $amountKobo,
                 'reference' => $reference,
@@ -370,7 +393,7 @@ class CheckoutController extends Controller
         }
 
         $secret = config('services.paystack.secret');
-        $verify = Http::withToken($secret)->get('https://api.paystack.co/transaction/verify/'.$reference);
+        $verify = Http::withOptions(['verify' => !app()->isLocal()])->withToken($secret)->get('https://api.paystack.co/transaction/verify/'.$reference);
         $body = $verify->json();
         $status = (string) data_get($body, 'data.status');
         $amount = (int) data_get($body, 'data.amount');

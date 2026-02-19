@@ -18,6 +18,7 @@ class Event extends Model
         'early_bird_price',
         'early_bird_ends_at',
         'capacity',
+        'free_tickets_count',
         'is_published',
         'pass_fees_to_buyer',
 'image_path',

@@ -45,6 +45,7 @@ class EventController extends Controller
             'ends_at' => ['nullable','date','after_or_equal:starts_at'],
             'price' => ['nullable','numeric','min:0'],
             'capacity' => ['nullable','integer','min:1'],
+            'free_tickets_count' => ['nullable','integer','min:0'],
             'early_bird_price' => ['nullable','numeric','min:0'],
             'early_bird_ends_at' => ['nullable','date'],
 'is_published' => ['sometimes','boolean'],
@@ -59,6 +60,10 @@ class EventController extends Controller
         $data['title'] = trim(strip_tags($data['title']));
         $data['description'] = $data['description'] ? trim($data['description']) : null;
         $data['venue'] = $data['venue'] ? trim(strip_tags($data['venue'])) : null;
+
+        // Set defaults for nullable numeric fields (database requires values)
+        $data['price'] = $data['price'] ?? 0;
+        $data['early_bird_price'] = $data['early_bird_price'] ?? null;
 
         // Normalize slug
         $data['use_custom_slug'] = $request->boolean('use_custom_slug');

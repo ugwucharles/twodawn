@@ -1,0 +1,26 @@
+
+$email = 'admin@partyapp.test';
+$password = 'password';
+
+echo "Checking user: $email\n";
+$user = \App\Models\User::where('email', $email)->first();
+
+if (!$user) {
+    echo "User not found in DB!\n";
+} else {
+    echo "User found. ID: " . $user->id . ", Admin: " . ($user->is_admin ? 'Yes' : 'No') . "\n";
+    echo "Password hash: " . $user->password . "\n";
+    
+    if (\Illuminate\Support\Facades\Hash::check($password, $user->password)) {
+        echo "Hash check: MATCH\n";
+    } else {
+        echo "Hash check: FAIL\n";
+    }
+
+    if (\Illuminate\Support\Facades\Auth::attempt(['email' => $email, 'password' => $password])) {
+        echo "Auth::attempt: SUCCESS\n";
+    } else {
+        echo "Auth::attempt: FAILED\n";
+    }
+}
+exit();

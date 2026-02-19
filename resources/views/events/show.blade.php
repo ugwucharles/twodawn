@@ -179,6 +179,7 @@
               <h2 class="text-sm uppercase tracking-widest text-zinc-400">Or buy for a friend</h2>
               <form method="POST" action="{{ route('orders.create', $event, false) }}" class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 @csrf
+                <input type="hidden" name="submission_token" value="{{ \Illuminate\Support\Str::random(32) }}" />
                 <div class="sm:col-span-1">
                   <label class="block text-xs text-zinc-400" for="friend_name">Friend's name</label>
                   <input id="friend_name" name="buyer_name" type="text" placeholder="Jane Doe" value="{{ old('buyer_name') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
