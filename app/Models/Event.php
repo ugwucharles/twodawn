@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Models\Order; // for free tickets calculations
 
 class Event extends Model
 {
@@ -21,7 +22,7 @@ class Event extends Model
         'free_tickets_count',
         'is_published',
         'pass_fees_to_buyer',
-'image_path',
+        'image_path',
         'gallery',
         'mood',
         'use_custom_slug',
@@ -33,11 +34,11 @@ class Event extends Model
         return [
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
-'is_published' => 'boolean',
-'pass_fees_to_buyer' => 'boolean',
+            'is_published' => 'boolean',
+            'pass_fees_to_buyer' => 'boolean',
             'use_custom_slug' => 'boolean',
             'price' => 'decimal:2',
-'early_bird_price' => 'decimal:2',
+            'early_bird_price' => 'decimal:2',
             'gallery' => 'array',
         ];
     }
@@ -53,6 +54,22 @@ class Event extends Model
             try { return route('events.slug', $this->slug); } catch (\Throwable $e) { return url('/event/' . $this->slug); }
         }
         try { return route('events.show', $this); } catch (\Throwable $e) { return url('/events/'.$this->id); }
+    }
+
+    /**
+     * Remaining promotional free tickets (first-N free).
+     * Counts all paid orders (free and paid amounts have status 'paid').
+     */
+    public function getFreeTicketsRemainingAttribute(): int
+    {
+        $limit = (int) ($this->free_tickets_count ?? 0);
+        if ($limit <= 0) return 0;
+        try {
+            $sold = (int) Order::where('event_id', $this->id)->where('status', 'paid')->sum('quantity');
+        } catch (\Throwable $e) {
+            $sold = 0;
+        }
+        return max(0, $limit - $sold);
     }
 
     public function getImageUrlAttribute(): ?string

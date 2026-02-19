@@ -61,6 +61,9 @@
             <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-rose-500"></div>
           @endif
         </div>
+        @if(($event->free_tickets_remaining ?? 0) > 0)
+          <p class="mt-3 text-emerald-300 text-sm">Free tickets available, hurry and get yours now</p>
+        @endif
       </div>
 
       <!-- Right: Details + Buy -->
@@ -114,7 +117,8 @@
               @if($isPast || ($remaining !== null && $remaining <= 0))
                 <button disabled class="inline-flex items-center px-4 py-2 rounded-xl bg-zinc-700/50 text-zinc-300 text-sm font-semibold cursor-not-allowed">Sales closed</button>
               @else
-                <a href="{{ route('events.buy', $event) }}" class="inline-flex items-center px-4 py-2 rounded-xl bg-white text-black text-sm font-semibold hover:bg-zinc-100 transition">{{ $isFree ? 'Get ticket' : 'Buy ticket' }}</a>
+                @php $hasPromoCta = (!is_null($event->free_tickets_count) && ($event->free_tickets_remaining ?? 0) > 0); @endphp
+                <a href="{{ route('events.buy', $event) }}" class="inline-flex items-center px-4 py-2 rounded-xl bg-white text-black text-sm font-semibold hover:bg-zinc-100 transition">{{ $hasPromoCta ? 'Get free ticket' : ($isFree ? 'Get ticket' : 'Buy ticket') }}</a>
               @endif
             </div>
             <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
