@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="form-container">
-    <div class="logo-container">Admin Sign In</div>
+    <div class="logo-container">Organizer Sign In</div>
 
     @if (session('status'))
         <div class="alert-success">{{ session('status') }}</div>
@@ -15,7 +15,7 @@
         </div>
     @endif
 
-    <form class="form" method="POST" action="{{ route('admin.login.store') }}">
+    <form class="form" method="POST" action="{{ route('organizer.login.store') }}">
         @csrf
         <div class="form-group">
             <label for="email">Email</label>
@@ -25,15 +25,17 @@
             <label for="password">Password</label>
             <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
         </div>
-        <div class="form-row">
-            <label class="checkbox-label">
+        <div class="form-row" style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+            <label class="checkbox-label" style="display:flex;align-items:center;gap:6px;font-size:13px;">
                 <input type="checkbox" name="remember"> Remember me
             </label>
-            @if (Route::has('password.request'))
-                <a href="{{ route('password.request') }}">Forgot password?</a>
-            @endif
         </div>
         <button class="form-submit-btn" type="submit">Sign In</button>
     </form>
+
+    <p class="signup-link">
+        Don't have an organizer account?
+        <a href="{{ route('organizer.register') }}" class="signup-link link">Create one here</a>
+    </p>
 </div>
 @endsection

@@ -10,6 +10,7 @@ use App\Models\Order; // for free tickets calculations
 class Event extends Model
 {
     protected $fillable = [
+        'user_id',
         'title',
         'description',
         'venue',
@@ -48,12 +49,32 @@ class Event extends Model
         return $this->hasMany(Comment::class);
     }
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function getPublicUrlAttribute(): string
     {
         if ($this->use_custom_slug && $this->slug) {
-            try { return route('events.slug', $this->slug); } catch (\Throwable $e) { return url('/event/' . $this->slug); }
+            try {
+                return route('events.slug', $this->slug);
+            }
+            catch (\Throwable $e) {
+                return url('/event/' . $this->slug);
+            }
         }
-        try { return route('events.show', $this); } catch (\Throwable $e) { return url('/events/'.$this->id); }
+        try {
+            return route('events.show', $this);
+        }
+        catch (\Throwable $e) {
+            return url('/events/' . $this->id);
+        }
     }
 
     /**
@@ -62,11 +83,13 @@ class Event extends Model
      */
     public function getFreeTicketsRemainingAttribute(): int
     {
-        $limit = (int) ($this->free_tickets_count ?? 0);
-        if ($limit <= 0) return 0;
+        $limit = (int)($this->free_tickets_count ?? 0);
+        if ($limit <= 0)
+            return 0;
         try {
-            $sold = (int) Order::where('event_id', $this->id)->where('status', 'paid')->sum('quantity');
-        } catch (\Throwable $e) {
+            $sold = (int)Order::where('event_id', $this->id)->where('status', 'paid')->sum('quantity');
+        }
+        catch (\Throwable $e) {
             $sold = 0;
         }
         return max(0, $limit - $sold);
@@ -77,38 +100,25 @@ class Event extends Model
         if (empty($this->image_path)) {
             return null;
         }
-        
+
         // If it's already a full URL (Cloudinary), return as-is
         if (str_starts_with($this->image_path, 'http')) {
             return $this->image_path;
         }
-        
-        // For local storage paths, prefer public disk URL if available
+
+        // Strip "storage/" if it's accidentally stored in the DB (common mistake)
+        $cleanPath = ltrim($this->image_path, '/');
+        if (str_starts_with($cleanPath, 'storage/')) {
+            $cleanPath = substr($cleanPath, 8);
+        }
+
         try {
-            if (Storage::disk('public')->exists($this->image_path)) {
-                // Use app URL to avoid misconfigured filesystems.public.url
-                return url('storage/' . ltrim($this->image_path, '/'));
-            }
-            return url('storage/' . ltrim($this->image_path, '/'));
-        } catch (\Exception $e) {
-            // Fallback: if Storage::url() fails, try to construct URL manually
-            $disk = config('filesystems.default', 'public');
-            if ($disk === 's3') {
-                $bucket = config('filesystems.disks.s3.bucket');
-                $region = config('filesystems.disks.s3.region');
-                $endpoint = config('filesystems.disks.s3.endpoint');
-                
-                if ($endpoint) {
-                    // Custom endpoint (Cloudflare R2, DigitalOcean Spaces, etc.)
-                    return rtrim($endpoint, '/') . '/' . $bucket . '/' . $this->image_path;
-                } else {
-                    // Standard AWS S3
-                    return "https://{$bucket}.s3.{$region}.amazonaws.com/{$this->image_path}";
-                }
-            } else {
-                // Local storage fallback
-                return url('storage/' . $this->image_path);
-            }
+            // Use Storage::url which is the standard Laravel way
+            return Storage::disk('public')->url($cleanPath);
+        }
+        catch (\Exception $e) {
+            // Fallback for local
+            return url('storage/' . $cleanPath);
         }
     }
 
@@ -117,15 +127,21 @@ class Event extends Model
         $out = [];
         $items = is_array($this->gallery ?? null) ? $this->gallery : [];
         foreach ($items as $p) {
-            if (!$p) continue;
-            if (str_starts_with($p, 'http')) { $out[] = $p; continue; }
+            if (!$p)
+                continue;
+            if (str_starts_with($p, 'http')) {
+                $out[] = $p;
+                continue;
+            }
             try {
                 if (Storage::disk('public')->exists($p)) {
                     $out[] = url('storage/' . ltrim($p, '/'));
-                } else {
+                }
+                else {
                     $out[] = url('storage/' . ltrim($p, '/'));
                 }
-            } catch (\Throwable $e) {
+            }
+            catch (\Throwable $e) {
                 $out[] = url('storage/' . ltrim($p, '/'));
             }
         }

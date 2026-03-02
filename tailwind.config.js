@@ -11,8 +11,24 @@ export default {
 
     theme: {
         extend: {
+            colors: {
+                tix: {
+                    orange: '#f05537',
+                },
+                eventbrite: {
+                    orange: '#d1410c',
+                    purple: '#1e0a3c',
+                    dark: '#1e0a3c',
+                    gray: {
+                        50: '#f8f7fa',
+                        100: '#eeedf2',
+                        400: '#6f7287',
+                        600: '#39364f',
+                    }
+                }
+            },
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Inter', 'Figtree', ...defaultTheme.fontFamily.sans],
             },
         },
     },

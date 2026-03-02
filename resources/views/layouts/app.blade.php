@@ -10,7 +10,7 @@
         <!-- Font & Assets -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
         @php
             $manifestPath = public_path('build/manifest.json');
@@ -35,30 +35,32 @@
             <script type="module" src="{{ $jsSrc }}"></script>
         @endif
         <style>
-            :root{ --font-ui: 'Manrope', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }
+            :root{ --font-ui: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }
             body{ font-family: var(--font-ui); }
             /* Prevent Alpine FOUC */
             [x-cloak]{ display:none !important; }
             /* Prevent horizontal dragging/scroll on mobile */
             html,body{ width:100%; max-width:100vw; overflow-x:hidden; }
             body{ overscroll-behavior-x:none; touch-action: pan-y; }
+            ::selection{ background:#1e0a3c !important; color:#ffffff !important; }
+            ::-moz-selection{ background:#1e0a3c !important; color:#ffffff !important; }
         </style>
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-black text-white">
+        <div class="min-h-screen bg-[#f8f7fa] text-eventbrite-dark">
             @include('partials.admin-header')
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-zinc-900 border-b border-zinc-800 mt-24 sm:mt-28">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <header class="border-b border-eventbrite-gray-100 bg-[#f8f7fa]">
+                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
                 </header>
             @endisset
 
             <!-- Page Content -->
-            <main class="pt-20 sm:pt-24 px-4 sm:px-6">
+            <main class="pt-6 sm:pt-8 px-4 sm:px-6">
                 {{ $slot }}
             </main>
         </div>

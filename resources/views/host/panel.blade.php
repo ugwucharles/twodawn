@@ -5,42 +5,42 @@
 @section('robots', 'noindex, nofollow')
 
 @section('content')
-<section id="page-content" class="pb-10">
-  <div class="max-w-6xl mx-auto px-6">
+<section id="page-content" class="pb-10 pt-6">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Header -->
     <div class="flex items-start justify-between gap-4 flex-wrap">
       <div>
-        <h1 class="text-2xl font-extrabold">{{ $event->title }} — Host Panel</h1>
-        <div class="text-zinc-400 text-sm mt-1">{{ $host->label ? ('Token: '.$host->label.' • ') : '' }}Expires {{ optional($host->expires_at)->diffForHumans() }}</div>
+        <h1 class="text-2xl font-bold text-eventbrite-dark">{{ $event->title }} — Host panel</h1>
+        <div class="text-eventbrite-gray-600 text-sm mt-1">{{ $host->label ? ('Token: '.$host->label.' • ') : '' }}Expires {{ optional($host->expires_at)->diffForHumans() }}</div>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
         <form method="GET" class="flex items-center gap-2 flex-wrap w-full sm:w-auto">
           <label for="from" class="sr-only">From date</label>
-<input id="from" type="date" name="from" value="{{ request('from', now()->subMonth()->toDateString()) }}" placeholder="From date" aria-label="From date" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm placeholder:text-zinc-500 w-40 sm:w-48" />
+          <input id="from" type="date" name="from" value="{{ request('from', now()->subMonth()->toDateString()) }}" placeholder="From date" aria-label="From date" class="rounded-md bg-white border border-eventbrite-gray-100 px-3 py-2 text-sm placeholder:text-eventbrite-gray-400 w-40 sm:w-48" />
           <label for="to" class="sr-only">To date</label>
-<input id="to" type="date" name="to" value="{{ request('to', now()->toDateString()) }}" placeholder="To date" aria-label="To date" class="rounded-md bg-black/30 border border-white/10 px-3 py-2 text-sm placeholder:text-zinc-500 w-40 sm:w-48" />
-          <button formaction="{{ route('host.sales.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100 whitespace-nowrap">Export sales</button>
-          <button formaction="{{ route('host.sales.exportDaily', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20 whitespace-nowrap">Daily sales</button>
-          <button formaction="{{ route('host.people.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20 whitespace-nowrap">Check-ins CSV</button>
+          <input id="to" type="date" name="to" value="{{ request('to', now()->toDateString()) }}" placeholder="To date" aria-label="To date" class="rounded-md bg-white border border-eventbrite-gray-100 px-3 py-2 text-sm placeholder:text-eventbrite-gray-400 w-40 sm:w-48" />
+          <button formaction="{{ route('host.sales.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-tix-orange text-white text-sm hover:bg-[#e55a2d] whitespace-nowrap">Export sales</button>
+          <button formaction="{{ route('host.sales.exportDaily', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md border border-eventbrite-gray-100 bg-white text-sm text-eventbrite-dark hover:bg-[#f8f7fa] whitespace-nowrap">Daily sales</button>
+          <button formaction="{{ route('host.people.export', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md border border-eventbrite-gray-100 bg-white text-sm text-eventbrite-dark hover:bg-[#f8f7fa] whitespace-nowrap">Check-ins CSV</button>
         </form>
-        <a href="{{ route('host.people', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">View people</a>
-        <button type="button" data-copy-link class="inline-flex items-center px-3 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Copy link</button>
+        <a href="{{ route('host.people', $host->token) }}" class="inline-flex items-center px-3 py-2 rounded-md border border-eventbrite-gray-100 bg-white text-sm text-eventbrite-dark hover:bg-[#f8f7fa]">View people</a>
+        <button type="button" data-copy-link class="inline-flex items-center px-3 py-2 rounded-md bg-tix-orange text-white text-sm hover:bg-[#e55a2d]">Copy link</button>
       </div>
     </div>
 
     <!-- Stats -->
     <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
-        <div class="text-xs text-zinc-400">Sold</div>
-        <div class="mt-1 text-2xl font-bold">{{ $sold }}</div>
+      <div class="rounded-2xl bg-white border border-eventbrite-gray-100 shadow-sm p-4">
+        <div class="text-[11px] font-medium text-eventbrite-gray-600 uppercase tracking-wide">Sold</div>
+        <div class="mt-1 text-2xl font-bold text-eventbrite-dark">{{ $sold }}</div>
       </div>
-      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
-        <div class="text-xs text-zinc-400">Checked in</div>
-        <div class="mt-1 text-2xl font-bold"><span id="stat-checked" class="menu-checked">{{ $checked }}</span></div>
+      <div class="rounded-2xl bg-white border border-eventbrite-gray-100 shadow-sm p-4">
+        <div class="text-[11px] font-medium text-eventbrite-gray-600 uppercase tracking-wide">Checked in</div>
+        <div class="mt-1 text-2xl font-bold text-eventbrite-dark"><span id="stat-checked" class="menu-checked">{{ $checked }}</span></div>
       </div>
-      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
-        <div class="text-xs text-zinc-400">Remaining</div>
-        <div class="mt-1 text-2xl font-bold"><span id="stat-remaining" class="menu-remaining">{{ $remaining }}</span></div>
+      <div class="rounded-2xl bg-white border border-eventbrite-gray-100 shadow-sm p-4">
+        <div class="text-[11px] font-medium text-eventbrite-gray-600 uppercase tracking-wide">Remaining</div>
+        <div class="mt-1 text-2xl font-bold text-eventbrite-dark"><span id="stat-remaining" class="menu-remaining">{{ $remaining }}</span></div>
       </div>
     </div>
 
@@ -48,11 +48,11 @@
     <div class="mt-6 grid lg:grid-cols-2 gap-6 items-start">
 
       <!-- Manual entry -->
-      <div id="manual" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
-        <div class="text-sm text-zinc-300 mb-2">Enter code manually</div>
+      <div id="manual" class="rounded-2xl bg-white border border-eventbrite-gray-100 shadow-sm p-4">
+        <div class="text-sm text-eventbrite-dark mb-2">Enter code manually</div>
         <form class="flex gap-2" onsubmit="return false;">
-          <input id="manual-code" type="text" placeholder="Order reference (PA_...)" class="flex-1 rounded-md bg-black/30 border border-white/10 px-3 py-2 focus:border-white/30 focus:ring-0" />
-          <button id="manual-submit" class="rounded-md px-4 py-2 bg-white text-black text-sm hover:bg-zinc-100">Verify</button>
+          <input id="manual-code" type="text" placeholder="Order reference (PA_...)" class="flex-1 rounded-md bg-white border border-eventbrite-gray-100 px-3 py-2 focus:border-eventbrite-gray-400 focus:ring-0" />
+          <button id="manual-submit" class="rounded-md px-4 py-2 bg-tix-orange text-white text-sm hover:bg-[#e55a2d]">Verify</button>
         </form>
         <div id="result" class="mt-4 hidden">
           <div id="status-badge" class="inline-flex items-center px-2 py-1 rounded text-xs"></div>
@@ -61,13 +61,13 @@
       </div>
 
       <!-- Recent scans -->
-      <div id="recent-card" class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+      <div id="recent-card" class="rounded-2xl bg-white border border-eventbrite-gray-100 shadow-sm p-4">
         <div class="flex items-center justify-between mb-2">
-          <div class="text-sm text-zinc-300">Recent scans</div>
-          <button id="clear-recent" class="text-xs text-zinc-400 hover:text-white">Clear</button>
+          <div class="text-sm text-eventbrite-dark">Recent scans</div>
+          <button id="clear-recent" class="text-xs text-eventbrite-gray-600 hover:text-tix-orange">Clear</button>
         </div>
-        <ul id="recent" class="mt-1 text-sm text-zinc-300 space-y-1"></ul>
-        <div class="mt-2 text-xs text-zinc-500">Latest results on this device only.</div>
+        <ul id="recent" class="mt-1 text-sm text-eventbrite-dark space-y-1"></ul>
+        <div class="mt-2 text-xs text-eventbrite-gray-600">Latest results on this device only.</div>
       </div>
     </div>
   </div>

@@ -65,9 +65,7 @@
     <!-- Font & Assets -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/Group 2.png') }}">
     <meta name="apple-mobile-web-app-title" content="{{ $appName }}">
@@ -116,8 +114,8 @@
       </script>
     @endif
     <style>
-      :root{ --font-ui: 'Manrope', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; @if(!empty($tenant?->brand_color)) --brand: {{ $tenant->brand_color }}; @endif }
-      body{ font-family: var(--font-ui); }
+      :root{ --font-ui: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; @if(!empty($tenant?->brand_color)) --brand: {{ $tenant->brand_color }}; @endif }
+      body{ font-family: var(--font-ui); color:#1e0a3c; }
       /* Prevent Alpine FOUC */
       [x-cloak]{ display:none !important; }
       /* Prevent horizontal dragging/scroll on mobile */
@@ -126,28 +124,8 @@
       /* Hide scrollbars for mood scroller */
       .no-scrollbar::-webkit-scrollbar{ display:none; }
       .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
-      /* Initial splash preloader */
-      #preloader{ position:fixed; inset:0; background:#000; display:flex; align-items:center; justify-content:center; z-index:9999; transition:opacity .8s ease, visibility .8s ease; }
-      #preloader.hidden{ opacity:0; visibility:hidden; }
-      #preloader .brand{ display:flex; flex-direction:column; align-items:center; gap:16px; }
-      #preloader .logo-text{ font-weight:800; letter-spacing:-.02em; color:#fff; font-size:clamp(24px,4.5vw,36px); text-shadow:0 0 18px rgba(96,165,250,.45); animation:glowPulse 2.4s ease-in-out infinite; }
-      #preloader .logo-text .accent{ color: var(--brand, #60a5fa); }
-      #preloader .spinner{ width:40px; height:40px; border-radius:9999px; border:3px solid rgba(255,255,255,.15); border-top-color:#fff; animation:spin 2.2s linear infinite; }
-      @keyframes spin{ to{ transform: rotate(360deg); } }
-      @keyframes glowPulse{
-        0%,100%{
-          text-shadow:
-            0 0 6px rgba(99,102,241,.25),
-            0 0 16px rgba(99,102,241,.35),
-            0 0 28px rgba(236,72,153,.30);
-        }
-        50%{
-          text-shadow:
-            0 0 10px rgba(99,102,241,.45),
-            0 0 26px rgba(236,72,153,.55),
-            0 0 52px rgba(236,72,153,.55);
-        }
-      }
+      ::selection{ background:#1e0a3c !important; color:#ffffff !important; }
+      ::-moz-selection{ background:#1e0a3c !important; color:#ffffff !important; }
     </style>
     @yield('head_links')
     @yield('jsonld')
@@ -175,18 +153,10 @@
     <script type="application/ld+json">{!! json_encode($orgJson, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
     <script type="application/ld+json">{!! json_encode($siteJson, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
   </head>
-  <body class="antialiased bg-black text-white min-h-screen flex flex-col">
-    <div id="preloader" aria-hidden="true">
-      <div class="brand">
-        <div class="logo-text">2<span class="accent">DAWN</span></div>
-        <div class="spinner" role="status" aria-label="Loading"></div>
-      </div>
-    </div>
-    @unless (request()->routeIs('home'))
-      @include('partials.public-header')
-    @endunless
+  <body class="antialiased bg-white min-h-screen flex flex-col">
+    @include('partials.public-header')
     @php
-      $mainTop = request()->routeIs('home') ? '' : (request()->routeIs('host.*') ? 'pt-2' : ((request()->routeIs('events.index') || request()->routeIs('events.recent') || request()->routeIs('pricing')) ? '' : 'pt-20 sm:pt-24'));
+      $mainTop = request()->routeIs('home') ? '' : (request()->routeIs('host.*') ? 'pt-2' : ((request()->routeIs('events.index') || request()->routeIs('events.recent') || request()->routeIs('pricing')) ? '' : 'pt-8 sm:pt-10'));
     @endphp
     <main class="flex-1 {{ $mainTop }}">
       @yield('content')
@@ -203,7 +173,7 @@
           const isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || (window.navigator && window.navigator.standalone === true);
           const isIOS = /iP(hone|ad|od)/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
           const isSafari = /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua);
-          const FALLBACK = '#0b0b0b';
+          const FALLBACK = '#ffffff';
           const apply = () => {
             const color = (isIOS && isSafari && !isStandalone) ? FALLBACK : '#00000000';
             m.setAttribute('content', color);
@@ -237,16 +207,16 @@
 
 
     <!-- Global search modal -->
-    <x-modal name="search-modal" maxWidth="xl" panelClass="bg-black text-white ring-1 ring-white/10" overlayClass="bg-black/60 backdrop-blur-sm" focusable>
+    <x-modal name="search-modal" maxWidth="xl" panelClass="bg-white text-zinc-900 shadow-2xl rounded-2xl" overlayClass="bg-zinc-900/60 backdrop-blur-sm" focusable>
       <form method="GET" action="{{ route('events.index') }}" class="p-6 sm:p-10">
-        <div class="text-sm text-zinc-400 mb-3">Search</div>
-        <div class="flex items-center gap-3">
+        <div class="text-sm text-zinc-500 font-semibold mb-3 uppercase tracking-wider">Search</div>
+        <div class="flex items-center gap-3 border-b border-zinc-200 pb-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-zinc-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/></svg>
-          <input name="q" placeholder="Search events, venues, vibes…" class="flex-1 bg-transparent text-2xl sm:text-3xl focus:outline-none placeholder:text-zinc-500" />
+          <input name="q" placeholder="Search events, venues, vibes…" class="flex-1 bg-transparent text-xl sm:text-2xl font-medium focus:outline-none placeholder:text-zinc-400 border-none px-0 ring-0 focus:ring-0" />
         </div>
-        <div class="mt-6 flex items-center justify-end gap-3 text-sm">
-          <button type="button" class="px-4 py-2 rounded-full bg-white/5 ring-1 ring-white/10 text-zinc-200 hover:bg-white/10" @click="$dispatch('close-modal', 'search-modal')">Cancel</button>
-          <button class="px-5 py-2 rounded-full bg-white text-black font-semibold hover:bg-zinc-100">Search</button>
+        <div class="mt-8 flex items-center justify-end gap-3 text-sm">
+          <button type="button" class="px-5 py-2.5 rounded-md font-semibold text-zinc-600 hover:bg-zinc-100 transition-colors" @click="$dispatch('close-modal', 'search-modal')">Cancel</button>
+          <button class="px-6 py-2.5 rounded-md bg-zinc-900 text-white font-semibold hover:bg-zinc-800 transition-colors">Search</button>
         </div>
       </form>
     </x-modal>
@@ -260,18 +230,5 @@
       })();
     </script>
 
-    <script>
-      // Preloader: show for ~3s, then fade out smoothly
-      (function(){
-        try{
-          var el = document.getElementById('preloader');
-          if(!el) return;
-          setTimeout(function(){
-            el.classList.add('hidden');
-            setTimeout(function(){ try{ el.remove(); }catch(_){} }, 900);
-          }, 3000);
-        }catch(_){}
-      })();
-    </script>
   </body>
 </html>

@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_organizer',
     ];
 
     /**
@@ -42,8 +43,17 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-'password' => 'hashed',
+            'password' => 'hashed',
             'is_admin' => 'boolean',
+            'is_organizer' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the events organized by this user.
+     */
+    public function events()
+    {
+        return $this->hasMany(Event::class);
     }
 }

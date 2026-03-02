@@ -5,43 +5,43 @@
 @section('robots', 'noindex, nofollow')
 
 @section('content')
-<section class="pb-10">
-  <div class="max-w-6xl mx-auto px-6">
+<section class="pb-10 pt-6">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-start justify-between gap-4 flex-wrap">
       <div>
-        <h1 class="text-2xl font-extrabold">Scanner — {{ $event->title }}</h1>
-        <div class="text-zinc-400 text-sm mt-1">{{ $host->label ? ('Token: '.$host->label.' • ') : '' }}Expires {{ optional($host->expires_at)->diffForHumans() }}</div>
+        <h1 class="text-2xl font-bold text-eventbrite-dark">Scanner — {{ $event->title }}</h1>
+        <div class="text-eventbrite-gray-600 text-sm mt-1">{{ $host->label ? ('Token: '.$host->label.' • ') : '' }}Expires {{ optional($host->expires_at)->diffForHumans() }}</div>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
-        <button type="button" data-copy-link class="inline-flex items-center px-3 py-2 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Copy link</button>
+        <button type="button" data-copy-link class="inline-flex items-center px-3 py-2 rounded-md bg-tix-orange text-white text-sm hover:bg-[#e55a2d]">Copy link</button>
       </div>
     </div>
 
     <div class="mt-6 grid lg:grid-cols-2 gap-6 items-start">
       <!-- Camera scanner -->
-      <div class="lg:col-span-2 rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+      <div class="lg:col-span-2 rounded-2xl bg-white border border-eventbrite-gray-100 shadow-sm p-4">
         <div class="flex items-center justify-between mb-3">
-          <div class="text-sm text-zinc-300">Camera scanner</div>
-          <div class="text-xs text-zinc-400">Auto-start</div>
+          <div class="text-sm text-eventbrite-dark">Camera scanner</div>
+          <div class="text-xs text-eventbrite-gray-600">Auto-start</div>
         </div>
         <div id="qr-reader" class="rounded-xl overflow-hidden bg-black relative" style="width:100%; height:60vh; max-height:520px; min-height:300px">
           <div id="scan-error" class="absolute inset-0 hidden items-center justify-center text-center text-sm text-red-300 px-4"></div>
         </div>
         <div class="mt-3 flex flex-wrap gap-2">
-          <button id="btn-switch" class="px-3 py-1.5 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Switch camera</button>
-          <button id="btn-pause" class="px-3 py-1.5 rounded-md bg-white/10 ring-1 ring-white/10 text-sm hover:bg-white/20">Pause</button>
-          <button id="btn-resume" class="hidden px-3 py-1.5 rounded-md bg-white text-black text-sm hover:bg-zinc-100">Resume</button>
-          <button id="btn-copy" class="px-3 py-1.5 rounded-md bg-white text-black text-sm hover:bg-zinc-100" data-copy-link>Copy link</button>
+          <button id="btn-switch" class="px-3 py-1.5 rounded-md border border-eventbrite-gray-100 bg-white text-sm text-eventbrite-dark hover:bg-[#f8f7fa]">Switch camera</button>
+          <button id="btn-pause" class="px-3 py-1.5 rounded-md border border-eventbrite-gray-100 bg-white text-sm text-eventbrite-dark hover:bg-[#f8f7fa]">Pause</button>
+          <button id="btn-resume" class="hidden px-3 py-1.5 rounded-md bg-tix-orange text-white text-sm hover:bg-[#e55a2d]">Resume</button>
+          <button id="btn-copy" class="px-3 py-1.5 rounded-md bg-tix-orange text-white text-sm hover:bg-[#e55a2d]" data-copy-link>Copy link</button>
         </div>
-        <div class="mt-2 text-xs text-zinc-400">Tips: Use the rear camera • Hold steady • Clean lens for faster scans.</div>
+        <div class="mt-2 text-xs text-eventbrite-gray-600">Tips: Use the rear camera • Hold steady • Clean lens for faster scans.</div>
       </div>
 
       <!-- Manual entry -->
-      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
-        <div class="text-sm text-zinc-300 mb-2">Enter code manually</div>
+      <div class="rounded-2xl bg-white border border-eventbrite-gray-100 shadow-sm p-4">
+        <div class="text-sm text-eventbrite-dark mb-2">Enter code manually</div>
         <form class="flex gap-2" onsubmit="return false;">
-          <input id="manual-code" type="text" placeholder="Order reference (PA_...)" class="flex-1 rounded-md bg-black/30 border border-white/10 px-3 py-2 focus:border-white/30 focus:ring-0" />
-          <button id="manual-submit" class="rounded-md px-4 py-2 bg-white text-black text-sm hover:bg-zinc-100">Verify</button>
+          <input id="manual-code" type="text" placeholder="Order reference (PA_...)" class="flex-1 rounded-md bg-white border border-eventbrite-gray-100 px-3 py-2 focus:border-eventbrite-gray-400 focus:ring-0" />
+          <button id="manual-submit" class="rounded-md px-4 py-2 bg-tix-orange text-white text-sm hover:bg-[#e55a2d]">Verify</button>
         </form>
         <div id="result" class="mt-4 hidden">
           <div id="status-badge" class="inline-flex items-center px-2 py-1 rounded text-xs"></div>

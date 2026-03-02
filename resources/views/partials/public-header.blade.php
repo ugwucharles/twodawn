@@ -1,74 +1,150 @@
-<header class="{{ request()->routeIs('host.*') ? 'relative mt-3 z-50' : ((request()->routeIs('events.index') || request()->routeIs('events.recent') || request()->routeIs('pricing')) ? 'relative z-50 block mb-4 sm:mb-6' : 'absolute inset-x-0 top-3 z-50') }}" x-data="{ open:false }" x-init="window.addEventListener('pageshow', () => open = false); window.addEventListener('popstate', () => open = false);" @keydown.window.escape="open=false">
+<header class="app-header bg-white border-b border-[#eeedf2] sticky top-0 z-[100] h-[72px] w-full flex items-center" x-data="{ open:false }">
   @php $logoOnly = request()->routeIs('admin.login'); @endphp
-  <div class="mx-auto max-w-7xl px-6">
-    <div class="relative h-14 flex items-center justify-between">
-      <!-- Brand -->
-      <a href="{{ url('/') }}" class="relative z-20 inline-flex items-center h-14 leading-none text-lg font-extrabold tracking-tight text-white">2<span class="text-indigo-400">DAWN</span></a>
+  <div class="w-full px-4 md:px-6 lg:px-10 h-full flex items-center justify-between gap-4">
+    
+    <!-- Left: Logo -->
+    <div class="flex items-center shrink-0">
+      <a href="{{ url('/') }}" class="flex items-center">
+        <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name', '2DAWN') }}" class="h-14 md:h-16 w-auto">
+      </a>
+    </div>
 
-      @unless($logoOnly)
-      <!-- Center nav (desktop only, absolutely centered) -->
+    @unless($logoOnly)
+    <!-- Center: Search Bar (Hardened Pill Style) -->
+    @unless (request()->routeIs('host.*'))
+    <div class="hidden md:flex flex-[2] max-w-[640px] items-center bg-[#f8f7fa] border border-[#eeedf2] rounded-full pl-4 pr-1.5 h-[48px] focus-within:bg-white focus-within:shadow-md transition-all overflow-hidden mx-4">
+      <!-- Search Part -->
+      <div class="flex items-center flex-[1.4] h-full">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#6f7287] mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        <input 
+          type="text" 
+          placeholder="Search events" 
+          class="w-full bg-transparent border-0 focus:ring-0 text-[14px] text-[#1e0a3c] placeholder:text-[#6f7287] font-medium p-0"
+        >
+      </div>
+      
+      <!-- Divider -->
+      <div class="h-5 w-[1px] bg-[#eeedf2] mx-3 shrink-0"></div>
+      
+      <!-- Location Part -->
+      <div class="flex items-center flex-1 h-full">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#6f7287] mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        <input 
+          type="text" 
+          placeholder="Near Me"
+          value="Lagos" 
+          class="w-full bg-transparent border-0 focus:ring-0 text-[14px] text-[#1e0a3c] font-medium p-0"
+        >
+      </div>
+
+      <!-- Action Button -->
+      <button class="shrink-0 w-9 h-9 rounded-full bg-[#1e0a3c] text-white flex items-center justify-center hover:bg-black transition-colors ml-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+      </button>
+    </div>
+    @endunless
+
+    <!-- Right: Desktop Navigation -->
+    <div class="hidden lg:flex items-center gap-1 shrink-0">
       @unless (request()->routeIs('host.*'))
-      <nav class="hidden md:flex absolute inset-0 items-center justify-center gap-6 text-sm text-zinc-200 z-10">
-        <a href="{{ route('events.index') }}" class="hover:text-white">Events</a>
-        <a href="{{ route('events.recent') }}" class="hover:text-white">Recent</a>
-        <a href="{{ route('pricing') }}" class="hover:text-white">Pricing</a>
-        <a href="{{ url('/#how-to-buy') }}" class="hover:text-white">How it works</a>
-        <a href="{{ url('/#host') }}" class="hover:text-white">Host</a>
+      <nav class="flex items-center text-[15px] font-medium text-eventbrite-dark">
+        @if(!auth()->check() || (!auth()->user()->is_admin && !auth()->user()->is_organizer))
+            <a href="{{ route('events.index') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Discover events</a>
+            <a href="{{ route('events.recent') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Find my tickets</a>
+        @endif
+        
+        @auth
+            @if(auth()->user()->is_organizer)
+                <a href="{{ route('organizer.dashboard') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Dashboard</a>
+            @elseif(auth()->user()->is_admin)
+                <a href="{{ route('admin.dashboard') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Admin</a>
+            @else
+                <a href="{{ route('organizer.dashboard') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Create event</a>
+            @endif
+            
+            <form method="POST" action="{{ route('logout') }}" class="inline ml-2">
+                @csrf
+                <button type="submit" class="text-xs font-bold text-gray-400 hover:text-red-500 uppercase tracking-wider px-2 py-1">Logout</button>
+            </form>
+        @else
+            <a href="{{ route('organizer.register') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Create event</a>
+            <a href="{{ route('organizer.login') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors ml-2 font-bold text-tix-orange">Login</a>
+        @endauth
       </nav>
       @endunless
-      @endunless
-
-      @unless($logoOnly)
-      <!-- Right: search icon + hamburger on mobile -->
-      <div class="relative z-20 flex items-center h-14 gap-4" :class="{ 'invisible pointer-events-none': open }">
-        @unless (request()->routeIs('host.*'))
-        <button type="button" aria-label="Search" class="text-zinc-200 hover:text-white" @click="$dispatch('open-modal', 'search-modal')">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 align-middle" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/></svg>
-        </button>
-        @endunless
-        <button type="button" class="md:hidden text-zinc-200 hover:text-white" aria-label="Open menu" @click="open=true">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 align-middle" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-        </button>
-      </div>
-      @endunless
     </div>
+
+    <!-- Mobile Nav Controls -->
+    <div class="flex lg:hidden items-center gap-2">
+      @unless (request()->routeIs('host.*'))
+      <button type="button" aria-label="Search" class="md:hidden p-2 text-[#6f7287] hover:bg-[#f8f7fa] rounded-full transition-colors" @click="$dispatch('open-modal', 'search-modal')">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/></svg>
+      </button>
+      @endunless
+      <button type="button" class="p-2 text-[#1e0a3c] hover:bg-[#f8f7fa] rounded-full transition-colors" aria-label="Open menu" @click="open=true">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+
+    @endunless
   </div>
 
   @unless($logoOnly)
   <!-- Overlay -->
-  <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] md:hidden" @click="open=false" aria-hidden="true"></div>
+  <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 bg-eventbrite-dark/40 backdrop-blur-sm z-[110] lg:hidden" @click="open=false" aria-hidden="true"></div>
 
-  <!-- Right drawer -->
-  <aside x-cloak x-show="open" x-transition:enter="transition transform ease-out duration-150" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition transform ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" class="fixed inset-y-0 right-0 w-72 max-w-[85vw] bg-zinc-950/95 border-l border-white/10 z-[70] p-6 md:hidden">
-    <div class="flex items-center justify-between">
-      <span class="text-base font-extrabold text-white">Menu</span>
-      <button type="button" class="text-zinc-300 hover:text-white" aria-label="Close menu" @click="open=false">
+  <!-- Mobile Drawer -->
+  <aside x-cloak x-show="open" x-transition:enter="transition transform ease-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition transform ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" class="fixed inset-y-0 right-0 w-full max-w-[320px] bg-white shadow-2xl z-[120] flex flex-col lg:hidden">
+    
+    <!-- Drawer Header -->
+    <div class="flex items-center justify-between p-4 border-b border-eventbrite-gray-100">
+      <span class="text-lg font-bold text-eventbrite-dark">Menu</span>
+      <button type="button" class="p-2 text-eventbrite-gray-400 hover:bg-eventbrite-gray-50 rounded-full transition-colors" aria-label="Close menu" @click="open=false">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
       </button>
     </div>
+    
+    <!-- Drawer Content -->
+    <div class="flex-1 overflow-y-auto py-2 px-0">
     @if (request()->routeIs('host.*'))
-      <nav class="mt-6 grid gap-2 text-sm text-zinc-200">
+      <nav class="grid text-[16px] text-eventbrite-dark">
         @if(isset($host))
-          <a href="{{ route('host.scan', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Scanner</a>
-          <a href="{{ route('host.panel', $host->token) }}#recent-card" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Recent scans</a>
-          <a href="{{ route('host.people', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">People</a>
-          <a href="{{ route('host.sales.export', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Export sales</a>
-          <a href="{{ route('host.sales.exportDaily', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Daily sales</a>
-          <a href="{{ route('host.people.export', $host->token) }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Check-ins CSV</a>
+          <a href="{{ route('host.scan', $host->token) }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">Scanner</a>
+          <a href="{{ route('host.panel', $host->token) }}#recent-card" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">Recent scans</a>
+          <a href="{{ route('host.people', $host->token) }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">People</a>
+          <a href="{{ route('host.sales.export', $host->token) }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">Export sales</a>
+          <a href="{{ route('host.sales.exportDaily', $host->token) }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">Daily sales</a>
+          <a href="{{ route('host.people.export', $host->token) }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">Check-ins CSV</a>
         @endif
         @if(isset($event) && $event?->public_url)
-          <a href="{{ $event->public_url }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">View event</a>
+          <a href="{{ $event->public_url }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">View event</a>
         @endif
       </nav>
     @else
-      <nav class="mt-6 grid gap-2 text-sm text-zinc-200">
-        <a href="{{ route('events.index') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Events</a>
-        <a href="{{ route('events.recent') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Recent</a>
-        <a href="{{ route('pricing') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Pricing</a>
-        <a href="{{ url('/#how-to-buy') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">How it works</a>
-        <a href="{{ url('/#host') }}" class="rounded px-3 py-2 hover:bg-white/5" @click="open=false">Host</a>
+      <nav class="grid text-[16px] text-eventbrite-dark">
+        @if(!auth()->check() || (!auth()->user()->is_admin && !auth()->user()->is_organizer))
+            <a href="{{ route('events.index') }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors border-b border-eventbrite-gray-50" @click="open=false">Discover events</a>
+            <a href="{{ route('events.recent') }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors border-b border-eventbrite-gray-50" @click="open=false">Find my tickets</a>
+        @endif
+        
+        @auth
+            @if(auth()->user()->is_organizer)
+                <a href="{{ route('organizer.dashboard') }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">Dashboard</a>
+            @else
+                <a href="{{ route('organizer.dashboard') }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">Create event</a>
+            @endif
+            <form method="POST" action="{{ route('logout') }}" class="contents">
+                @csrf
+                <button type="submit" class="w-full text-left px-6 py-4 text-red-500 font-bold hover:bg-red-50 transition-colors">Logout</button>
+            </form>
+        @else
+            <a href="{{ route('organizer.register') }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors border-b border-eventbrite-gray-50" @click="open=false">Create event</a>
+            <a href="{{ route('organizer.login') }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">Login</a>
+        @endauth
       </nav>
     @endif
+    </div>
   </aside>
   @endunless
 </header>
+
