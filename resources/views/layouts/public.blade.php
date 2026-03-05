@@ -66,9 +66,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/jpeg" href="{{ asset('logo.jpg') }}">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/Group 2.png') }}">
-    <meta name="apple-mobile-web-app-title" content="{{ $appName }}">
+    <link rel="apple-touch-icon" href="{{ asset('logo.jpg') }}">
+    <meta name="apple-mobile-web-app-title" content="2DAWN">
 
     @php
       $manifestPath = public_path('build/manifest.json');
