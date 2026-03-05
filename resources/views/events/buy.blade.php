@@ -4,7 +4,7 @@
 <section class="relative py-12 sm:py-16">
   <div class="max-w-5xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-10">
     <div class="space-y-4">
-      <div class="aspect-[16/10] overflow-hidden rounded-2xl ring-1 ring-white/10 bg-white/5">
+      <div class="aspect-[16/10] overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
         @if($event->image_url)
           <img src="{{ $event->image_url }}" alt="{{ $event->title }}" class="h-full w-full object-cover"/>
         @else
@@ -21,7 +21,7 @@
 
     <div>
       @if ($errors->any())
-        <div class="mb-4 p-3 bg-red-500/10 text-red-300 rounded ring-1 ring-red-500/30">
+        <div class="mb-6 p-4 bg-red-50 text-red-700 rounded-2xl border border-red-200 shadow-sm">
           <ul class="list-disc list-inside">
             @foreach ($errors->all() as $error)
               <li>{{ $error }}</li>
