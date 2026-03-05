@@ -66,9 +66,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
+    <link rel="icon" type="image/png" href="/images/logo.png">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    <link rel="apple-touch-icon" href="{{ asset('logo.png') }}">
+    <link rel="apple-touch-icon" href="/images/logo.png">
     <meta name="apple-mobile-web-app-title" content="2DAWN">
 
     @php
