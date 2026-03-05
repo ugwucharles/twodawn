@@ -4,7 +4,7 @@
     <!-- Left: Logo -->
     <div class="flex items-center shrink-0">
       <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
-        <img src="{{ asset('logo.jpg') }}" alt="{{ config('app.name', '2DAWN') }}" class="h-10 w-auto mix-blend-multiply object-contain" style="transform: scale(2.2); transform-origin: left center;">
+        <img src="{{ asset('logo.png') }}" alt="{{ config('app.name', '2DAWN') }}" class="h-10 w-auto mix-blend-multiply object-contain" style="transform: scale(2.2); transform-origin: left center;">
         <span class="hidden sm:inline text-[11px] font-semibold uppercase tracking-[0.18em] text-eventbrite-gray-600">Admin</span>
       </a>
     </div>

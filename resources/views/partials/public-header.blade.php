@@ -5,7 +5,7 @@
     <!-- Left: Logo -->
     <div class="flex items-center shrink-0">
       <a href="{{ url('/') }}" class="flex items-center">
-        <img src="{{ asset('logo.jpg') }}" alt="{{ config('app.name', '2DAWN') }}" class="h-10 w-auto mix-blend-multiply object-contain" style="transform: scale(2.5); transform-origin: left center;">
+        <img src="{{ asset('logo.png') }}" alt="{{ config('app.name', '2DAWN') }}" class="h-10 w-auto mix-blend-multiply object-contain" style="transform: scale(2.5); transform-origin: left center;">
       </a>
     </div>
 
