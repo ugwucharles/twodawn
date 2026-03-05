@@ -25,7 +25,7 @@
             @elseif(auth()->user()->is_admin)
                 <a href="{{ route('admin.dashboard') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Admin</a>
             @else
-                <a href="{{ route('organizer.dashboard') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Create event</a>
+                <a href="{{ route('coming-soon') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Create event</a>
             @endif
             
             <form method="POST" action="{{ route('logout') }}" class="inline ml-2">
@@ -33,7 +33,7 @@
                 <button type="submit" class="text-xs font-bold text-gray-400 hover:text-red-500 uppercase tracking-wider px-2 py-1">Logout</button>
             </form>
         @else
-            <a href="{{ route('organizer.register') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Create event</a>
+            <a href="{{ route('coming-soon') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Create event</a>
         @endauth
       </nav>
       @endunless
@@ -90,14 +90,14 @@
             @if(auth()->user()->is_organizer)
                 <a href="{{ route('organizer.dashboard') }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">Dashboard</a>
             @else
-                <a href="{{ route('organizer.dashboard') }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">Create event</a>
+                <a href="{{ route('coming-soon') }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">Create event</a>
             @endif
             <form method="POST" action="{{ route('logout') }}" class="contents">
                 @csrf
                 <button type="submit" class="w-full text-left px-6 py-4 text-red-500 font-bold hover:bg-red-50 transition-colors">Logout</button>
             </form>
         @else
-            <a href="{{ route('organizer.register') }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors border-b border-eventbrite-gray-50" @click="open=false">Create event</a>
+            <a href="{{ route('coming-soon') }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors border-b border-eventbrite-gray-50" @click="open=false">Create event</a>
         @endauth
       </nav>
     @endif

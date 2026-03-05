@@ -27,6 +27,7 @@ Route::get('/', [EventPublicController::class , 'landing'])->name('home');
 
 Route::view('/about', 'about')->name('about');
 Route::view('/pricing', 'pricing')->name('pricing');
+Route::view('/coming-soon', 'coming-soon')->name('coming-soon');
 
 Route::redirect('/dashboard', '/')->name('dashboard');
 

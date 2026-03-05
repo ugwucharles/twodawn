@@ -116,8 +116,8 @@
                     <div class="flex gap-4 min-w-max px-1">
                         @foreach($featured as $event)
                             <a href="{{ $event->public_url }}"
-                               class="relative w-[240px] sm:w-[260px] md:w-[280px] rounded-[24px] bg-black text-white overflow-hidden shrink-0 group">
-                                <div class="relative h-[320px] sm:h-[340px]">
+                             class="relative w-[276px] sm:w-[300px] md:w-[322px] rounded-[24px] bg-black text-white overflow-hidden shrink-0 group">
+                                <div class="relative h-[370px] sm:h-[390px]">
                                     @if($event->image_url)
                                         <img src="{{ $event->image_url }}" alt="{{ $event->title }}"
                                              class="absolute inset-0 h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"/>
@@ -322,10 +322,10 @@
                             <h3 class="text-sm sm:text-[15px] font-bold text-gray-900 line-clamp-2 transition-colors group-hover:text-tix-orange leading-snug">
                                 {{ $event->title }}
                             </h3>
-                            <div class="mt-1 text-[11px] text-gray-500 font-medium">
+                            <div class="mt-1 text-[13px] text-gray-500 font-medium">
                                 @if($startDate)
                                     <div class="flex items-center gap-1.5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-tix-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-tix-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                         <span class="truncate">{{ $startDate }}</span>
