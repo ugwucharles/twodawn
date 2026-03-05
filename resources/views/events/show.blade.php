@@ -166,6 +166,19 @@
             </div>
         @endif
 
+        {{-- MUST KNOW Section --}}
+        @if ($event->must_know)
+            <div class="rounded-[2rem] bg-amber-50 border-2 border-amber-200 p-8 shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-amber-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-tighter">Must Know!</div>
+                    <h2 class="text-amber-900 font-black text-xl">Important Information</h2>
+                </div>
+                <div class="text-amber-900/80 font-bold leading-relaxed whitespace-pre-line text-lg">
+                    {!! nl2br(e($event->must_know)) !!}
+                </div>
+            </div>
+        @endif
+
         {{-- About Section --}}
         <div>
             <h2 class="text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-4">About this event</h2>
