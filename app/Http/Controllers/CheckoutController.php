@@ -109,7 +109,7 @@ class CheckoutController extends Controller
             // Never add fees for free events (unit price <= 0)
             $feesKobo = 0;
             if ($unitPrice > 0 && $event->pass_fees_to_buyer) {
-                $perTicketFeeKobo = (int) round($unitPrice * 0.05 * 100) + 5000; // 50 NGN = 5000 kobo
+                $perTicketFeeKobo = (int) round($unitPrice * 0.07 * 100) + 5000; // 7% + ₦50 = 5000 kobo
                 $feesKobo = max(0, $perTicketFeeKobo * $quantity);
             }
 
@@ -309,7 +309,7 @@ class CheckoutController extends Controller
             // Fees (never add fees for free events)
             $feesKobo = 0;
             if ($unitPrice > 0 && $event->pass_fees_to_buyer) {
-                $perTicketFeeKobo = (int) round($unitPrice * 0.05 * 100) + 5000; // 50 NGN
+                $perTicketFeeKobo = (int) round($unitPrice * 0.07 * 100) + 5000; // 7% + ₦50
                 $feesKobo = max(0, $perTicketFeeKobo * $quantity);
             }
 

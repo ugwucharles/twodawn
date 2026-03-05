@@ -81,7 +81,7 @@
         <div class="rounded-2xl bg-zinc-50 border border-zinc-100 p-5 text-sm text-black">
           <div class="flex justify-between font-medium"><span>Price per ticket</span><span>@if($unitPrice <= 0) Free @else ₦{{ number_format($unitPrice, 0) }} @if($isEarly)<span class="text-xs text-emerald-600 ml-1 font-bold">(early-bird)</span>@endif @endif</span></div>
           @if($event->pass_fees_to_buyer && $unitPrice > 0)
-          <div class="flex justify-between text-zinc-500 mt-1 italic"><span>Platform fee per ticket</span><span>5% + ₦50</span></div>
+          <div class="flex justify-between text-zinc-500 mt-1 italic"><span>Platform fee per ticket</span><span>7% + ₦50</span></div>
           @endif
           <div class="mt-4 space-y-2">
             <div class="flex justify-between"><span>Subtotal</span><span id="sum-subtotal" class="font-bold text-black">₦0</span></div>
@@ -109,7 +109,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const UNIT_PRICE = parseFloat(@json($unitPriceStr));
     const FEES_ON = (UNIT_PRICE > 0) && @json((bool) $event->pass_fees_to_buyer);
-    const FEE_PER_TICKET_K = FEES_ON ? (Math.round(UNIT_PRICE * 0.05 * 100) + 5000) : 0; // 5% + ₦50
+    const FEE_PER_TICKET_K = FEES_ON ? (Math.round(UNIT_PRICE * 0.07 * 100) + 5000) : 0; // 7% + ₦50
     const QUOTE_URL = UNIT_PRICE > 0 ? @json(route('orders.quote', $event)) : null;
 
     const qtyEl = document.getElementById('quantity');
