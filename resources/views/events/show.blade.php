@@ -168,12 +168,15 @@
 
         {{-- MUST KNOW Section --}}
         @if ($event->must_know)
-            <div class="rounded-[2rem] bg-amber-50 border-2 border-amber-200 p-8 shadow-sm">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="bg-amber-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-tighter">Must Know!</div>
-                    <h2 class="text-amber-900 font-black text-xl">Important Information</h2>
+            <div class="p-8 rounded-[2rem] bg-white border-2 border-black shadow-sm relative overflow-hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-2 rounded-full bg-black"></div>
+                        <h2 class="text-xl font-black text-gray-900 uppercase tracking-tighter">Must Know!</h2>
+                    </div>
+                    <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest border border-gray-100 px-3 py-1 rounded-full">Important</div>
                 </div>
-                <div class="text-amber-900/80 font-bold leading-relaxed whitespace-pre-line text-lg">
+                <div class="text-gray-900 font-black leading-relaxed whitespace-pre-line text-lg">
                     {!! nl2br(e($event->must_know)) !!}
                 </div>
             </div>
