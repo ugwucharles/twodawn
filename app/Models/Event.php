@@ -30,6 +30,7 @@ class Event extends Model
         'use_custom_slug',
         'slug',
         'whatsapp_group_url',
+        'state',
     ];
 
     protected function casts(): array

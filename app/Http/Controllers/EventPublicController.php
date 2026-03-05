@@ -73,7 +73,26 @@ class EventPublicController extends Controller
         $base = Event::query()->where('is_published', true)
             ->where(function($q){ $q->whereNull('ends_at')->orWhere('ends_at', '>=', now()); });
 
+        $state = $request->query('state');
+        $priceFilter = $request->query('price');
+        $dateFilter = $request->query('date');
+
         $events = (clone $base)
+            ->when($state, fn($q) => $q->where('state', $state))
+            ->when($priceFilter === 'free', fn($q) => $q->where(function($qq){ $qq->whereNull('price')->orWhere('price', '<=', 0); }))
+            ->when($priceFilter === 'paid', fn($q) => $q->where('price', '>', 0))
+            ->when($dateFilter === 'today', fn($q) => $q->whereDate('starts_at', now()->toDateString()))
+            ->when($dateFilter === 'weekend', function($q) {
+                $fri = now()->startOfWeek(\Carbon\Carbon::MONDAY)->addDays(4);
+                if (now()->gt($fri)) { $fri = $fri->addWeek(); }
+                $sunEnd = (clone $fri)->addDays(2)->endOfDay();
+                $q->whereBetween('starts_at', [$fri, $sunEnd]);
+            })
+            ->when($dateFilter === 'next-week', function($q) {
+                $start = now()->addWeek()->startOfWeek();
+                $end = (clone $start)->endOfWeek();
+                $q->whereBetween('starts_at', [$start, $end]);
+            })
             ->when($mood && (empty($allowed) || in_array($mood, $allowed, true)), fn ($q) => $q->where('mood', $mood))
             ->when($term !== '', function ($q) use ($term) {
                 $q->where(function ($qq) use ($term) {
@@ -86,7 +105,7 @@ class EventPublicController extends Controller
             })
             ->orderBy('starts_at')
             ->paginate(12)
-            ->appends($request->only(['q','mood']));
+            ->appends($request->only(['q','mood','state','price','date','state_label']));
 
         $showCurated = ($term === '' && !$mood && $events->currentPage() === 1);
         $trendingEvents = collect(); $weekendEvents = collect(); $freeEvents = collect(); $newWeekEvents = collect();

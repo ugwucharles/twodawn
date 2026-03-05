@@ -41,6 +41,7 @@ class EventController extends Controller
             'description' => ['nullable','string'],
             'must_know' => ['nullable','string'],
             'venue' => ['nullable','string','max:255'],
+            'state' => ['required','string','max:50'],
             'mood' => ['required','string', Rule::in(config('moods.list', ['Rave','Romantic','Amapiano','Afrobeats','Hip‑Hop','House','Live Band','Jazz','Techno','Gospel','Comedy','Networking']))],
             'starts_at' => ['required','date'],
             'ends_at' => ['nullable','date','after_or_equal:starts_at'],

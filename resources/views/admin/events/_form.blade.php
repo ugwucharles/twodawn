@@ -28,6 +28,31 @@
     </div>
 
     <div>
+        <x-input-label for="state" :value="__('State')" />
+        <select id="state" name="state" required class="mt-1 block w-full rounded-md shadow-sm border-[#D1D5DB] bg-[#F9FAFB] text-[#111827] focus:border-[#6366F1] focus:ring-2 focus:ring-[rgba(99,102,241,0.2)]">
+            <option value="" disabled {{ old('state', $event->state) ? '' : 'selected' }}>Select state</option>
+            @php
+              $ngStates = [
+                'abia' => 'Abia', 'adamawa' => 'Adamawa', 'akwa-ibom' => 'Akwa Ibom', 'anambra' => 'Anambra',
+                'bauchi' => 'Bauchi', 'bayelsa' => 'Bayelsa', 'benue' => 'Benue', 'borno' => 'Borno',
+                'cross-river' => 'Cross River', 'delta' => 'Delta', 'ebonyi' => 'Ebonyi', 'edo' => 'Edo',
+                'ekiti' => 'Ekiti', 'enugu' => 'Enugu', 'gombe' => 'Gombe', 'imo' => 'Imo',
+                'jigawa' => 'Jigawa', 'kaduna' => 'Kaduna', 'kano' => 'Kano', 'katsina' => 'Katsina',
+                'kebbi' => 'Kebbi', 'kogi' => 'Kogi', 'kwara' => 'Kwara', 'lagos' => 'Lagos',
+                'nasarawa' => 'Nasarawa', 'niger' => 'Niger', 'ogun' => 'Ogun', 'ondo' => 'Ondo',
+                'osun' => 'Osun', 'oyo' => 'Oyo', 'plateau' => 'Plateau', 'rivers' => 'Rivers',
+                'sokoto' => 'Sokoto', 'taraba' => 'Taraba', 'yobe' => 'Yobe', 'zamfara' => 'Zamfara',
+                'abuja' => 'Abuja (FCT)',
+              ];
+            @endphp
+            @foreach($ngStates as $code => $label)
+                <option value="{{ $code }}" @selected(old('state', $event->state) === $code)>{{ $label }}</option>
+            @endforeach
+        </select>
+        <x-input-error :messages="$errors->get('state')" class="mt-2" />
+    </div>
+
+    <div>
         <x-input-label for="mood" :value="__('Mood')" />
         <select id="mood" name="mood" required class="mt-1 block w-full rounded-md shadow-sm border-[#D1D5DB] bg-[#F9FAFB] text-[#111827] focus:border-[#6366F1] focus:ring-2 focus:ring-[rgba(99,102,241,0.2)]">
             <option value="" disabled {{ old('mood', $event->mood) ? '' : 'selected' }}>Select mood</option>
