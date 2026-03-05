@@ -259,9 +259,9 @@
           $startDate = $start ? $start->format('D, M j') : null;
         @endphp
         <a href="{{ $event->public_url }}"
-           class="flex items-center rounded-2xl border border-gray-100 bg-white hover:shadow-xl hover:border-gray-200 transition-all duration-300 overflow-hidden group h-32">
+           class="flex items-center rounded-2xl border border-gray-100 bg-white hover:shadow-xl hover:border-gray-200 transition-all duration-300 overflow-hidden group h-44">
           {{-- Left: Image --}}
-          <div class="w-24 sm:w-28 h-full relative bg-gray-50 shrink-0">
+          <div class="w-32 sm:w-40 h-full relative bg-gray-50 shrink-0">
               @if($event->image_url)
                   <img src="{{ $event->image_url }}" alt="{{ $event->title }}"
                        class="absolute inset-0 h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"/>

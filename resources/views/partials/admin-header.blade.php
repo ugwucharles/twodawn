@@ -1,10 +1,10 @@
-<header class="app-header bg-[#f8f7fa] border-b border-eventbrite-gray-100 sticky top-0 z-[90] h-[72px] w-full flex items-center" x-data="{ open:false }">
+<header class="app-header bg-white border-b border-[#E5E7EB] sticky top-0 z-[90] h-[72px] w-full flex items-center" x-data="{ open:false }">
   <div class="w-full px-4 md:px-6 lg:px-10 h-full flex items-center justify-between gap-4">
 
     <!-- Left: Logo -->
     <div class="flex items-center shrink-0">
       <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
-        <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name', '2DAWN') }}" class="h-12 w-auto">
+        <img src="{{ asset('logo.jpg') }}" alt="{{ config('app.name', '2DAWN') }}" class="h-10 w-auto mix-blend-multiply object-contain" style="transform: scale(2.2); transform-origin: left center;">
         <span class="hidden sm:inline text-[11px] font-semibold uppercase tracking-[0.18em] text-eventbrite-gray-600">Admin</span>
       </a>
     </div>
@@ -12,16 +12,13 @@
     <!-- Center: Nav -->
     <div class="hidden lg:flex items-center gap-1 shrink-0">
       <nav class="flex items-center text-[16px] font-normal text-eventbrite-dark">
-        <a href="{{ route('admin.dashboard') }}" class="px-3 py-2 hover:text-tix-orange {{ request()->routeIs('admin.dashboard') ? 'text-tix-orange' : '' }}">Dashboard</a>
-        <a href="{{ route('admin.events.index') }}" class="px-3 py-2 hover:text-tix-orange {{ request()->routeIs('admin.events.*') ? 'text-tix-orange' : '' }}">Events</a>
-        <a href="{{ route('admin.orders.index') }}" class="px-3 py-2 hover:text-tix-orange {{ request()->routeIs('admin.orders.*') ? 'text-tix-orange' : '' }}">Orders</a>
-        <a href="{{ route('admin.scanner.index') }}" class="px-3 py-2 hover:text-tix-orange {{ request()->routeIs('admin.scanner.*') ? 'text-tix-orange' : '' }}">Scanner</a>
-        <a href="{{ route('admin.host-requests.index') }}" class="px-3 py-2 hover:text-tix-orange {{ request()->routeIs('admin.host-requests.*') ? 'text-tix-orange' : '' }}">Host Requests</a>
-        <a href="{{ route('admin.comments.index') }}" class="px-3 py-2 hover:text-tix-orange {{ request()->routeIs('admin.comments.*') ? 'text-tix-orange' : '' }}">Comments</a>
-        <a href="{{ route('admin.chat.index') }}" class="px-3 py-2 hover:text-tix-orange {{ request()->routeIs('admin.chat.*') ? 'text-tix-orange' : '' }}">Chat</a>
+        <a href="{{ route('admin.dashboard') }}" class="px-3 py-2 hover:text-black {{ request()->routeIs('admin.dashboard') ? 'text-black font-semibold' : '' }}">Dashboard</a>
+        <a href="{{ route('admin.events.index') }}" class="px-3 py-2 hover:text-black {{ request()->routeIs('admin.events.*') ? 'text-black font-semibold' : '' }}">Events</a>
+        <a href="{{ route('admin.orders.index') }}" class="px-3 py-2 hover:text-black {{ request()->routeIs('admin.orders.*') ? 'text-black font-semibold' : '' }}">Orders</a>
+        <a href="{{ route('admin.scanner.index') }}" class="px-3 py-2 hover:text-black {{ request()->routeIs('admin.scanner.*') ? 'text-black font-semibold' : '' }}">Scanner</a>
       </nav>
       <div class="ml-4">
-        <a href="{{ route('admin.events.create') }}" class="inline-flex items-center px-4 py-2 rounded-md bg-tix-orange text-white text-[14px] font-semibold hover:bg-[#e55a2d] shadow-sm">
+        <a href="{{ route('admin.events.create') }}" class="inline-flex items-center px-4 py-2 rounded-md bg-black text-white text-[14px] font-semibold hover:bg-gray-800 shadow-sm">
           New event
         </a>
       </div>
@@ -36,7 +33,7 @@
   </div>
 
   <!-- Overlay -->
-  <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 bg-eventbrite-dark/40 backdrop-blur-sm z-[85] lg:hidden" @click="open=false" aria-hidden="true"></div>
+  <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 bg-white/90 backdrop-blur-xl z-[85] lg:hidden" @click="open=false" aria-hidden="true"></div>
 
   <!-- Mobile drawer -->
   <aside
@@ -61,10 +58,7 @@
       <a href="{{ route('admin.events.index') }}" class="block px-6 py-3 hover:bg-eventbrite-gray-50" @click="open=false">Events</a>
       <a href="{{ route('admin.orders.index') }}" class="block px-6 py-3 hover:bg-eventbrite-gray-50" @click="open=false">Orders</a>
       <a href="{{ route('admin.scanner.index') }}" class="block px-6 py-3 hover:bg-eventbrite-gray-50" @click="open=false">Scanner</a>
-      <a href="{{ route('admin.host-requests.index') }}" class="block px-6 py-3 hover:bg-eventbrite-gray-50" @click="open=false">Host Requests</a>
-      <a href="{{ route('admin.comments.index') }}" class="block px-6 py-3 hover:bg-eventbrite-gray-50" @click="open=false">Comments</a>
-      <a href="{{ route('admin.chat.index') }}" class="block px-6 py-3 hover:bg-eventbrite-gray-50" @click="open=false">Chat</a>
-      <a href="{{ route('admin.events.create') }}" class="block px-6 py-3 hover:bg-eventbrite-gray-50 font-semibold text-tix-orange" @click="open=false">New event</a>
+      <a href="{{ route('admin.events.create') }}" class="block px-6 py-3 hover:bg-eventbrite-gray-50 font-semibold text-black" @click="open=false">New event</a>
       <a href="{{ route('profile.edit') }}" class="block px-6 py-3 hover:bg-eventbrite-gray-50" @click="open=false">Profile</a>
       <form method="POST" action="{{ route('logout') }}" class="border-t border-eventbrite-gray-100 mt-2 pt-2">
         @csrf

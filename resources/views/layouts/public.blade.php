@@ -186,24 +186,7 @@
       </script>
     @endif
 
-    @php
-      $chatPref = trim($__env->yieldContent('chat', 'on'));
-      $chatEnabled = config('chat.enabled') && strtolower($chatPref) !== 'off';
-      $provider = config('chat.provider');
-      $showMode = null;
-      if ($provider === 'native' && $chatEnabled) {
-        if (request()->routeIs('home')) { $showMode = 'after-host'; }
-        if (request()->routeIs('orders.public')) { $showMode = 'always'; }
-      }
-    @endphp
-    @if ($chatEnabled && $provider === 'crisp' && config('chat.crisp_website_id'))
-      <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID={{ json_encode(config('chat.crisp_website_id')) }};(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
-      @if (Auth::check())
-        <script>window.$crisp=window.$crisp||[];window.$crisp.push(["set","user:email", {{ json_encode(Auth::user()->email) }} ]);window.$crisp.push(["set","user:nickname", {{ json_encode(Auth::user()->name ?? 'User') }} ]);</script>
-      @endif
-    @elseif ($provider === 'native' && $showMode)
-      @include('partials.chat-widget', ['showMode' => $showMode])
-    @endif
+    {{-- Chat/support widget removed --}}
 
 
     <!-- Global search modal -->

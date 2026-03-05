@@ -122,7 +122,7 @@
                                         <img src="{{ $event->image_url }}" alt="{{ $event->title }}"
                                              class="absolute inset-0 h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"/>
                                     @else
-                                        <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-rose-500"></div>
+                                        <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-gray-700 via-gray-800 to-black"></div>
                                     @endif
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
                                     <div class="absolute inset-x-0 bottom-0 p-4">
@@ -305,9 +305,9 @@
                     $startDate = $start ? $start->format('D, M j') : null;
                 @endphp
                 <a href="{{ $event->public_url }}"
-                   class="flex items-center rounded-2xl border border-gray-100 bg-white hover:shadow-xl hover:border-gray-200 transition-all duration-300 overflow-hidden group h-32">
+                   class="flex items-center rounded-2xl border border-gray-100 bg-white hover:shadow-xl hover:border-gray-200 transition-all duration-300 overflow-hidden group h-44">
                     {{-- Left: Image --}}
-                    <div class="w-24 sm:w-28 h-full relative bg-gray-50 shrink-0">
+                    <div class="w-32 sm:w-40 h-full relative bg-gray-50 shrink-0">
                         @if($event->image_url)
                             <img src="{{ $event->image_url }}" alt="{{ $event->title }}"
                                  class="absolute inset-0 h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"/>
@@ -362,10 +362,14 @@
                         @php
                             $start = $event->starts_at;
                             $startDate = $start ? $start->format('D, M j') : null;
+                            $recentPrice = $event->price;
+                            if (!is_null($event->early_bird_price) && !is_null($event->early_bird_ends_at) && now()->lte($event->early_bird_ends_at)) {
+                                $recentPrice = $event->early_bird_price;
+                            }
                         @endphp
                         <a href="{{ $event->public_url }}"
-                           class="flex rounded-2xl border border-eventbrite-gray-100 bg-white hover:border-eventbrite-gray-400 hover:shadow-md transition overflow-hidden group">
-                            <div class="w-20 sm:w-24 relative bg-eventbrite-gray-50">
+                           class="flex rounded-2xl border border-eventbrite-gray-100 bg-white hover:border-eventbrite-gray-400 hover:shadow-md transition overflow-hidden group h-32">
+                            <div class="w-24 sm:w-28 h-full relative bg-eventbrite-gray-50 shrink-0">
                                 @if($event->image_url)
                                     <img src="{{ $event->image_url }}" alt="{{ $event->title }}"
                                          class="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"/>
@@ -373,15 +377,29 @@
                                     <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600"></div>
                                 @endif
                             </div>
-                            <div class="flex-1 p-3 sm:p-4">
-                                <h3 class="text-sm font-semibold text-eventbrite-dark group-hover:text-eventbrite-orange line-clamp-2">
-                                    {{ $event->title }}
-                                </h3>
-                                @if($startDate)
-                                    <div class="mt-1 text-xs text-eventbrite-gray-600">
-                                        {{ $startDate }}
+                            <div class="flex-1 p-3 sm:p-4 flex flex-col justify-between min-w-0 h-full">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-eventbrite-dark group-hover:text-eventbrite-orange line-clamp-2">
+                                        {{ $event->title }}
+                                    </h3>
+                                    <div class="mt-1 text-[11px] text-gray-500 space-y-0.5">
+                                        @if($startDate)
+                                            <div>{{ $startDate }}</div>
+                                        @endif
+                                        @if($event->venue)
+                                            <div class="truncate">{{ $event->venue }}</div>
+                                        @endif
                                     </div>
-                                @endif
+                                </div>
+                                <div>
+                                    <span class="text-sm font-bold text-gray-900">
+                                        @if(!is_null($recentPrice) && $recentPrice > 0)
+                                            ₦{{ number_format($recentPrice, 0) }}
+                                        @else
+                                            Free
+                                        @endif
+                                    </span>
+                                </div>
                             </div>
                         </a>
                     @endforeach
@@ -408,7 +426,7 @@
                                     <img src="{{ $event->image_url }}" alt="{{ $event->title }}"
                                          class="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"/>
                                 @else
-                                    <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-indigo-500 via-fuchsia-500 to-rose-500"></div>
+                            <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600"></div>
                                 @endif
                             </div>
                             <div class="flex-1 p-3 sm:p-4">

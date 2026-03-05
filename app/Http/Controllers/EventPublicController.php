@@ -154,7 +154,7 @@ class EventPublicController extends Controller
     {
         abort_unless($event->is_published, 404);
         $event->load(['comments' => function($q){
-            $q->where('approved', true)->latest();
+            $q->latest();
         }]);
         return view('events.show', compact('event'));
     }
@@ -163,7 +163,7 @@ class EventPublicController extends Controller
     {
         $event = Event::where('slug', $slug)->firstOrFail();
         abort_unless($event->is_published, 404);
-        $event->load(['comments' => function($q){ $q->where('approved', true)->latest(); }]);
+        $event->load(['comments' => function($q){ $q->latest(); }]);
         return view('events.show', compact('event'));
     }
 

@@ -5,7 +5,7 @@
     <!-- Left: Logo -->
     <div class="flex items-center shrink-0">
       <a href="{{ url('/') }}" class="flex items-center">
-        <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name', '2DAWN') }}" class="h-14 md:h-16 w-auto">
+        <img src="{{ asset('logo.jpg') }}" alt="{{ config('app.name', '2DAWN') }}" class="h-10 w-auto mix-blend-multiply object-contain" style="transform: scale(2.5); transform-origin: left center;">
       </a>
     </div>
 
@@ -34,7 +34,6 @@
             </form>
         @else
             <a href="{{ route('organizer.register') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Create event</a>
-            <a href="{{ route('organizer.login') }}" class="ml-4 px-6 py-2.5 bg-black text-white rounded-full hover:bg-gray-800 transition-colors font-medium">Login</a>
         @endauth
       </nav>
       @endunless
@@ -51,7 +50,7 @@
 
   @unless($logoOnly)
   <!-- Overlay -->
-  <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 bg-white/80 backdrop-blur-md z-[110] lg:hidden" @click="open=false" aria-hidden="true"></div>
+  <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 bg-white/90 backdrop-blur-xl z-[110] lg:hidden" @click="open=false" aria-hidden="true"></div>
 
   <!-- Mobile Drawer -->
   <aside x-cloak x-show="open" x-transition:enter="transition transform ease-out duration-300" x-transition:enter-start="-translate-y-full" x-transition:enter-end="translate-y-0" x-transition:leave="transition transform ease-in duration-200" x-transition:leave-start="translate-y-0" x-transition:leave-end="-translate-y-full" class="fixed inset-x-0 top-0 w-full bg-white shadow-2xl z-[120] flex flex-col lg:hidden max-h-screen overflow-y-auto">
@@ -99,7 +98,6 @@
             </form>
         @else
             <a href="{{ route('organizer.register') }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors border-b border-eventbrite-gray-50" @click="open=false">Create event</a>
-            <a href="{{ route('organizer.login') }}" class="px-6 py-4 hover:bg-eventbrite-gray-50 transition-colors" @click="open=false">Login</a>
         @endauth
       </nav>
     @endif

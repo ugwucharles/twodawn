@@ -2,9 +2,9 @@
     <div class="py-6">
         <div class="max-w-4xl mx-auto px-6">
             <!-- Breadcrumbs -->
-            <nav class="text-sm text-zinc-400 mb-4"><a href="{{ route('admin.events.index') }}" class="hover:text-white">Events</a> <span class="mx-1">/</span> <span class="text-zinc-200">Create</span></nav>
+            <nav class="text-sm text-[#6B7280] mb-4"><a href="{{ route('admin.events.index') }}" class="hover:text-[#111827]">Events</a> <span class="mx-1">/</span> <span class="text-[#111827]">Create</span></nav>
 
-            <div class="bg-white/5 ring-1 ring-white/10 rounded-2xl">
+            <div class="bg-white border border-[#E5E7EB] rounded-2xl shadow-sm">
                 <div class="p-6">
 <form method="POST" action="{{ route('admin.events.store') }}" class="space-y-4" enctype="multipart/form-data">
                         @csrf

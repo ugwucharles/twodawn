@@ -7,65 +7,67 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
     :root {
-        --font-ui: 'Montserrat', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+        --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-        margin: 0; min-height: 100vh;
+        min-height: 100vh;
         font-family: var(--font-ui);
-        background: #0f0f0f;
+        background: #FFFFFF;
         display: flex; align-items: center; justify-content: center;
+        color: #111827;
     }
     .admin-card {
-        width: 100%; max-width: 360px;
-        background: #1a1a1a;
-        border: 1px solid #2a2a2a;
+        width: 100%; max-width: 400px;
+        background: #FFFFFF;
+        border: 1px solid #E5E7EB;
         border-radius: 16px;
-        padding: 40px 32px;
+        padding: 48px 40px;
         margin: 40px 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 16px rgba(0,0,0,0.04);
     }
     .admin-badge {
         display: inline-flex; align-items: center; gap: 6px;
-        background: #ff4d2d15; border: 1px solid #ff4d2d30;
-        color: #ff6b4d; font-size: 11px; font-weight: 700;
-        text-transform: uppercase; letter-spacing: 0.1em;
+        background: #F3F4F6; border: 1px solid #E5E7EB;
+        color: #374151; font-size: 11px; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.08em;
         padding: 4px 12px; border-radius: 6px; margin-bottom: 24px;
     }
     .admin-title {
-        color: #fff; font-size: 22px; font-weight: 800; margin: 0 0 8px;
+        color: #111827; font-size: 24px; font-weight: 700; margin: 0 0 6px;
     }
     .admin-subtitle {
-        color: #666; font-size: 13px; font-weight: 500; margin: 0 0 28px;
+        color: #9CA3AF; font-size: 14px; font-weight: 400; margin: 0 0 32px;
     }
     .admin-form { display: flex; flex-direction: column; gap: 16px; }
-    .admin-form label { color: #888; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block; }
+    .admin-form label { color: #374151; font-size: 13px; font-weight: 500; margin-bottom: 6px; display: block; }
     .admin-form input[type="email"],
     .admin-form input[type="password"] {
         width: 100%; padding: 12px 14px;
-        background: #111; border: 1px solid #2a2a2a; border-radius: 8px;
-        color: #fff; font-family: inherit; font-size: 14px;
-        outline: none; transition: border-color 0.2s;
+        background: #F9FAFB; border: 1px solid #D1D5DB; border-radius: 6px;
+        color: #111827; font-family: inherit; font-size: 14px;
+        outline: none; transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .admin-form input:focus { border-color: #ff4d2d; }
-    .admin-form input::placeholder { color: #444; }
+    .admin-form input:focus { border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
+    .admin-form input::placeholder { color: #9CA3AF; }
     .form-row { display: flex; justify-content: space-between; align-items: center; }
-    .form-row label { color: #666; font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0; display: flex; align-items: center; gap: 6px; cursor: pointer; }
-    .form-row a { color: #ff6b4d; font-size: 13px; text-decoration: none; }
+    .form-row label { color: #6B7280; font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .form-row a { color: #6366F1; font-size: 13px; text-decoration: none; font-weight: 500; }
     .form-row a:hover { text-decoration: underline; }
     .admin-btn {
-        width: 100%; padding: 13px; margin-top: 8px;
-        background: #ff4d2d; color: #fff; border: none; border-radius: 8px;
-        font-family: inherit; font-size: 14px; font-weight: 700;
+        width: 100%; padding: 10px 16px; margin-top: 8px;
+        background: #6366F1; color: #FFFFFF; border: none; border-radius: 6px;
+        font-family: inherit; font-size: 14px; font-weight: 600;
         cursor: pointer; transition: background 0.2s, transform 0.1s;
     }
-    .admin-btn:hover { background: #e8432a; }
+    .admin-btn:hover { background: #4F46E5; }
     .admin-btn:active { transform: scale(0.98); }
-    .alert-error { background: #ff4d2d15; border: 1px solid #ff4d2d30; color: #ff6b4d; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 8px; }
-    .alert-success { background: #00c85115; border: 1px solid #00c85130; color: #00c851; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 8px; }
+    .alert-error { background: #FEF2F2; border: 1px solid #FECACA; color: #DC2626; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 8px; }
+    .alert-success { background: #F0FDF4; border: 1px solid #BBF7D0; color: #16A34A; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 8px; }
 </style>
 </head>
 <body>

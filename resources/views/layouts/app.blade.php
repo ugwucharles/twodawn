@@ -47,12 +47,12 @@
         </style>
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-[#f8f7fa] text-eventbrite-dark">
+        <div class="min-h-screen bg-white text-[#111827]">
             @include('partials.admin-header')
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="border-b border-eventbrite-gray-100 bg-[#f8f7fa]">
+                <header class="border-b border-[#E5E7EB] bg-white">
                     <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
@@ -65,15 +65,6 @@
             </main>
         </div>
 
-        @php
-          $chatPref = trim($__env->yieldContent('chat', 'on'));
-          $chatOk = config('chat.enabled') && strtolower($chatPref) !== 'off' && config('chat.provider') === 'crisp' && config('chat.crisp_website_id');
-        @endphp
-        @if ($chatOk)
-          <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID={{ json_encode(config('chat.crisp_website_id')) }};(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
-          @auth
-            <script>window.$crisp=window.$crisp||[];window.$crisp.push(["set","user:email", {{ json_encode(Auth::user()->email) }} ]);window.$crisp.push(["set","user:nickname", {{ json_encode(Auth::user()->name ?? 'Admin') }} ]);</script>
-          @endauth
-        @endif
+        {{-- Chat/support widget removed --}}
     </body>
 </html>

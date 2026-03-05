@@ -9,7 +9,7 @@
 
             <div class="mb-4 flex items-center justify-between">
                 <h1 class="text-xl font-semibold text-eventbrite-dark">Events</h1>
-                <a href="{{ route('admin.events.create') }}" class="inline-flex items-center px-4 py-2 bg-tix-orange border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#e55a2d] transition ease-in-out duration-150">
+                <a href="{{ route('admin.events.create') }}" class="inline-flex items-center px-4 py-2 bg-black border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-800 transition ease-in-out duration-150">
                     + New event
                 </a>
             </div>

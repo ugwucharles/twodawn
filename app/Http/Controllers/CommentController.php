@@ -24,7 +24,7 @@ class CommentController extends Controller
             'name' => $data['name'],
             'email' => $data['email'] ?? null,
             'content' => $data['content'],
-            'approved' => false,
+            'approved' => true,
         ]);
 
         LoggerService::logUserAction('Comment submitted', array_merge([
@@ -35,6 +35,6 @@ class CommentController extends Controller
             'commenter_email' => $data['email'] ?? null,
         ], LoggerService::getRequestContext($request)));
 
-        return back()->with('status', 'Comment submitted and awaiting approval.');
+        return back()->with('status', 'Comment posted successfully.');
     }
 }

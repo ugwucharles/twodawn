@@ -50,8 +50,8 @@ Route::get('/admin', function () {
 
 // Dedicated admin login routes
 Route::middleware('guest')->group(function () {
-    Route::get('/admin/login', [AuthenticatedSessionController::class , 'create'])->name('admin.login');
-    Route::post('/admin/login', [AuthenticatedSessionController::class , 'store'])->name('admin.login.store');
+    Route::get('/xyz/login', [AuthenticatedSessionController::class , 'create'])->name('admin.login');
+    Route::post('/xyz/login', [AuthenticatedSessionController::class , 'store'])->name('admin.login.store');
 });
 
 Route::middleware('auth')->group(function () {

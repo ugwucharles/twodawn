@@ -11,13 +11,13 @@
 
     <div>
         <x-input-label for="description" :value="__('Description')" />
-        <textarea id="description" name="description" class="mt-1 block w-full rounded-md shadow-sm border-white/20 bg-zinc-900/70 text-white placeholder-zinc-400 focus:border-indigo-400 focus:ring-indigo-400/30">{{ old('description', $event->description) }}</textarea>
+        <textarea id="description" name="description" class="mt-1 block w-full rounded-md shadow-sm border-[#D1D5DB] bg-[#F9FAFB] text-[#111827] placeholder-[#9CA3AF] focus:border-[#6366F1] focus:ring-2 focus:ring-[rgba(99,102,241,0.2)]">{{ old('description', $event->description) }}</textarea>
         <x-input-error :messages="$errors->get('description')" class="mt-2" />
     </div>
 
     <div>
         <x-input-label for="must_know" :value="__('MUST KNOW!')" />
-        <textarea id="must_know" name="must_know" class="mt-1 block w-full rounded-md shadow-sm border-white/20 bg-zinc-900/70 text-white placeholder-zinc-400 focus:border-indigo-400 focus:ring-indigo-400/30" rows="3" placeholder="Important info for attendees (dress code, gate times, etc.)">{{ old('must_know', $event->must_know) }}</textarea>
+        <textarea id="must_know" name="must_know" class="mt-1 block w-full rounded-md shadow-sm border-[#D1D5DB] bg-[#F9FAFB] text-[#111827] placeholder-[#9CA3AF] focus:border-[#6366F1] focus:ring-2 focus:ring-[rgba(99,102,241,0.2)]" rows="3" placeholder="Important info for attendees (dress code, gate times, etc.)">{{ old('must_know', $event->must_know) }}</textarea>
         <x-input-error :messages="$errors->get('must_know')" class="mt-2" />
     </div>
 
@@ -29,7 +29,7 @@
 
     <div>
         <x-input-label for="mood" :value="__('Mood')" />
-        <select id="mood" name="mood" required class="mt-1 block w-full rounded-md shadow-sm border-white/20 bg-zinc-900/70 text-white focus:border-indigo-400 focus:ring-indigo-400/30">
+        <select id="mood" name="mood" required class="mt-1 block w-full rounded-md shadow-sm border-[#D1D5DB] bg-[#F9FAFB] text-[#111827] focus:border-[#6366F1] focus:ring-2 focus:ring-[rgba(99,102,241,0.2)]">
             <option value="" disabled {{ old('mood', $event->mood) ? '' : 'selected' }}>Select mood</option>
             @foreach (config('moods.list', ['Rave','Romantic','Amapiano','Afrobeats','Hip‑Hop','House','Live Band','Jazz','Techno','Gospel','Comedy','Networking']) as $m)
                 <option value="{{ $m }}" @selected(old('mood', $event->mood) === $m)>{{ $m }}</option>
@@ -56,20 +56,20 @@
             <x-input-label for="price" :value="__('Price')" />
             <x-text-input id="price" name="price" type="number" step="0.01" min="0" class="mt-1 block w-full" :value="old('price', $event->price)" />
             <x-input-error :messages="$errors->get('price')" class="mt-2" />
-            <p class="mt-1 text-xs text-zinc-400">Set to 0 for a free event.</p>
+            <p class="mt-1 text-xs text-[#9CA3AF]">Set to 0 for a free event.</p>
         </div>
         <div>
             <x-input-label for="early_bird_price" :value="__('Early-bird price')" />
             <x-text-input id="early_bird_price" name="early_bird_price" type="number" step="0.01" min="0" class="mt-1 block w-full" :value="old('early_bird_price', $event->early_bird_price)" />
             <x-input-error :messages="$errors->get('early_bird_price')" class="mt-2" />
-            <p class="mt-1 text-xs text-zinc-400">Optional discounted price until the date below.</p>
+            <p class="mt-1 text-xs text-[#9CA3AF]">Optional discounted price until the date below.</p>
         </div>
     </div>
 
     <div class="flex items-start gap-2">
         <input type="hidden" name="pass_fees_to_buyer" value="0" />
-        <input id="pass_fees_to_buyer" name="pass_fees_to_buyer" type="checkbox" value="1" class="mt-1 rounded border-white/20 text-indigo-500 shadow-sm focus:ring-indigo-400/30" @checked(old('pass_fees_to_buyer', $event->pass_fees_to_buyer)) />
-        <label for="pass_fees_to_buyer" class="text-sm text-zinc-300">Pass fees to buyer <span class="text-zinc-500">(adds 5% + ₦50 per ticket at checkout)</span></label>
+        <input id="pass_fees_to_buyer" name="pass_fees_to_buyer" type="checkbox" value="1" class="mt-1 rounded border-[#D1D5DB] text-[#6366F1] shadow-sm focus:ring-[rgba(99,102,241,0.2)]" @checked(old('pass_fees_to_buyer', $event->pass_fees_to_buyer)) />
+        <label for="pass_fees_to_buyer" class="text-sm text-[#374151]">Pass fees to buyer <span class="text-[#9CA3AF]">(adds 5% + ₦50 per ticket at checkout)</span></label>
         <x-input-error :messages="$errors->get('pass_fees_to_buyer')" class="mt-2" />
     </div>
     <script>
@@ -104,13 +104,13 @@
         <x-input-label for="free_tickets_count" :value="__('First N tickets free')" />
         <x-text-input id="free_tickets_count" name="free_tickets_count" type="number" step="1" min="0" class="mt-1 block w-full" :value="old('free_tickets_count', $event->free_tickets_count)" placeholder="e.g. 50" />
         <x-input-error :messages="$errors->get('free_tickets_count')" class="mt-2" />
-        <p class="mt-1 text-xs text-zinc-400">The first N buyers get free tickets. Leave empty to disable.</p>
+        <p class="mt-1 text-xs text-[#9CA3AF]">The first N buyers get free tickets. Leave empty to disable.</p>
     </div>
 
     <div class="flex items-center">
         <input type="hidden" name="is_published" value="0" />
-        <input id="is_published" name="is_published" type="checkbox" value="1" class="rounded border-white/20 text-indigo-500 shadow-sm focus:ring-indigo-400/30" @checked(old('is_published', $event->is_published)) />
-        <label for="is_published" class="ms-2 text-sm text-zinc-300">{{ __('Published') }}</label>
+        <input id="is_published" name="is_published" type="checkbox" value="1" class="rounded border-[#D1D5DB] text-[#6366F1] shadow-sm focus:ring-[rgba(99,102,241,0.2)]" @checked(old('is_published', $event->is_published)) />
+        <label for="is_published" class="ms-2 text-sm text-[#374151]">{{ __('Published') }}</label>
         <x-input-error :messages="$errors->get('is_published')" class="mt-2" />
     </div>
 
@@ -118,19 +118,19 @@
         <x-input-label for="whatsapp_group_url" :value="__('WhatsApp Group Link')" />
         <x-text-input id="whatsapp_group_url" name="whatsapp_group_url" type="url" class="mt-1 block w-full" :value="old('whatsapp_group_url', $event->whatsapp_group_url)" placeholder="https://chat.whatsapp.com/..." />
         <x-input-error :messages="$errors->get('whatsapp_group_url')" class="mt-2" />
-        <p class="mt-1 text-xs text-zinc-400">Optional. Paste a WhatsApp group invite link to show a "Join Group" button on the event page.</p>
+        <p class="mt-1 text-xs text-[#9CA3AF]">Optional. Paste a WhatsApp group invite link to show a "Join Group" button on the event page.</p>
     </div>
 
     <div class="mt-4 flex items-start gap-2">
         <input type="hidden" name="use_custom_slug" value="0" />
-        <input id="use_custom_slug" name="use_custom_slug" type="checkbox" value="1" class="mt-1 rounded border-white/20 text-indigo-500 shadow-sm focus:ring-indigo-400/30" @checked(old('use_custom_slug', $event->use_custom_slug)) />
+        <input id="use_custom_slug" name="use_custom_slug" type="checkbox" value="1" class="mt-1 rounded border-[#D1D5DB] text-[#6366F1] shadow-sm focus:ring-[rgba(99,102,241,0.2)]" @checked(old('use_custom_slug', $event->use_custom_slug)) />
         <div class="flex-1">
-            <label for="slug" class="text-sm text-zinc-300">Custom URL</label>
+            <label for="slug" class="text-sm text-[#374151]">Custom URL</label>
             <div class="mt-1 flex items-center gap-2">
-                <span class="text-zinc-400 text-sm">{{ url('/event') }}/</span>
-                <input id="slug" name="slug" type="text" placeholder="event-name" value="{{ old('slug', $event->slug) }}" class="flex-1 rounded-md bg-black/30 border border-white/10 px-3 py-2 focus:border-white/30 focus:ring-0" />
+                <span class="text-[#9CA3AF] text-sm">{{ url('/event') }}/</span>
+                <input id="slug" name="slug" type="text" placeholder="event-name" value="{{ old('slug', $event->slug) }}" class="flex-1 rounded-md bg-[#F9FAFB] border border-[#D1D5DB] px-3 py-2 text-[#111827] focus:border-[#6366F1] focus:ring-2 focus:ring-[rgba(99,102,241,0.2)]" />
             </div>
-            <p class="mt-1 text-xs text-zinc-500">Toggle to use a friendly URL. Only lowercase letters, numbers and hyphens.</p>
+            <p class="mt-1 text-xs text-[#9CA3AF]">Toggle to use a friendly URL. Only lowercase letters, numbers and hyphens.</p>
             <x-input-error :messages="$errors->get('slug')" class="mt-1" />
         </div>
     </div>
@@ -154,7 +154,7 @@
       });
     </script>
     <input id="image" name="image" type="file" accept="image/*"
-           class="mt-1 block w-full rounded-md shadow-sm border-white/20 bg-zinc-900/70 text-white file:text-white file:bg-zinc-800 file:border-0 focus:border-indigo-400 focus:ring-indigo-400/30" />
+           class="mt-1 block w-full rounded-md shadow-sm border-[#D1D5DB] bg-[#F9FAFB] text-[#111827] file:text-[#374151] file:bg-[#E5E7EB] file:border-0 file:rounded-md file:px-3 file:py-1 file:mr-3 focus:border-[#6366F1] focus:ring-2 focus:ring-[rgba(99,102,241,0.2)]" />
     <x-input-error :messages="$errors->get('image')" class="mt-2" />
     @if (!empty($event->image_path))
         <div class="mt-2">
@@ -165,7 +165,7 @@
 
 <div class="mt-4">
   <x-input-label for="gallery" :value="__('Additional flyers (optional)')" />
-  <input id="gallery" name="gallery[]" type="file" accept="image/*" multiple class="mt-1 block w-full rounded-md shadow-sm border-white/20 bg-zinc-900/70 text-white file:text-white file:bg-zinc-800 file:border-0 focus:border-indigo-400 focus:ring-indigo-400/30" />
+  <input id="gallery" name="gallery[]" type="file" accept="image/*" multiple class="mt-1 block w-full rounded-md shadow-sm border-[#D1D5DB] bg-[#F9FAFB] text-[#111827] file:text-[#374151] file:bg-[#E5E7EB] file:border-0 file:rounded-md file:px-3 file:py-1 file:mr-3 focus:border-[#6366F1] focus:ring-2 focus:ring-[rgba(99,102,241,0.2)]" />
   @php $gal = $event->gallery_urls ?? []; @endphp
   @if (!empty($gal))
     <div class="mt-2 grid grid-cols-4 gap-2">

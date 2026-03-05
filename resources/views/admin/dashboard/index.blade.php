@@ -35,25 +35,25 @@
       </div>
 
       <!-- Quick links -->
-      <div class="mt-8 grid grid-cols-1 sm:grid-cols-4 gap-6">
-        <a href="{{ route('admin.events.create') }}" class="rounded-2xl bg-white border border-eventbrite-gray-100 shadow-sm p-6 hover:border-eventbrite-gray-400 hover:shadow-md transition">
-          <div class="text-base font-semibold text-eventbrite-dark">Create event</div>
-          <div class="text-sm text-eventbrite-gray-600 mt-1">Add a new event to your lineup.</div>
+      <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <a href="{{ route('admin.events.create') }}" class="rounded-2xl bg-white border border-[#E5E7EB] shadow-sm p-8 hover:border-[#6366F1] hover:shadow-md transition">
+          <div class="text-lg font-bold text-[#111827]">Create event</div>
+          <div class="text-sm text-[#6B7280] mt-2">Add a new event to your lineup.</div>
         </a>
-        <a href="{{ route('admin.events.index') }}" class="rounded-2xl bg-white border border-eventbrite-gray-100 shadow-sm p-6 hover:border-eventbrite-gray-400 hover:shadow-md transition">
-          <div class="text-base font-semibold text-eventbrite-dark">Manage events</div>
-          <div class="text-sm text-eventbrite-gray-600 mt-1">Edit, publish, or remove events.</div>
+        <a href="{{ route('admin.events.index') }}" class="rounded-2xl bg-white border border-[#E5E7EB] shadow-sm p-8 hover:border-[#6366F1] hover:shadow-md transition">
+          <div class="text-lg font-bold text-[#111827]">Manage events</div>
+          <div class="text-sm text-[#6B7280] mt-2">Edit, publish, or remove events.</div>
         </a>
-        <a href="{{ route('admin.orders.index') }}" class="rounded-2xl bg-white border border-eventbrite-gray-100 shadow-sm p-6 hover:border-eventbrite-gray-400 hover:shadow-md transition">
-          <div class="text-base font-semibold text-eventbrite-dark">View orders</div>
-          <div class="text-sm text-eventbrite-gray-600 mt-1">See sales and order details.</div>
+        <a href="{{ route('admin.orders.index') }}" class="rounded-2xl bg-white border border-[#E5E7EB] shadow-sm p-8 hover:border-[#6366F1] hover:shadow-md transition">
+          <div class="text-lg font-bold text-[#111827]">View orders</div>
+          <div class="text-sm text-[#6B7280] mt-2">See sales and order details.</div>
         </a>
         <form method="POST" action="{{ route('admin.ops.backup') }}" class="rounded-2xl bg-white border border-eventbrite-gray-100 shadow-sm p-6">
           @csrf
           <div class="text-base font-semibold text-eventbrite-dark">Run backup</div>
           <div class="text-sm text-eventbrite-gray-600 mt-1">Starts a full app + DB backup now.</div>
           <div class="mt-3 flex items-center gap-2">
-            <button class="inline-flex items-center px-4 py-2 rounded-md bg-tix-orange text-white text-sm font-semibold hover:bg-[#e55a2d]">Run backup</button>
+            <button class="inline-flex items-center px-4 py-2 rounded-md bg-black text-white text-sm font-semibold hover:bg-gray-800">Run backup</button>
             <a href="{{ route('admin.backups.index') }}" class="inline-flex items-center px-4 py-2 rounded-md border border-eventbrite-gray-100 bg-white text-sm text-eventbrite-dark hover:border-eventbrite-gray-400 hover:bg-[#f8f7fa]">View backups</a>
           </div>
         </form>
@@ -61,7 +61,7 @@
 
       <!-- Sales chart (Simplified) -->
       <div class="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 rounded-2xl bg-white border border-eventbrite-gray-100 shadow-sm p-6">
+        <div class="lg:col-span-2 rounded-2xl bg-white border border-[#E5E7EB] shadow-sm p-6">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-bold text-eventbrite-dark">Daily Revenue (Last 14 Days)</h2>
           </div>
@@ -138,7 +138,7 @@
         </div>
 
         <!-- Upcoming events -->
-        <div class="rounded-2xl bg-white border border-eventbrite-gray-100 shadow-sm p-6">
+        <div class="rounded-2xl bg-white border border-[#E5E7EB] shadow-sm p-6">
           <div class="flex items-center justify-between mb-3">
             <h2 class="text-xl font-bold text-eventbrite-dark">Upcoming</h2>
             <a href="{{ route('admin.events.index') }}" class="text-sm text-eventbrite-gray-600 hover:text-tix-orange">View all →</a>

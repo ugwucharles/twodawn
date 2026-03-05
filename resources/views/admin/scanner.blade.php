@@ -2,21 +2,21 @@
   <div id="page-content" class="py-6">
     <div class="max-w-6xl mx-auto px-6">
       <div class="mb-6 flex items-center">
-<h1 class="text-3xl font-extrabold tracking-tight text-white">QR Scanner</h1>
+<h1 class="text-3xl font-extrabold tracking-tight text-[#111827]">QR Scanner</h1>
       </div>
 
       <div class="grid lg:grid-cols-2 gap-6 items-start">
         <!-- Camera & preview -->
-        <div class="rounded-2xl bg-zinc-900/40 backdrop-blur-sm ring-1 ring-white/10 p-5 shadow-xl">
+        <div class="rounded-2xl bg-white border border-[#E5E7EB] p-5 shadow-sm">
           <div class="flex items-center gap-3 mb-3">
-            <button id="btn-start" class="px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm hover:bg-indigo-400 shadow-sm">Start camera</button>
-            <button id="btn-stop" class="px-4 py-2 rounded-lg bg-zinc-800 ring-1 ring-white/10 text-white text-sm hover:bg-zinc-700">Stop</button>
+            <button id="btn-start" class="px-4 py-2 rounded-lg bg-[#6366F1] text-white text-sm hover:bg-[#4F46E5] shadow-sm">Start camera</button>
+            <button id="btn-stop" class="px-4 py-2 rounded-lg bg-[#F9FAFB] border border-[#D1D5DB] text-[#374151] text-sm hover:bg-gray-100">Stop</button>
             <div class="ml-auto flex items-center gap-2">
-              <span id="status-dot" class="inline-block w-2 h-2 rounded-full bg-zinc-500"></span>
-              <span id="status" class="inline-flex items-center rounded-full px-2 py-1 text-[11px] font-medium bg-white/10 ring-1 ring-white/10 text-zinc-300">Ready</span>
+              <span id="status-dot" class="inline-block w-2 h-2 rounded-full bg-gray-400"></span>
+              <span id="status" class="inline-flex items-center rounded-full px-2 py-1 text-[11px] font-medium bg-[#F9FAFB] border border-[#D1D5DB] text-[#374151]">Ready</span>
             </div>
           </div>
-          <div class="aspect-video rounded-xl overflow-hidden bg-black/90 ring-1 ring-white/10 relative">
+          <div class="aspect-video rounded-xl overflow-hidden bg-gray-900 border border-[#E5E7EB] relative">
             <video id="video" playsinline autoplay muted class="w-full h-full object-cover"></video>
             <div class="pointer-events-none absolute inset-0">
               <div class="absolute inset-6 rounded-xl ring-1 ring-white/20"></div>
@@ -30,25 +30,25 @@
         </div>
 
         <!-- Manual + Image -->
-        <div class="rounded-2xl bg-zinc-900/40 backdrop-blur-sm ring-1 ring-white/10 p-5 shadow-xl">
+        <div class="rounded-2xl bg-white border border-[#E5E7EB] p-5 shadow-sm">
           <div class="space-y-4">
             <div>
-              <div class="text-sm text-zinc-300 mb-2">Enter code manually</div>
+              <div class="text-sm text-[#374151] mb-2 font-medium">Enter code manually</div>
               <div class="flex gap-2">
-                <input id="code" type="text" placeholder="Order ref (PA_...)" class="flex-1 rounded-lg bg-black/30 border border-white/10 px-3 py-2 focus:border-indigo-300 focus:ring-0" />
-                <button id="btn-verify" class="rounded-lg px-4 py-2 bg-indigo-500 text-white text-sm hover:bg-indigo-400 shadow-sm">Verify</button>
+                <input id="code" type="text" placeholder="Order ref (PA_...)" class="flex-1 rounded-md bg-[#F9FAFB] border border-[#D1D5DB] px-3 py-2 text-[#111827] placeholder-[#9CA3AF] focus:border-[#6366F1] focus:ring-2 focus:ring-[rgba(99,102,241,0.2)]" />
+                <button id="btn-verify" class="rounded-md px-4 py-2 bg-[#6366F1] text-white text-sm hover:bg-[#4F46E5] shadow-sm">Verify</button>
               </div>
             </div>
             <div>
-              <div class="text-sm text-zinc-300 mb-2">Or upload a screenshot</div>
+              <div class="text-sm text-[#374151] mb-2 font-medium">Or upload a screenshot</div>
               <input id="file" type="file" accept="image/*" class="hidden" />
-              <div id="dropzone" class="relative rounded-2xl border-2 border-dashed border-white/15 bg-black/20 hover:border-indigo-400 transition p-6 flex items-center justify-center text-center cursor-pointer">
+              <div id="dropzone" class="relative rounded-2xl border-2 border-dashed border-[#D1D5DB] bg-[#F9FAFB] hover:border-[#6366F1] transition p-6 flex items-center justify-center text-center cursor-pointer">
                 <div>
-                  <div class="mx-auto w-12 h-12 rounded-full bg-indigo-500/20 ring-1 ring-indigo-500/30 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-300" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5v14m-7-7h14"/></svg>
+                  <div class="mx-auto w-12 h-12 rounded-full bg-[#EEF2FF] border border-[#C7D2FE] flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-[#6366F1]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5v14m-7-7h14"/></svg>
                   </div>
-                  <div class="mt-3 text-sm">Drop image to scan, or <span class="underline">click to choose</span></div>
-                  <div id="file-hint" class="mt-1 text-xs text-zinc-400">PNG/JPG from the success page</div>
+                  <div class="mt-3 text-sm text-[#374151]">Drop image to scan, or <span class="underline text-[#6366F1]">click to choose</span></div>
+                  <div id="file-hint" class="mt-1 text-xs text-[#9CA3AF]">PNG/JPG from the success page</div>
                 </div>
               </div>
             </div>

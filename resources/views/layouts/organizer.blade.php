@@ -40,8 +40,8 @@
         <style>
             :root { 
                 --font-ui: 'Montserrat', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-                --accent-pink: #FF6B81;
-                --accent-pink-light: #FFF0F2;
+                --accent-pink: #000000;
+                --accent-pink-light: #F3F4F6;
                 --bg-sidebar: #FFFFFF;
                 --bg-main: #F4F7FE;
             }
@@ -64,7 +64,7 @@
             }
         </style>
     </head>
-    <body class="antialiased selection:bg-pink-100 selection:text-pink-600">
+    <body class="antialiased selection:bg-gray-200 selection:text-black">
         <div class="flex h-screen overflow-hidden">
             <!-- Sidebar -->
             <aside class="w-64 bg-white hidden lg:flex flex-col border-r border-gray-100 shrink-0">
@@ -83,7 +83,7 @@
                         <ul class="space-y-1">
                             <li>
                                 <a href="{{ route('organizer.dashboard') }}" class="sidebar-link group flex items-center px-4 py-3 text-sm font-bold transition-all {{ request()->routeIs('organizer.dashboard') ? 'active' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl' }}">
-                                    <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('organizer.dashboard') ? 'text-pink-500' : 'text-gray-400 group-hover:text-gray-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                                    <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('organizer.dashboard') ? 'text-black' : 'text-gray-400 group-hover:text-gray-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                                     Dashboard
                                 </a>
                             </li>
@@ -95,7 +95,7 @@
                             </li>
                             <li>
                                 <a href="{{ route('organizer.events.create') }}" class="sidebar-link group flex items-center px-4 py-3 text-sm font-bold transition-all {{ request()->routeIs('organizer.events.*') ? 'active' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl' }}">
-                                    <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('organizer.events.*') ? 'text-pink-500' : 'text-gray-400 group-hover:text-gray-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                    <svg class="w-5 h-5 mr-3 transition-colors {{ request()->routeIs('organizer.events.*') ? 'text-black' : 'text-gray-400 group-hover:text-gray-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                                     Events
                                 </a>
                             </li>
@@ -196,3 +196,4 @@
         @endif
     </body>
 </html>
+
