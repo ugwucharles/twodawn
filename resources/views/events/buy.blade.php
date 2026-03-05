@@ -13,8 +13,9 @@
       </div>
       <div>
         @php $isFree = ((float)($event->early_bird_price ?? $event->price ?? 0)) <= 0; @endphp
-        <h1 class="text-3xl font-extrabold">{{ $isFree ? 'Get Tickets' : 'Buy Tickets' }} — {{ $event->title }}</h1>
-        <div class="mt-2 text-zinc-300">{{ optional($event->starts_at)->format('D, M j, Y g:i A') }} @if($event->venue) • {{ $event->venue }} @endif</div>
+        <h1 class="text-3xl font-black text-black">{{ $isFree ? 'Get Tickets' : 'Buy Tickets' }}</h1>
+        <h2 class="text-xl font-bold text-zinc-900 mt-1">{{ $event->title }}</h2>
+        <div class="mt-2 text-zinc-600 font-medium">{{ optional($event->starts_at)->format('D, M j, Y g:i A') }} @if($event->venue) • {{ $event->venue }} @endif</div>
       </div>
     </div>
 
@@ -40,7 +41,7 @@
       @endphp
       @php $unitPriceStr = number_format($unitPrice ?? 0, 2, '.', ''); @endphp
 
-      <form method="POST" action="{{ route('orders.create', $event, false) }}" class="space-y-4 rounded-2xl bg-white/5 ring-1 ring-white/10 p-6" id="payment-form">
+      <form method="POST" action="{{ route('orders.create', $event, false) }}" class="space-y-6 rounded-3xl bg-white border border-zinc-200 p-8 shadow-sm" id="payment-form">
         @csrf
         <!-- Security token to prevent double submissions -->
         <input type="hidden" name="submission_token" value="{{ \Illuminate\Support\Str::random(32) }}" id="submission-token">
@@ -51,54 +52,54 @@
           </div>
         @endif
         <div>
-          <label class="block text-sm text-zinc-300" for="buyer_name">Full name</label>
-          <input id="buyer_name" name="buyer_name" type="text" required value="{{ old('buyer_name') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
+          <label class="block text-xs font-black uppercase tracking-widest text-black" for="buyer_name">Full name</label>
+          <input id="buyer_name" name="buyer_name" type="text" required value="{{ old('buyer_name') }}" class="mt-1 block w-full border-0 border-b border-zinc-300 bg-transparent focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-zinc-300" placeholder="John Doe" />
         </div>
         <div>
-          <label class="block text-sm text-zinc-300" for="buyer_email">Email</label>
-          <input id="buyer_email" name="buyer_email" type="email" required value="{{ old('buyer_email') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
+          <label class="block text-xs font-black uppercase tracking-widest text-black" for="buyer_email">Email address</label>
+          <input id="buyer_email" name="buyer_email" type="email" required value="{{ old('buyer_email') }}" class="mt-1 block w-full border-0 border-b border-zinc-300 bg-transparent focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-zinc-300" placeholder="john@example.com" />
         </div>
         <div>
-          <label class="block text-sm text-zinc-300" for="buyer_phone">Phone (optional)</label>
-          <input id="buyer_phone" name="buyer_phone" type="text" value="{{ old('buyer_phone') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
+          <label class="block text-xs font-black uppercase tracking-widest text-black" for="buyer_phone">Phone number (optional)</label>
+          <input id="buyer_phone" name="buyer_phone" type="text" value="{{ old('buyer_phone') }}" class="mt-1 block w-full border-0 border-b border-zinc-300 bg-transparent focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-zinc-300" placeholder="+234..." />
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm text-zinc-300" for="quantity">Quantity</label>
-            <input id="quantity" name="quantity" type="number" min="1" step="1" required value="{{ old('quantity', 1) }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
+            <label class="block text-xs font-black uppercase tracking-widest text-black" for="quantity">Quantity</label>
+            <input id="quantity" name="quantity" type="number" min="1" step="1" required value="{{ old('quantity', 1) }}" class="mt-1 block w-full border-0 border-b border-zinc-300 bg-transparent focus:border-black focus:ring-0 px-0 py-2 text-black" />
           </div>
           @if($unitPrice > 0)
           <div>
-            <label class="block text-sm text-zinc-300" for="coupon">Coupon (optional)</label>
-            <input id="coupon" name="coupon" type="text" value="{{ old('coupon') }}" class="mt-1 block w-full rounded-lg bg-black/30 border border-white/10 focus:border-white/30 focus:ring-0 px-3 py-2" />
+            <label class="block text-xs font-black uppercase tracking-widest text-black" for="coupon">Coupon code</label>
+            <input id="coupon" name="coupon" type="text" value="{{ old('coupon') }}" class="mt-1 block w-full border-0 border-b border-zinc-300 bg-transparent focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-zinc-300" placeholder="Optional" />
             <div id="coupon-msg" class="mt-1 text-xs"></div>
           </div>
           @endif
         </div>
 
         <!-- Cost summary -->
-        <div class="rounded-lg bg-black/20 border border-white/10 p-4 text-sm">
-          <div class="flex justify-between"><span>Price</span><span>@if($unitPrice <= 0) Free @else ₦{{ number_format($unitPrice, 0) }} @if($isEarly)<span class="text-xs text-emerald-300 ml-1">(early-bird)</span>@endif @endif</span></div>
+        <div class="rounded-2xl bg-zinc-50 border border-zinc-100 p-5 text-sm text-black">
+          <div class="flex justify-between font-medium"><span>Price per ticket</span><span>@if($unitPrice <= 0) Free @else ₦{{ number_format($unitPrice, 0) }} @if($isEarly)<span class="text-xs text-emerald-600 ml-1 font-bold">(early-bird)</span>@endif @endif</span></div>
           @if($event->pass_fees_to_buyer && $unitPrice > 0)
-          <div class="flex justify-between text-zinc-300"><span>Platform fee per ticket</span><span>5% + ₦50</span></div>
+          <div class="flex justify-between text-zinc-500 mt-1 italic"><span>Platform fee per ticket</span><span>5% + ₦50</span></div>
           @endif
-          <div class="mt-3 space-y-1">
-            <div class="flex justify-between"><span>Subtotal</span><span id="sum-subtotal">₦0</span></div>
+          <div class="mt-4 space-y-2">
+            <div class="flex justify-between"><span>Subtotal</span><span id="sum-subtotal" class="font-bold text-black">₦0</span></div>
             @if($event->pass_fees_to_buyer)
-            <div class="flex justify-between"><span>Fees</span><span id="sum-fees">₦0</span></div>
+            <div class="flex justify-between"><span>Fees</span><span id="sum-fees" class="font-bold text-black">₦0</span></div>
             @endif
-            <div class="pt-1 mt-1 border-t border-white/10 flex justify-between font-semibold"><span>Total</span><span id="sum-total">₦0</span></div>
+            <div class="pt-3 mt-3 border-t border-zinc-200 flex justify-between font-black text-lg"><span>Total</span><span id="sum-total">₦0</span></div>
           </div>
         </div>
 
-        <button type="submit" class="w-full inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-black font-semibold hover:bg-zinc-100 transition disabled:opacity-50 disabled:cursor-not-allowed" id="payment-button">
+        <button type="submit" class="w-full inline-flex items-center justify-center px-6 py-4 rounded-full bg-black text-white font-black hover:bg-zinc-800 transition shadow-xl disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider text-sm" id="payment-button">
           <span id="button-text">{{ $unitPrice <= 0 ? 'Get Ticket' : 'Proceed to Paystack' }}</span>
-          <svg id="button-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-black hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg id="button-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
         </button>
-        <a href="{{ $event->public_url }}" class="block text-center text-zinc-400 hover:text-white text-sm">Cancel</a>
+        <a href="{{ $event->public_url }}" class="block text-center text-zinc-500 hover:text-black text-sm font-bold">Cancel</a>
       </form>
     </div>
   </div>
