@@ -72,11 +72,14 @@
     <meta name="apple-mobile-web-app-title" content="2DAWN">
 
     @php
+      // 1. Determine the final logo URL
+      $finalLogoUrl = '/images/logo.png'; // Default
+      $absUrl = config('app.url') . '/images/logo.png';
+      
       $manifestPath = public_path('build/manifest.json');
       $cssHref = null; $jsSrc = null;
       if (file_exists($manifestPath)) {
           $manifest = json_decode(file_get_contents($manifestPath), true);
-          // Prefer direct CSS entry; fall back to CSS emitted by the JS entry
           if (isset($manifest['resources/css/app.css']['file'])) {
               $cssHref = asset('build/' . $manifest['resources/css/app.css']['file']);
           } elseif (!empty($manifest['resources/js/app.js']['css'][0])) {
