@@ -39,6 +39,7 @@ class EventController extends Controller
         $data = $request->validate([
             'title' => ['required','string','max:255'],
             'description' => ['nullable','string'],
+            'must_know' => ['nullable','string'],
             'venue' => ['nullable','string','max:255'],
             'mood' => ['required','string', Rule::in(config('moods.list', ['Rave','Romantic','Amapiano','Afrobeats','Hip‑Hop','House','Live Band','Jazz','Techno','Gospel','Comedy','Networking']))],
             'starts_at' => ['required','date'],
@@ -54,6 +55,7 @@ class EventController extends Controller
             'gallery.*' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:4096'],
             'use_custom_slug' => ['sometimes','boolean'],
             'slug' => [\Illuminate\Validation\Rule::requiredIf(fn() => $request->boolean('use_custom_slug')), 'nullable','string','max:120','regex:/^[a-z0-9-]+$/', \Illuminate\Validation\Rule::unique('events','slug')->ignore($event?->id)],
+            'whatsapp_group_url' => ['nullable','url','max:500'],
         ]);
 
         // Sanitize string inputs

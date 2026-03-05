@@ -13,6 +13,7 @@ class Event extends Model
         'user_id',
         'title',
         'description',
+        'must_know',
         'venue',
         'starts_at',
         'ends_at',
@@ -28,6 +29,7 @@ class Event extends Model
         'mood',
         'use_custom_slug',
         'slug',
+        'whatsapp_group_url',
     ];
 
     protected function casts(): array

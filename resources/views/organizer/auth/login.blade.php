@@ -2,7 +2,10 @@
 
 @section('content')
 <div class="form-container">
-    <div class="logo-container">Organizer Sign In</div>
+    <div class="logo-container" style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+        <a href="{{ url('/') }}"><img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name', '2DAWN') }}" style="height:48px;width:auto;"></a>
+        <span>Organizer Sign In</span>
+    </div>
 
     @if (session('status'))
         <div class="alert-success">{{ session('status') }}</div>

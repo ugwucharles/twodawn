@@ -5,14 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', '2DAWN') }} - Auth</title>
 
+    <!-- Font & Assets -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
 <style>
+    :root {
+        --font-ui: 'Montserrat', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    }
+
     /* Uiverse form CSS */
     .form-container {
       max-width: 300px; /* Reduced max-width */
       background-color: #fff;
       padding: 32px 24px;
       font-size: 14px;
-      font-family: inherit;
+      font-family: var(--font-ui);
       color: #212121;
       display: flex;
       flex-direction: column;
@@ -48,7 +57,7 @@
     }
 </style>
 </head>
-<body class="bg-[#f8f7fa]">
+<body class="bg-[#f8f7fa]" style="font-family: var(--font-ui);">
     @yield('content')
 </body>
 </html>

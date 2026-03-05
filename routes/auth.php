@@ -18,10 +18,13 @@ Route::middleware('guest')->group(function () {
     // Registration disabled
     // Route::post('register', [RegisteredUserController::class, 'store']);
 
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
+    Route::get('login', function () {
+        return redirect()->route('organizer.login');
+    })->name('login');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::post('login', function () {
+        return redirect()->route('organizer.login');
+    });
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');

@@ -22,6 +22,10 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     View Public Page
                 </a>
+                <a href="{{ route('organizer.events.edit', $event) }}" class="inline-flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 font-semibold bg-white border border-gray-200 hover:bg-gray-50 rounded-xl px-4 py-2 shadow-sm transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Edit Event
+                </a>
             </div>
         </div>
 
@@ -39,7 +43,7 @@
             <div class="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
                 <p class="text-sm font-medium text-gray-500 mb-2">Ticket Price</p>
                 <p class="text-3xl font-bold text-gray-900">
-                    {{ $event->price > 0 ? '₦'.number_format($event->price / 100, 2) : 'Free' }}
+                    {{ $event->price > 0 ? '₦'.number_format($event->price, 2) : 'Free' }}
                 </p>
             </div>
             <div class="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
@@ -47,6 +51,23 @@
                 <p class="text-3xl font-bold text-gray-900 mb-2">₦{{ number_format($totalRevenue / 100, 2) }}</p>
             </div>
         </div>
+
+        <!-- MUST KNOW! Info Box -->
+        @if(!empty($event->must_know))
+            <div class="mb-8 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(245,158,11,0.15)]">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-base font-extrabold text-amber-800 tracking-wide mb-1">MUST KNOW!</h3>
+                        <p class="text-sm text-amber-900/80 leading-relaxed whitespace-pre-line">{{ $event->must_know }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
 
         <!-- Attendees Table -->
         <div class="bg-white rounded-2xl p-0 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] overflow-hidden">

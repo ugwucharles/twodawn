@@ -10,44 +10,10 @@
     </div>
 
     @unless($logoOnly)
-    <!-- Center: Search Bar (Hardened Pill Style) -->
-    @unless (request()->routeIs('host.*'))
-    <div class="hidden md:flex flex-[2] max-w-[640px] items-center bg-[#f8f7fa] border border-[#eeedf2] rounded-full pl-4 pr-1.5 h-[48px] focus-within:bg-white focus-within:shadow-md transition-all overflow-hidden mx-4">
-      <!-- Search Part -->
-      <div class="flex items-center flex-[1.4] h-full">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#6f7287] mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-        <input 
-          type="text" 
-          placeholder="Search events" 
-          class="w-full bg-transparent border-0 focus:ring-0 text-[14px] text-[#1e0a3c] placeholder:text-[#6f7287] font-medium p-0"
-        >
-      </div>
-      
-      <!-- Divider -->
-      <div class="h-5 w-[1px] bg-[#eeedf2] mx-3 shrink-0"></div>
-      
-      <!-- Location Part -->
-      <div class="flex items-center flex-1 h-full">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#6f7287] mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-        <input 
-          type="text" 
-          placeholder="Near Me"
-          value="Lagos" 
-          class="w-full bg-transparent border-0 focus:ring-0 text-[14px] text-[#1e0a3c] font-medium p-0"
-        >
-      </div>
-
-      <!-- Action Button -->
-      <button class="shrink-0 w-9 h-9 rounded-full bg-[#1e0a3c] text-white flex items-center justify-center hover:bg-black transition-colors ml-1">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-      </button>
-    </div>
-    @endunless
-
     <!-- Right: Desktop Navigation -->
     <div class="hidden lg:flex items-center gap-1 shrink-0">
       @unless (request()->routeIs('host.*'))
-      <nav class="flex items-center text-[15px] font-medium text-eventbrite-dark">
+      <nav class="flex items-center text-[16px] font-normal text-eventbrite-dark">
         @if(!auth()->check() || (!auth()->user()->is_admin && !auth()->user()->is_organizer))
             <a href="{{ route('events.index') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Discover events</a>
             <a href="{{ route('events.recent') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Find my tickets</a>
@@ -68,7 +34,7 @@
             </form>
         @else
             <a href="{{ route('organizer.register') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors">Create event</a>
-            <a href="{{ route('organizer.login') }}" class="px-3.5 py-2 hover:text-tix-orange transition-colors ml-2 font-bold text-tix-orange">Login</a>
+            <a href="{{ route('organizer.login') }}" class="ml-4 px-6 py-2.5 bg-black text-white rounded-full hover:bg-gray-800 transition-colors font-medium">Login</a>
         @endauth
       </nav>
       @endunless
@@ -76,25 +42,19 @@
 
     <!-- Mobile Nav Controls -->
     <div class="flex lg:hidden items-center gap-2">
-      @unless (request()->routeIs('host.*'))
-      <button type="button" aria-label="Search" class="md:hidden p-2 text-[#6f7287] hover:bg-[#f8f7fa] rounded-full transition-colors" @click="$dispatch('open-modal', 'search-modal')">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/></svg>
-      </button>
-      @endunless
-      <button type="button" class="p-2 text-[#1e0a3c] hover:bg-[#f8f7fa] rounded-full transition-colors" aria-label="Open menu" @click="open=true">
+      <button type="button" class="p-2 text-[#1e0a3c] rounded-full transition-colors" aria-label="Open menu" @click="open=true">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
     </div>
-
-    @endunless
   </div>
+  @endunless
 
   @unless($logoOnly)
   <!-- Overlay -->
-  <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 bg-eventbrite-dark/40 backdrop-blur-sm z-[110] lg:hidden" @click="open=false" aria-hidden="true"></div>
+  <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 bg-white/80 backdrop-blur-md z-[110] lg:hidden" @click="open=false" aria-hidden="true"></div>
 
   <!-- Mobile Drawer -->
-  <aside x-cloak x-show="open" x-transition:enter="transition transform ease-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition transform ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" class="fixed inset-y-0 right-0 w-full max-w-[320px] bg-white shadow-2xl z-[120] flex flex-col lg:hidden">
+  <aside x-cloak x-show="open" x-transition:enter="transition transform ease-out duration-300" x-transition:enter-start="-translate-y-full" x-transition:enter-end="translate-y-0" x-transition:leave="transition transform ease-in duration-200" x-transition:leave-start="translate-y-0" x-transition:leave-end="-translate-y-full" class="fixed inset-x-0 top-0 w-full bg-white shadow-2xl z-[120] flex flex-col lg:hidden max-h-screen overflow-y-auto">
     
     <!-- Drawer Header -->
     <div class="flex items-center justify-between p-4 border-b border-eventbrite-gray-100">

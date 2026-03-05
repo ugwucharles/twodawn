@@ -22,6 +22,9 @@ class User extends Authenticatable
         'email',
         'password',
         'is_organizer',
+        'instagram_handle',
+        'whatsapp_number',
+        'twitter_handle',
     ];
 
     /**

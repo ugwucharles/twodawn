@@ -16,6 +16,12 @@
     </div>
 
     <div>
+        <x-input-label for="must_know" :value="__('MUST KNOW!')" />
+        <textarea id="must_know" name="must_know" class="mt-1 block w-full rounded-md shadow-sm border-white/20 bg-zinc-900/70 text-white placeholder-zinc-400 focus:border-indigo-400 focus:ring-indigo-400/30" rows="3" placeholder="Important info for attendees (dress code, gate times, etc.)">{{ old('must_know', $event->must_know) }}</textarea>
+        <x-input-error :messages="$errors->get('must_know')" class="mt-2" />
+    </div>
+
+    <div>
         <x-input-label for="venue" :value="__('Venue')" />
         <x-text-input id="venue" name="venue" type="text" class="mt-1 block w-full" :value="old('venue', $event->venue)" />
         <x-input-error :messages="$errors->get('venue')" class="mt-2" />
@@ -106,6 +112,13 @@
         <input id="is_published" name="is_published" type="checkbox" value="1" class="rounded border-white/20 text-indigo-500 shadow-sm focus:ring-indigo-400/30" @checked(old('is_published', $event->is_published)) />
         <label for="is_published" class="ms-2 text-sm text-zinc-300">{{ __('Published') }}</label>
         <x-input-error :messages="$errors->get('is_published')" class="mt-2" />
+    </div>
+
+    <div>
+        <x-input-label for="whatsapp_group_url" :value="__('WhatsApp Group Link')" />
+        <x-text-input id="whatsapp_group_url" name="whatsapp_group_url" type="url" class="mt-1 block w-full" :value="old('whatsapp_group_url', $event->whatsapp_group_url)" placeholder="https://chat.whatsapp.com/..." />
+        <x-input-error :messages="$errors->get('whatsapp_group_url')" class="mt-2" />
+        <p class="mt-1 text-xs text-zinc-400">Optional. Paste a WhatsApp group invite link to show a "Join Group" button on the event page.</p>
     </div>
 
     <div class="mt-4 flex items-start gap-2">

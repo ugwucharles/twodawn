@@ -1,4 +1,4 @@
-<header class="app-header bg-white border-b border-[#eeedf2] sticky top-0 z-[90] h-[64px] w-full flex items-center" x-data="{ open:false }">
+<header class="app-header bg-[#f8f7fa] border-b border-eventbrite-gray-100 sticky top-0 z-[90] h-[72px] w-full flex items-center" x-data="{ open:false }">
   <div class="w-full px-4 md:px-6 lg:px-10 h-full flex items-center justify-between gap-4">
 
     <!-- Left: Logo -->
@@ -11,7 +11,7 @@
 
     <!-- Center: Nav -->
     <div class="hidden lg:flex items-center gap-1 shrink-0">
-      <nav class="flex items-center text-[14px] font-medium text-eventbrite-dark">
+      <nav class="flex items-center text-[16px] font-normal text-eventbrite-dark">
         <a href="{{ route('admin.dashboard') }}" class="px-3 py-2 hover:text-tix-orange {{ request()->routeIs('admin.dashboard') ? 'text-tix-orange' : '' }}">Dashboard</a>
         <a href="{{ route('admin.events.index') }}" class="px-3 py-2 hover:text-tix-orange {{ request()->routeIs('admin.events.*') ? 'text-tix-orange' : '' }}">Events</a>
         <a href="{{ route('admin.orders.index') }}" class="px-3 py-2 hover:text-tix-orange {{ request()->routeIs('admin.orders.*') ? 'text-tix-orange' : '' }}">Orders</a>
@@ -43,12 +43,12 @@
     x-cloak
     x-show="open"
     x-transition:enter="transition transform ease-out duration-200"
-    x-transition:enter-start="translate-x-full"
-    x-transition:enter-end="translate-x-0"
+    x-transition:enter-start="-translate-y-full"
+    x-transition:enter-end="translate-y-0"
     x-transition:leave="transition transform ease-in duration-150"
-    x-transition:leave-start="translate-x-0"
-    x-transition:leave-end="translate-x-full"
-    class="fixed inset-y-0 right-0 w-full max-w-[320px] bg-white shadow-2xl z-[90] flex flex-col lg:hidden"
+    x-transition:leave-start="translate-y-0"
+    x-transition:leave-end="-translate-y-full"
+    class="fixed inset-x-0 top-0 w-full bg-white shadow-2xl z-[90] flex flex-col lg:hidden max-h-screen overflow-y-auto"
   >
     <div class="flex items-center justify-between p-4 border-b border-eventbrite-gray-100">
       <span class="text-sm font-semibold text-eventbrite-dark uppercase tracking-[0.18em]">Admin</span>

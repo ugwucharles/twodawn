@@ -299,8 +299,15 @@
           </div>
         </a>
       @empty
-        <div class="py-20 text-center text-gray-400 col-span-full">
-          No matching events found.
+        <div class="py-20 text-center col-span-full">
+          @php
+            $stateLabel = request('state_label', 'this area');
+          @endphp
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <p class="text-xl font-bold text-gray-900 mb-2">Sorry, no events found</p>
+          <p class="text-gray-500">There are currently no events in {{ $stateLabel }}. Check back soon!</p>
         </div>
       @endforelse
     </div>

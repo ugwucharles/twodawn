@@ -20,6 +20,7 @@ class EventController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'starts_at' => 'required|date',
+            'state' => 'required|string|max:50',
             'venue' => 'required|string|max:255',
             'price' => 'numeric|min:0',
         ]);
@@ -27,6 +28,8 @@ class EventController extends Controller
         $event = Auth::user()->events()->create([
             'title' => $request->title,
             'description' => $request->description,
+            'must_know' => $request->must_know,
+            'state' => $request->state,
             'venue' => $request->venue,
             'starts_at' => $request->starts_at,
             'ends_at' => $request->ends_at,
@@ -50,5 +53,43 @@ class EventController extends Controller
         $totalRevenue = $event->orders()->where('status', 'paid')->sum('amount');
 
         return view('organizer.events.show', compact('event', 'orders', 'totalSold', 'totalRevenue'));
+    }
+
+    public function edit(Event $event)
+    {
+        if ($event->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return view('organizer.events.edit', compact('event'));
+    }
+
+    public function update(Request $request, Event $event)
+    {
+        if ($event->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'starts_at' => 'required|date',
+            'state' => 'required|string|max:50',
+            'venue' => 'required|string|max:255',
+            'price' => 'numeric|min:0',
+        ]);
+
+        $event->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'must_know' => $request->must_know,
+            'state' => $request->state,
+            'venue' => $request->venue,
+            'starts_at' => $request->starts_at,
+            'ends_at' => $request->ends_at,
+            'price' => $request->input('price', 0),
+            'capacity' => $request->capacity,
+        ]);
+
+        return redirect()->route('organizer.events.show', $event)->with('status', 'Event updated successfully!');
     }
 }

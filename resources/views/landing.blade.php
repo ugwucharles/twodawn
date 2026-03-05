@@ -351,15 +351,52 @@
             @endforelse
         </div>
 
-        {{-- Other events you may like (recent events) --}}
-        @php $more = $recentEvents ?? collect(); @endphp
-        @if($more->count())
+        {{-- Recent events (past events) --}}
+        @if(isset($recentEvents) && $recentEvents->count())
             <div class="mt-12 border-t border-eventbrite-gray-100 pt-8">
-                <h2 class="text-lg font-semibold text-eventbrite-dark mb-4">
+                <h2 class="text-xl sm:text-2xl font-bold text-eventbrite-dark mb-4">
+                    Recent events
+                </h2>
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach($recentEvents as $event)
+                        @php
+                            $start = $event->starts_at;
+                            $startDate = $start ? $start->format('D, M j') : null;
+                        @endphp
+                        <a href="{{ $event->public_url }}"
+                           class="flex rounded-2xl border border-eventbrite-gray-100 bg-white hover:border-eventbrite-gray-400 hover:shadow-md transition overflow-hidden group">
+                            <div class="w-20 sm:w-24 relative bg-eventbrite-gray-50">
+                                @if($event->image_url)
+                                    <img src="{{ $event->image_url }}" alt="{{ $event->title }}"
+                                         class="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"/>
+                                @else
+                                    <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600"></div>
+                                @endif
+                            </div>
+                            <div class="flex-1 p-3 sm:p-4">
+                                <h3 class="text-sm font-semibold text-eventbrite-dark group-hover:text-eventbrite-orange line-clamp-2">
+                                    {{ $event->title }}
+                                </h3>
+                                @if($startDate)
+                                    <div class="mt-1 text-xs text-eventbrite-gray-600">
+                                        {{ $startDate }}
+                                    </div>
+                                @endif
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        {{-- Other events you may like (upcoming events) --}}
+        @if(isset($otherEvents) && $otherEvents->count())
+            <div class="mt-12 border-t border-eventbrite-gray-100 pt-8">
+                <h2 class="text-xl sm:text-2xl font-bold text-eventbrite-dark mb-4">
                     Other events you may like
                 </h2>
                 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    @foreach($more as $event)
+                    @foreach($otherEvents as $event)
                         @php
                             $start = $event->starts_at;
                             $startDate = $start ? $start->format('D, M j') : null;

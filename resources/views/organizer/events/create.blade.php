@@ -37,10 +37,69 @@
                 </div>
 
                 <div>
+                    <label for="must_know" class="block text-sm font-semibold text-gray-700 mb-2">
+                        MUST KNOW!
+                        <span class="text-xs font-normal text-gray-400 ml-1">Important info for attendees</span>
+                    </label>
+                    <textarea id="must_know" name="must_know" rows="4"
+                              class="block w-full rounded-xl border border-amber-200 bg-amber-50/30 text-gray-900 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 px-5 py-3.5 text-sm shadow-sm transition-all resize-none"
+                              placeholder="e.g. Dress code, gate closing time, items not allowed...">{{ old('must_know') }}</textarea>
+                </div>
+
+                <div>
+                    <label for="state" class="block text-sm font-semibold text-gray-700 mb-2">State *</label>
+                    <select id="state" name="state" required
+                            class="block w-full rounded-xl border border-gray-200 bg-white text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 px-5 py-3.5 text-sm shadow-sm transition-all">
+                        <option value="">Select State</option>
+                        <option value="abia" {{ old('state') == 'abia' ? 'selected' : '' }}>Abia</option>
+                        <option value="adamawa" {{ old('state') == 'adamawa' ? 'selected' : '' }}>Adamawa</option>
+                        <option value="akwa-ibom" {{ old('state') == 'akwa-ibom' ? 'selected' : '' }}>Akwa Ibom</option>
+                        <option value="anambra" {{ old('state') == 'anambra' ? 'selected' : '' }}>Anambra</option>
+                        <option value="bauchi" {{ old('state') == 'bauchi' ? 'selected' : '' }}>Bauchi</option>
+                        <option value="bayelsa" {{ old('state') == 'bayelsa' ? 'selected' : '' }}>Bayelsa</option>
+                        <option value="benue" {{ old('state') == 'benue' ? 'selected' : '' }}>Benue</option>
+                        <option value="borno" {{ old('state') == 'borno' ? 'selected' : '' }}>Borno</option>
+                        <option value="cross-river" {{ old('state') == 'cross-river' ? 'selected' : '' }}>Cross River</option>
+                        <option value="delta" {{ old('state') == 'delta' ? 'selected' : '' }}>Delta</option>
+                        <option value="ebonyi" {{ old('state') == 'ebonyi' ? 'selected' : '' }}>Ebonyi</option>
+                        <option value="edo" {{ old('state') == 'edo' ? 'selected' : '' }}>Edo</option>
+                        <option value="ekiti" {{ old('state') == 'ekiti' ? 'selected' : '' }}>Ekiti</option>
+                        <option value="enugu" {{ old('state') == 'enugu' ? 'selected' : '' }}>Enugu</option>
+                        <option value="gombe" {{ old('state') == 'gombe' ? 'selected' : '' }}>Gombe</option>
+                        <option value="imo" {{ old('state') == 'imo' ? 'selected' : '' }}>Imo</option>
+                        <option value="jigawa" {{ old('state') == 'jigawa' ? 'selected' : '' }}>Jigawa</option>
+                        <option value="kaduna" {{ old('state') == 'kaduna' ? 'selected' : '' }}>Kaduna</option>
+                        <option value="kano" {{ old('state') == 'kano' ? 'selected' : '' }}>Kano</option>
+                        <option value="katsina" {{ old('state') == 'katsina' ? 'selected' : '' }}>Katsina</option>
+                        <option value="kebbi" {{ old('state') == 'kebbi' ? 'selected' : '' }}>Kebbi</option>
+                        <option value="kogi" {{ old('state') == 'kogi' ? 'selected' : '' }}>Kogi</option>
+                        <option value="kwara" {{ old('state') == 'kwara' ? 'selected' : '' }}>Kwara</option>
+                        <option value="lagos" {{ old('state', 'lagos') == 'lagos' ? 'selected' : '' }}>Lagos</option>
+                        <option value="nasarawa" {{ old('state') == 'nasarawa' ? 'selected' : '' }}>Nasarawa</option>
+                        <option value="niger" {{ old('state') == 'niger' ? 'selected' : '' }}>Niger</option>
+                        <option value="ogun" {{ old('state') == 'ogun' ? 'selected' : '' }}>Ogun</option>
+                        <option value="ondo" {{ old('state') == 'ondo' ? 'selected' : '' }}>Ondo</option>
+                        <option value="osun" {{ old('state') == 'osun' ? 'selected' : '' }}>Osun</option>
+                        <option value="oyo" {{ old('state') == 'oyo' ? 'selected' : '' }}>Oyo</option>
+                        <option value="plateau" {{ old('state') == 'plateau' ? 'selected' : '' }}>Plateau</option>
+                        <option value="rivers" {{ old('state') == 'rivers' ? 'selected' : '' }}>Rivers</option>
+                        <option value="sokoto" {{ old('state') == 'sokoto' ? 'selected' : '' }}>Sokoto</option>
+                        <option value="taraba" {{ old('state') == 'taraba' ? 'selected' : '' }}>Taraba</option>
+                        <option value="yobe" {{ old('state') == 'yobe' ? 'selected' : '' }}>Yobe</option>
+                        <option value="zamfara" {{ old('state') == 'zamfara' ? 'selected' : '' }}>Zamfara</option>
+                        <option value="abuja" {{ old('state') == 'abuja' ? 'selected' : '' }}>Abuja (FCT)</option>
+                    </select>
+                </div>
+
+                <div>
                     <label for="venue" class="block text-sm font-semibold text-gray-700 mb-2">Venue / Location *</label>
                     <input id="venue" type="text" name="venue" value="{{ old('venue') }}" required
                            class="block w-full rounded-xl border border-gray-200 bg-white text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 px-5 py-3.5 text-sm shadow-sm transition-all"
-                           placeholder="e.g. Eko Hotel, Victoria Island Lagos">
+                           placeholder="e.g. Eko Hotel, Victoria Island">
+                    <div class="mt-3 inline-block px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-bold uppercase tracking-wide">
+                        Detailed Location on Ticket
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">This exact location will be printed on tickets and visible to attendees</p>
                 </div>
             </div>
 

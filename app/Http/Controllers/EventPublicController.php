@@ -18,21 +18,35 @@ class EventPublicController extends Controller
                   });
             })
             ->orderBy('starts_at')
-            ->take(5)
+            ->take(6)
             ->get();
 
+        // Recent past events (ended in the last 30 days)
         $recentEvents = Event::query()->where('is_published', true)
             ->where(function($q){
                 $q->where(function($q2){
                     $q2->whereNotNull('ends_at')
-                       ->whereBetween('ends_at', [now()->subMonth(), now()]);
+                       ->whereBetween('ends_at', [now()->subDays(30), now()]);
                 })->orWhere(function($q3){
                     $q3->whereNull('ends_at')
-                       ->whereBetween('starts_at', [now()->subMonth(), now()]);
+                       ->whereBetween('starts_at', [now()->subDays(30), now()]);
                 });
             })
             ->orderByDesc('starts_at')
-            ->take(5)
+            ->take(6)
+            ->get();
+
+        // Other upcoming events (not in featured)
+        $otherEvents = Event::query()->where('is_published', true)
+            ->where(function($q){
+                $q->where('ends_at', '>=', now())
+                  ->orWhere(function($q2){
+                      $q2->whereNull('ends_at')->where('starts_at', '>=', now());
+                  });
+            })
+            ->whereNotIn('id', $featuredEvents->pluck('id'))
+            ->orderBy('starts_at')
+            ->take(6)
             ->get();
 
         $stats = [
@@ -47,7 +61,7 @@ class EventPublicController extends Controller
             'tickets_sold' => \App\Models\Order::where('status','paid')->sum('quantity'),
         ];
 
-        return view('landing', compact('featuredEvents','recentEvents','stats'));
+        return view('landing', compact('featuredEvents','recentEvents','otherEvents','stats'));
     }
 
     public function index(Request $request)

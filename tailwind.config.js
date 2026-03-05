@@ -13,7 +13,7 @@ export default {
         extend: {
             colors: {
                 tix: {
-                    orange: '#f05537',
+                    orange: '#000000',
                 },
                 eventbrite: {
                     orange: '#d1410c',
@@ -28,7 +28,7 @@ export default {
                 }
             },
             fontFamily: {
-                sans: ['Inter', 'Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Montserrat', 'Figtree', ...defaultTheme.fontFamily.sans],
             },
         },
     },

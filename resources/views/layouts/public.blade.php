@@ -65,7 +65,7 @@
     <!-- Font & Assets -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/Group 2.png') }}">
     <meta name="apple-mobile-web-app-title" content="{{ $appName }}">
@@ -114,7 +114,7 @@
       </script>
     @endif
     <style>
-      :root{ --font-ui: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; @if(!empty($tenant?->brand_color)) --brand: {{ $tenant->brand_color }}; @endif }
+      :root{ --font-ui: 'Montserrat', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; @if(!empty($tenant?->brand_color)) --brand: {{ $tenant->brand_color }}; @endif }
       body{ font-family: var(--font-ui); color:#1e0a3c; }
       /* Prevent Alpine FOUC */
       [x-cloak]{ display:none !important; }
