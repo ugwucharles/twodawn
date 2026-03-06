@@ -72,19 +72,31 @@ class CheckoutController extends Controller
                 'buyer_phone' => ['nullable','string','max:50'],
                 'quantity' => ['required','integer','min:1'],
                 'coupon' => ['nullable','string','max:50'],
+                'ticket_type' => ['nullable', 'string', 'max:100'],
             ]);
 
             $quantity = (int) $data['quantity'];
+            $selectedTicketType = $data['ticket_type'] ?? null;
 
             // Prevent oversell: basic pre-check
             if (! is_null($event->capacity) && $quantity > (int)$event->capacity) {
                 return back()->withErrors(['quantity' => 'Only '.$event->capacity.' ticket(s) remaining for this event.'])->withInput();
             }
 
-            // Early bird pricing
+            // Early bird pricing or Ticket Type pricing
             $now = now();
             $unitPrice = (float) ($event->price ?? 0);
-            if (!is_null($event->early_bird_price) && !is_null($event->early_bird_ends_at) && $now->lte($event->early_bird_ends_at)) {
+            $appliedTicketType = null;
+            
+            if ($selectedTicketType && is_array($event->ticket_types)) {
+                foreach ($event->ticket_types as $type) {
+                    if (strcasecmp($type['name'], $selectedTicketType) === 0) {
+                        $unitPrice = (float) ($type['price'] ?? 0);
+                        $appliedTicketType = trim($type['name']);
+                        break;
+                    }
+                }
+            } else if (!is_null($event->early_bird_price) && !is_null($event->early_bird_ends_at) && $now->lte($event->early_bird_ends_at)) {
                 $unitPrice = (float) $event->early_bird_price;
             }
 
@@ -189,6 +201,7 @@ class CheckoutController extends Controller
                 'paystack_reference' => $reference,
                 'status' => 'pending',
                 'created_ip' => $request->ip(),
+                'ticket_type' => $appliedTicketType,
             ]);
 
             // Log order creation
@@ -295,13 +308,23 @@ class CheckoutController extends Controller
             $data = $request->validate([
                 'quantity' => ['required','integer','min:1'],
                 'coupon' => ['nullable','string','max:50'],
+                'ticket_type' => ['nullable', 'string', 'max:100'],
             ]);
             $quantity = (int) $data['quantity'];
+            $selectedTicketType = $data['ticket_type'] ?? null;
 
-            // Base/early-bird unit price
+            // Base/early-bird unit price or Custom Ticket Type
             $unitPrice = (float) ($event->price ?? 0);
             $now = now();
-            if (!is_null($event->early_bird_price) && !is_null($event->early_bird_ends_at) && $now->lte($event->early_bird_ends_at)) {
+            
+            if ($selectedTicketType && is_array($event->ticket_types)) {
+                foreach ($event->ticket_types as $type) {
+                    if (strcasecmp($type['name'], $selectedTicketType) === 0) {
+                        $unitPrice = (float) ($type['price'] ?? 0);
+                        break;
+                    }
+                }
+            } else if (!is_null($event->early_bird_price) && !is_null($event->early_bird_ends_at) && $now->lte($event->early_bird_ends_at)) {
                 $unitPrice = (float) $event->early_bird_price;
             }
             $subtotalKobo = (int) round($unitPrice * $quantity * 100);

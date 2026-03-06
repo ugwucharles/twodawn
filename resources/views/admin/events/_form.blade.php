@@ -91,6 +91,81 @@
         </div>
     </div>
 
+    <div class="border-t border-[#E5E7EB] pt-4 mt-4">
+        <div class="flex items-center justify-between mb-2">
+            <div>
+                <x-input-label :value="__('Ticket Types (Optional)')" />
+                <p class="text-xs text-[#9CA3AF]">Add multiple ticket tiers (e.g. Regular, VIP). If added, these override the base price above.</p>
+            </div>
+            <button type="button" id="add-ticket-type-btn" class="px-3 py-1 text-sm bg-black text-white rounded font-medium hover:bg-gray-800 transition">
+                + Add Ticket
+            </button>
+        </div>
+        
+        <x-input-error :messages="$errors->get('ticket_types')" class="mt-2" />
+        
+        <div id="ticket-types-container" class="space-y-3">
+            @php
+                $oldTicketTypes = old('ticket_types', is_array($event->ticket_types) ? $event->ticket_types : []);
+            @endphp
+            
+            @if(count($oldTicketTypes) > 0)
+                @foreach($oldTicketTypes as $index => $type)
+                    <div class="flex items-center gap-2 ticket-type-row">
+                        <div class="flex-1">
+                            <input type="text" name="ticket_types[{{ $index }}][name]" value="{{ $type['name'] ?? '' }}" placeholder="Ticket Name (e.g. VIP)" class="w-full rounded-md shadow-sm border-[#D1D5DB] bg-[#F9FAFB] text-[#111827] focus:border-[#6366F1] focus:ring-2 focus:ring-[rgba(99,102,241,0.2)]" required>
+                            @error("ticket_types.{$index}.name") <span class="text-sm text-red-600">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="flex-1">
+                            <input type="number" name="ticket_types[{{ $index }}][price]" value="{{ $type['price'] ?? '' }}" step="0.01" min="0" placeholder="Price (₦)" class="w-full rounded-md shadow-sm border-[#D1D5DB] bg-[#F9FAFB] text-[#111827] focus:border-[#6366F1] focus:ring-2 focus:ring-[rgba(99,102,241,0.2)]" required>
+                            @error("ticket_types.{$index}.price") <span class="text-sm text-red-600">{{ $message }}</span> @enderror
+                        </div>
+                        <button type="button" class="p-2 text-red-500 hover:text-red-700 remove-ticket-type-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                @endforeach
+            @endif
+        </div>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const container = document.getElementById('ticket-types-container');
+                const addBtn = document.getElementById('add-ticket-type-btn');
+                let counter = {{ count($oldTicketTypes) > 0 ? max(array_keys($oldTicketTypes)) + 1 : 0 }};
+                
+                addBtn.addEventListener('click', function() {
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center gap-2 ticket-type-row mt-3';
+                    row.innerHTML = `
+                        <div class="flex-1">
+                            <input type="text" name="ticket_types[${counter}][name]" placeholder="Ticket Name (e.g. VIP)" class="w-full rounded-md shadow-sm border-[#D1D5DB] bg-[#F9FAFB] text-[#111827] focus:border-[#6366F1] focus:ring-2 focus:ring-[rgba(99,102,241,0.2)]" required>
+                        </div>
+                        <div class="flex-1">
+                            <input type="number" name="ticket_types[${counter}][price]" step="0.01" min="0" placeholder="Price (₦)" class="w-full rounded-md shadow-sm border-[#D1D5DB] bg-[#F9FAFB] text-[#111827] focus:border-[#6366F1] focus:ring-2 focus:ring-[rgba(99,102,241,0.2)]" required>
+                        </div>
+                        <button type="button" class="p-2 text-red-500 hover:text-red-700 remove-ticket-type-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    `;
+                    container.appendChild(row);
+                    counter++;
+                });
+                
+                container.addEventListener('click', function(e) {
+                    const btn = e.target.closest('.remove-ticket-type-btn');
+                    if (btn) {
+                        btn.closest('.ticket-type-row').remove();
+                    }
+                });
+            });
+        </script>
+    </div>
+
     <div class="flex items-start gap-2">
         <input type="hidden" name="pass_fees_to_buyer" value="0" />
         <input id="pass_fees_to_buyer" name="pass_fees_to_buyer" type="checkbox" value="1" class="mt-1 rounded border-[#D1D5DB] text-[#6366F1] shadow-sm focus:ring-[rgba(99,102,241,0.2)]" @checked(old('pass_fees_to_buyer', $event->pass_fees_to_buyer)) />

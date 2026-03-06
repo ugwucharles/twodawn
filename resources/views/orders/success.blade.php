@@ -39,6 +39,10 @@
           <div class="text-white">{{ $event?->title ?? '—' }}</div>
           <div class="mt-4 text-zinc-400">Buyer</div>
           <div class="text-white">{{ $order->buyer_name }} <span class="text-zinc-400">({{ $order->buyer_email }})</span></div>
+          @if($order->ticket_type)
+          <div class="mt-4 text-zinc-400">Ticket Type</div>
+          <div class="text-white font-bold">{{ $order->ticket_type }}</div>
+          @endif
           <div class="mt-4 text-zinc-400">Quantity</div>
           <div class="text-white">{{ $order->quantity }}</div>
         </div>

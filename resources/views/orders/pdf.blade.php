@@ -61,6 +61,9 @@
             <div class="invite-host">{{ $host }}</div>
             <div class="invite-mid">cordially invites</div>
             <div class="invite-guest">{{ $guest }}</div>
+            @if($order->ticket_type)
+              <div class="invite-mid" style="margin-top: 5pt; font-size: 11pt; color: {{ $brandColor ?? '#818cf8' }};">{{ strtoupper($order->ticket_type) }} ADMISSION</div>
+            @endif
           </div>
         </td>
         <td class="flyer-cell" style="width:22%;">

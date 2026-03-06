@@ -68,7 +68,7 @@
             <label class="block text-xs font-black uppercase tracking-widest text-black" for="quantity">Quantity</label>
             <input id="quantity" name="quantity" type="number" min="1" step="1" required value="{{ old('quantity', 1) }}" class="mt-1 block w-full border-0 border-b border-zinc-300 bg-transparent focus:border-black focus:ring-0 px-0 py-2 text-black" />
           </div>
-          @if($unitPrice > 0)
+          @if($unitPrice > 0 || (is_array($event->ticket_types) && count($event->ticket_types) > 0))
           <div>
             <label class="block text-xs font-black uppercase tracking-widest text-black" for="coupon">Coupon code</label>
             <input id="coupon" name="coupon" type="text" value="{{ old('coupon') }}" class="mt-1 block w-full border-0 border-b border-zinc-300 bg-transparent focus:border-black focus:ring-0 px-0 py-2 text-black placeholder:text-zinc-300" placeholder="Optional" />
@@ -76,6 +76,28 @@
           </div>
           @endif
         </div>
+
+        @if(is_array($event->ticket_types) && count($event->ticket_types) > 0)
+        <div class="space-y-3">
+          <label class="block text-xs font-black uppercase tracking-widest text-black">Ticket Type</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="ticket-types-grid">
+            @foreach($event->ticket_types as $index => $type)
+              <label class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-4 shadow-sm focus:outline-none ticket-type-label hover:border-black transition">
+                <input type="radio" name="ticket_type" value="{{ $type['name'] }}" class="sr-only" required @checked(old('ticket_type') === $type['name'] || $index === 0) data-price="{{ $type['price'] }}">
+                <span class="flex flex-1">
+                  <span class="flex flex-col">
+                    <span class="block text-sm font-bold text-black">{{ $type['name'] }}</span>
+                    <span class="mt-1 flex items-center text-sm text-zinc-500">₦{{ number_format($type['price'], 0) }}</span>
+                  </span>
+                </span>
+                <svg class="h-5 w-5 text-indigo-600 hidden check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+              </label>
+            @endforeach
+          </div>
+        </div>
+        @endif
 
         <!-- Cost summary -->
         <div class="rounded-2xl bg-zinc-50 border border-zinc-100 p-5 text-sm text-black">
@@ -107,26 +129,58 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const UNIT_PRICE = parseFloat(@json($unitPriceStr));
-    const FEES_ON = (UNIT_PRICE > 0) && @json((bool) $event->pass_fees_to_buyer);
-    const FEE_PER_TICKET_K = FEES_ON ? (Math.round(UNIT_PRICE * 0.07 * 100) + 5000) : 0; // 7% + ₦50
-    const QUOTE_URL = UNIT_PRICE > 0 ? @json(route('orders.quote', $event)) : null;
+    const HAS_TICKET_TYPES = @json(is_array($event->ticket_types) && count($event->ticket_types) > 0);
+    const BASE_UNIT_PRICE = parseFloat(@json($unitPriceStr));
+    const PASS_FEES = @json((bool) $event->pass_fees_to_buyer);
+    const QUOTE_URL = @json(route('orders.quote', $event));
 
     const qtyEl = document.getElementById('quantity');
     const sumSubtotal = document.getElementById('sum-subtotal');
     const sumFees = document.getElementById('sum-fees');
     const sumTotal = document.getElementById('sum-total');
+    const typeRadios = document.querySelectorAll('input[name="ticket_type"]');
+    
+    // UI styling for selected ticket type
+    function updateSelectedRadioUI() {
+        if (!HAS_TICKET_TYPES) return;
+        document.querySelectorAll('.ticket-type-label').forEach(label => {
+            const radio = label.querySelector('input[type="radio"]');
+            const check = label.querySelector('.check-icon');
+            if (radio.checked) {
+                label.classList.add('border-black', 'ring-1', 'ring-black');
+                if (check) check.classList.remove('hidden');
+            } else {
+                label.classList.remove('border-black', 'ring-1', 'ring-black');
+                if (check) check.classList.add('hidden');
+            }
+        });
+    }
+
+    // Get the current active unit price
+    function getCurrentUnitPrice() {
+        if (HAS_TICKET_TYPES) {
+            const checked = document.querySelector('input[name="ticket_type"]:checked');
+            return checked ? parseFloat(checked.dataset.price || '0') : 0;
+        }
+        return BASE_UNIT_PRICE;
+    }
 
     function fmtKoboToNaira(k){ return new Intl.NumberFormat('en-NG').format(Math.round(k/100)); }
 
     function recalc(){
+      const currentPrice = getCurrentUnitPrice();
+      const feesOn = (currentPrice > 0) && PASS_FEES;
+      const feePerKobo = feesOn ? (Math.round(currentPrice * 0.07 * 100) + 5000) : 0;
+      
       let q = parseInt(qtyEl.value || '1', 10); if (!Number.isFinite(q) || q < 1) q = 1;
-      const subK = Math.round(UNIT_PRICE * 100) * q;
-      const feeK = FEE_PER_TICKET_K * q;
+      const subK = Math.round(currentPrice * 100) * q;
+      const feeK = feePerKobo * q;
       const totK = subK + feeK;
+      
       if (sumSubtotal) sumSubtotal.textContent = '₦' + fmtKoboToNaira(subK);
       if (sumFees) sumFees.textContent = '₦' + fmtKoboToNaira(feeK);
       if (sumTotal) sumTotal.textContent = '₦' + fmtKoboToNaira(totK);
+      
       const btnText = document.getElementById('button-text');
       if (btnText) btnText.textContent = (totK <= 0 ? 'Get Ticket' : ('Pay ₦' + fmtKoboToNaira(totK) + ' via Paystack'));
     }
@@ -134,11 +188,18 @@ document.addEventListener('DOMContentLoaded', function() {
     function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
 
     async function quote(){
-      if (!QUOTE_URL) return; // no quote for free events
+      const currentPrice = getCurrentUnitPrice();
+      if (currentPrice <= 0 && !HAS_TICKET_TYPES) return; // no quote for purely free static events
       try{
         const q = parseInt(qtyEl.value||'1',10)||1;
         const c = (document.getElementById('coupon')?.value || '').trim();
-        const resp = await fetch(QUOTE_URL + '?quantity=' + encodeURIComponent(q) + (c?('&coupon='+encodeURIComponent(c)):'') , { headers: { 'Accept':'application/json' } });
+        const t = document.querySelector('input[name="ticket_type"]:checked')?.value || '';
+        
+        let url = QUOTE_URL + '?quantity=' + encodeURIComponent(q);
+        if (c) url += '&coupon=' + encodeURIComponent(c);
+        if (t) url += '&ticket_type=' + encodeURIComponent(t);
+        
+        const resp = await fetch(url, { headers: { 'Accept':'application/json' } });
         if (!resp.ok) return; const data = await resp.json();
         if (!data || !data.ok) return;
         if (sumSubtotal) sumSubtotal.textContent = '₦' + fmtKoboToNaira(data.subtotal_kobo||0);
@@ -159,7 +220,17 @@ document.addEventListener('DOMContentLoaded', function() {
     qtyEl.addEventListener('input', onChange);
     const couponEl = document.getElementById('coupon');
     if (couponEl) couponEl.addEventListener('input', onChange);
+    
+    // Add listeners to ticket type radios
+    typeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            updateSelectedRadioUI();
+            recalc();
+            quote();
+        });
+    });
 
+    updateSelectedRadioUI();
     recalc();
     quote();
     const form = document.getElementById('payment-form');

@@ -23,7 +23,24 @@ class EventController extends Controller
             'state' => 'required|string|max:50',
             'venue' => 'required|string|max:255',
             'price' => 'numeric|min:0',
+            'ticket_types' => 'nullable|array',
+            'ticket_types.*.name' => 'required_with:ticket_types|string|max:50',
+            'ticket_types.*.price' => 'required_with:ticket_types|numeric|min:0',
         ]);
+
+        $ticketTypes = null;
+        if ($request->has('ticket_types') && is_array($request->ticket_types)) {
+            $formattedTypes = [];
+            foreach ($request->ticket_types as $type) {
+                if (!empty($type['name'])) {
+                    $formattedTypes[] = [
+                        'name' => trim($type['name']),
+                        'price' => (float) ($type['price'] ?? 0)
+                    ];
+                }
+            }
+            $ticketTypes = !empty($formattedTypes) ? $formattedTypes : null;
+        }
 
         $event = Auth::user()->events()->create([
             'title' => $request->title,
@@ -37,6 +54,7 @@ class EventController extends Controller
             'capacity' => $request->capacity,
             'is_published' => true, // Auto publish for organizers
             'slug' => Str::slug($request->title) . '-' . Str::random(6),
+            'ticket_types' => $ticketTypes,
         ]);
 
         return redirect()->route('organizer.dashboard')->with('status', 'Event created successfully and is now live!');
@@ -76,7 +94,24 @@ class EventController extends Controller
             'state' => 'required|string|max:50',
             'venue' => 'required|string|max:255',
             'price' => 'numeric|min:0',
+            'ticket_types' => 'nullable|array',
+            'ticket_types.*.name' => 'required_with:ticket_types|string|max:50',
+            'ticket_types.*.price' => 'required_with:ticket_types|numeric|min:0',
         ]);
+
+        $ticketTypes = null;
+        if ($request->has('ticket_types') && is_array($request->ticket_types)) {
+            $formattedTypes = [];
+            foreach ($request->ticket_types as $type) {
+                if (!empty($type['name'])) {
+                    $formattedTypes[] = [
+                        'name' => trim($type['name']),
+                        'price' => (float) ($type['price'] ?? 0)
+                    ];
+                }
+            }
+            $ticketTypes = !empty($formattedTypes) ? $formattedTypes : null;
+        }
 
         $event->update([
             'title' => $request->title,
@@ -88,6 +123,7 @@ class EventController extends Controller
             'ends_at' => $request->ends_at,
             'price' => $request->input('price', 0),
             'capacity' => $request->capacity,
+            'ticket_types' => $ticketTypes,
         ]);
 
         return redirect()->route('organizer.events.show', $event)->with('status', 'Event updated successfully!');

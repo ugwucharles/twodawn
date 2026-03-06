@@ -31,6 +31,7 @@ class Event extends Model
         'slug',
         'whatsapp_group_url',
         'state',
+        'ticket_types',
     ];
 
     protected function casts(): array
@@ -44,6 +45,7 @@ class Event extends Model
             'price' => 'decimal:2',
             'early_bird_price' => 'decimal:2',
             'gallery' => 'array',
+            'ticket_types' => 'array',
         ];
     }
 

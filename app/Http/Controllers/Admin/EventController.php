@@ -57,6 +57,9 @@ class EventController extends Controller
             'use_custom_slug' => ['sometimes','boolean'],
             'slug' => [\Illuminate\Validation\Rule::requiredIf(fn() => $request->boolean('use_custom_slug')), 'nullable','string','max:120','regex:/^[a-z0-9-]+$/', \Illuminate\Validation\Rule::unique('events','slug')->ignore($event?->id)],
             'whatsapp_group_url' => ['nullable','url','max:500'],
+            'ticket_types' => ['nullable', 'array'],
+            'ticket_types.*.name' => ['required_with:ticket_types', 'string', 'max:50'],
+            'ticket_types.*.price' => ['required_with:ticket_types', 'numeric', 'min:0'],
         ]);
 
         // Sanitize string inputs
@@ -76,6 +79,20 @@ class EventController extends Controller
             $slug = $request->input('slug');
             $slug = $slug ? Str::slug($slug) : Str::slug((string) ($data['title'] ?? ''));
             $data['slug'] = $slug ?: null;
+        }
+
+        // Format ticket types to valid array with numeric prices
+        if (isset($data['ticket_types']) && is_array($data['ticket_types'])) {
+            $formattedTypes = [];
+            foreach ($data['ticket_types'] as $type) {
+                if (!empty($type['name'])) {
+                    $formattedTypes[] = [
+                        'name' => trim($type['name']),
+                        'price' => (float) ($type['price'] ?? 0)
+                    ];
+                }
+            }
+            $data['ticket_types'] = !empty($formattedTypes) ? $formattedTypes : null;
         }
 
         return $data;
