@@ -22,6 +22,7 @@ use App\Http\Controllers\Organizer\AuthController as OrganizerAuthController;
 use App\Http\Controllers\Organizer\DashboardController as OrganizerDashboardController;
 use App\Http\Controllers\Organizer\EventController as OrganizerEventController;
 use App\Http\Controllers\Organizer\LoginController as OrganizerLoginController;
+use App\Http\Controllers\Organizer\WalletController as OrganizerWalletController;
 
 Route::get('/', [EventPublicController::class , 'landing'])->name('home');
 
@@ -194,15 +195,19 @@ Route::prefix('organizer')->name('organizer.')->group(function () {
         // Organizer authenticated routes
         Route::middleware('auth')->group(function () {
             Route::get('/dashboard', [OrganizerDashboardController::class , 'index'])->name('dashboard');
+            Route::get('/events', [OrganizerEventController::class , 'index'])->name('events.index');
             Route::get('/events/create', [OrganizerEventController::class , 'create'])->name('events.create');
             Route::post('/events', [OrganizerEventController::class , 'store'])->name('events.store');
             Route::get('/events/{event}', [OrganizerEventController::class , 'show'])->name('events.show');
             Route::get('/events/{event}/edit', [OrganizerEventController::class , 'edit'])->name('events.edit');
             Route::patch('/events/{event}', [OrganizerEventController::class , 'update'])->name('events.update');
+            Route::get('/orders', [App\Http\Controllers\Organizer\OrderController::class , 'index'])->name('orders.index');
             Route::get('/settings', [App\Http\Controllers\Organizer\SettingsController::class , 'edit'])->name('settings.edit');
             Route::patch('/settings', [App\Http\Controllers\Organizer\SettingsController::class , 'update'])->name('settings.update');
-        }
-        );    });
+            Route::get('/wallet', [OrganizerWalletController::class , 'index'])->name('wallet.index');
+            Route::post('/wallet/withdraw', [OrganizerWalletController::class , 'createWithdrawal'])->name('wallet.withdraw');
+        });
+    });
 
 // Host Panel: public, token-scoped
 Route::get('/h/assets/html5-qrcode.js', [App\Http\Controllers\Admin\AssetsController::class , 'html5qrcode'])->name('host.assets.h5qrcode');

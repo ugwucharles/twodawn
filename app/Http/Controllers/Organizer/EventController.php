@@ -10,8 +10,15 @@ use Illuminate\Support\Str;
 
 class EventController extends Controller
 {
+    public function index()
+    {
+        $events = Auth::user()->events()->latest()->get();
+        return view('organizer.events.index', compact('events'));
+    }
+
     public function create()
     {
+        // Force return the correct view
         return view('organizer.events.create');
     }
 

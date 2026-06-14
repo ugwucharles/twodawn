@@ -60,4 +60,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(Event::class);
     }
+
+    /**
+     * Get the wallet for this user.
+     */
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    /**
+     * Get or create wallet for this user.
+     */
+    public function getWallet()
+    {
+        return $this->wallet ?? $this->wallet()->create([
+            'balance' => 0,
+            'total_earnings' => 0,
+            'total_withdrawn' => 0,
+        ]);
+    }
 }

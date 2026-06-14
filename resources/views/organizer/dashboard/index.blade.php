@@ -6,72 +6,70 @@
             <p class="text-gray-500 mt-1 font-medium">Welcome back! Here's what's happening with your events today.</p>
         </div>
 
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <!-- Stats Grid - 2 Cards Per Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             <!-- Total Events -->
-            <div class="group relative bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-blue-50 rounded-2xl group-hover:bg-blue-100 transition-colors duration-500">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <div class="group relative bg-gradient-to-br from-amber-50 to-amber-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-amber-200/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500">
+                <div class="flex items-start justify-between mb-6">
+                    <div class="p-4 bg-white rounded-2xl group-hover:bg-amber-200 transition-colors duration-500 shadow-sm">
+                        <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     </div>
                     @if($upcomingEvents > 0)
-                        <span class="flex items-center text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full uppercase tracking-wider">{{ $upcomingEvents }} Upcoming</span>
+                        <span class="flex items-center text-xs font-bold text-amber-600 bg-white px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">{{ $upcomingEvents }} Upcoming</span>
                     @endif
                 </div>
-                <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Total Events</p>
-                <p class="text-3xl font-black text-gray-900 mt-1">{{ number_format($totalEvents) }}</p>
+                <p class="text-sm font-bold text-amber-400 uppercase tracking-widest mb-2">Total Events</p>
+                <p class="text-5xl font-black text-amber-900">{{ number_format($totalEvents) }}</p>
             </div>
 
-            <!-- Total Tickets -->
-            <div class="group relative bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-fuchsia-50 rounded-2xl group-hover:bg-fuchsia-100 transition-colors duration-500">
-                        <svg class="w-6 h-6 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+            <!-- Tickets Sold -->
+            <div class="group relative bg-gradient-to-br from-amber-50 to-amber-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-amber-200/50 hover:shadow-[0_8px_30px(rgb(0,0,0,0.08)] transition-all duration-500">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="p-3 bg-white rounded-2xl group-hover:bg-amber-200 transition-colors duration-500 shadow-sm">
+                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
                     </div>
                 </div>
-                <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Tickets Sold</p>
-                <p class="text-3xl font-black text-gray-900 mt-1">{{ number_format($totalTicketsSold) }}</p>
+                <p class="text-sm font-bold text-amber-400 uppercase tracking-widest mb-2">Tickets Sold</p>
+                <p class="text-4xl font-black text-amber-900">{{ number_format($totalTicketsSold) }}</p>
+            </div>
+
+            <!-- Wallet Balance -->
+            <div class="group relative bg-gradient-to-br from-amber-50 to-amber-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-amber-200/50 hover:shadow-[0_8px_30px(rgb(0,0,0,0.08)] transition-all duration-500">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-white rounded-2xl group-hover:bg-amber-200 transition-colors duration-500 shadow-sm">
+                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                    </div>
+                    <span class="text-[10px] font-bold text-amber-600 bg-white px-2 py-1 rounded-full uppercase tracking-wider shadow-sm">Available</span>
+                </div>
+                <p class="text-sm font-bold text-amber-900 uppercase tracking-widest">Wallet Balance</p>
+                <div class="flex items-baseline gap-1 mt-1">
+                    <span class="text-xl font-black text-amber-900">₦</span>
+                    <p class="text-3xl font-black text-amber-900">{{ number_format($walletBalance, 2) }}</p>
+                </div>
             </div>
 
             <!-- Total Revenue -->
-            <div class="group relative bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 lg:col-span-2 overflow-hidden">
-                <div class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-emerald-50 rounded-full blur-3xl opacity-50"></div>
+            <div class="group relative bg-gradient-to-br from-amber-50 to-amber-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-amber-200/50 hover:shadow-[0_8px_30px(rgb(0,0,0,0.08)] transition-all duration-500 overflow-hidden">
+                <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-amber-200 rounded-full blur-3xl opacity-50"></div>
                 <div class="relative z-10">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="p-3 bg-emerald-50 rounded-2xl group-hover:bg-emerald-100 transition-colors duration-500">
-                            <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div class="p-3 bg-white rounded-2xl group-hover:bg-amber-200 transition-colors duration-500 shadow-sm">
+                            <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
                     </div>
-                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Total Revenue</p>
-                    <div class="flex items-baseline gap-2 mt-1">
-                        <span class="text-2xl font-black text-gray-400">₦</span>
-                        <p class="text-4xl font-black text-gray-900">{{ number_format($totalRevenue / 100, 2) }}</p>
+                    <p class="text-sm font-bold text-amber-400 uppercase tracking-widest">Gross Revenue</p>
+                    <div class="flex items-baseline gap-1 mt-1">
+                        <span class="text-xl font-black text-amber-400">₦</span>
+                        <p class="text-3xl font-black text-amber-900">{{ number_format($totalRevenue / 100, 2) }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Charts Central -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
-            <!-- Revenue Main Chart -->
-            <div class="lg:col-span-8 bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                    <div>
-                        <h2 class="text-xl font-black text-gray-900">Revenue Flow</h2>
-                        <p class="text-sm text-gray-500 font-medium">Monthly analysis of your earnings</p>
-                    </div>
-                    <div class="inline-flex p-1 bg-gray-50 rounded-2xl">
-                        <button class="px-4 py-2 text-xs font-bold bg-white text-gray-900 rounded-xl shadow-sm">Monthly</button>
-                        <button class="px-4 py-2 text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors">Quarterly</button>
-                    </div>
-                </div>
-                <div class="h-80 w-full">
-                    <canvas id="revenueChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Capacity Pie -->
-            <div class="lg:col-span-4 bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 flex flex-col">
+        <div class="mb-10">
+            <!-- Capacity Pie Only -->
+            <div class="w-full bg-gradient-to-br from-amber-50 to-amber-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-amber-200/50 flex flex-col">
                 <h2 class="text-xl font-black text-gray-900 mb-2">Ticket Analytics</h2>
                 <p class="text-sm text-gray-500 font-medium mb-8">Overall sales performance</p>
                 
@@ -91,11 +89,11 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 mt-8">
-                    <div class="p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50">
-                        <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest block mb-1">Sold</span>
-                        <span class="text-lg font-black text-blue-700">{{ number_format($totalTicketsSold) }}</span>
+                    <div class="p-4 bg-white/50 rounded-2xl border border-amber-100/50">
+                        <span class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-1">Sold</span>
+                        <span class="text-lg font-black text-amber-700">{{ number_format($totalTicketsSold) }}</span>
                     </div>
-                    <div class="p-4 bg-orange-50/50 rounded-2xl border border-orange-100/50">
+                    <div class="p-4 bg-white/50 rounded-2xl border border-amber-100/50">
                         <span class="text-[10px] font-black text-orange-400 uppercase tracking-widest block mb-1">Left</span>
                         <span class="text-lg font-black text-orange-700">{{ number_format($leftTickets) }}</span>
                     </div>
@@ -105,27 +103,68 @@
 
         <!-- Recent Activity Sections -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Events Summary -->
+            <div class="lg:col-span-5 bg-gradient-to-br from-amber-50 to-amber-100 rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-amber-200/50 animate-slide-up">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-xl font-black text-gray-900">Your Events</h2>
+                    <a href="{{ route('organizer.events.create') }}" class="p-2 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-200 hover:scale-105 transition-transform">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                    </a>
+                </div>
+                
+                <div class="space-y-4">
+                    @forelse($events->take(4) as $event)
+                    <div class="group flex items-center p-4 bg-gradient-to-br from-white to-amber-50 rounded-[24px] border border-amber-200/50 hover:border-blue-100 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 transition-all duration-300">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 shadow-sm flex flex-col items-center justify-center font-black group-hover:bg-gradient-to-br group-hover:from-blue-600 group-hover:to-blue-700 group-hover:text-white transition-all duration-300">
+                            @if($event->starts_at)
+                                <span class="text-base">{{ $event->starts_at->format('d') }}</span>
+                                <span class="text-[8px] uppercase tracking-tighter -mt-1 opacity-70">{{ $event->starts_at->format('M') }}</span>
+                            @else
+                                <span class="text-[10px]">TBD</span>
+                            @endif
+                        </div>
+                        <div class="flex-1 mx-4 min-w-0">
+                            <h3 class="font-bold text-gray-900 text-sm truncate group-hover:text-blue-700 transition-colors">{{ $event->title }}</h3>
+                            <div class="flex items-center gap-3 mt-1">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $event->orders()->where('status', 'paid')->sum('quantity') }} Sold</span>
+                                <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                                <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Active</span>
+                            </div>
+                        </div>
+                        <a href="{{ route('organizer.events.show', $event) }}" class="p-2.5 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 border border-amber-200/50 text-gray-400 group-hover:text-blue-600 group-hover:border-blue-100 group-hover:shadow-sm transition-all duration-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                    </div>
+                    @empty
+                    <div class="py-12 flex flex-col items-center justify-center grayscale opacity-50">
+                        <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">No events yet</p>
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+
             <!-- Transactions -->
-            <div class="lg:col-span-7 bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 overflow-hidden">
-                <div class="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
+            <div class="lg:col-span-7 bg-gradient-to-br from-amber-50 to-amber-100 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-amber-200/50 overflow-hidden">
+                <div class="p-8 border-b border-amber-200/50 flex justify-between items-center bg-gradient-to-br from-amber-100 to-amber-200">
                     <div>
                         <h2 class="text-xl font-black text-gray-900">Recent Transactions</h2>
                         <p class="text-sm text-gray-500 font-medium">Latest payments received</p>
                     </div>
-                    <a href="#" class="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-4 py-2 rounded-xl transition-all">View All</a>
+                    <a href="#" class="text-xs font-bold text-blue-600 hover:text-blue-700 bg-white px-4 py-2 rounded-xl transition-all">View All</a>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead>
-                            <tr class="text-[11px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50">
+                            <tr class="text-[11px] font-black text-gray-400 uppercase tracking-widest border-b border-amber-200/50">
                                 <th class="px-8 py-5">Event</th>
                                 <th class="px-8 py-5">Date</th>
                                 <th class="px-8 py-5 text-right">Amount</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-50">
+                        <tbody class="divide-y divide-amber-200/50">
                             @forelse($recentOrders as $order)
-                            <tr class="group hover:bg-gray-50/50 transition-colors">
+                            <tr class="group hover:bg-gradient-to-br hover:from-amber-100 hover:to-amber-200 transition-colors">
                                 <td class="px-8 py-6">
                                     <div class="flex flex-col">
                                         <span class="text-sm font-bold text-gray-900 leading-tight">{{ $order->event->title ?? 'Deleted Event' }}</span>
@@ -144,47 +183,6 @@
                             @endforelse
                         </tbody>
                     </table>
-                </div>
-            </div>
-
-            <!-- Events Summary -->
-            <div class="lg:col-span-5 bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 animate-slide-up">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-xl font-black text-gray-900">Your Events</h2>
-                    <a href="{{ route('organizer.events.create') }}" class="p-2 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-200 hover:scale-105 transition-transform">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                    </a>
-                </div>
-                
-                <div class="space-y-4">
-                    @forelse($events->take(4) as $event)
-                    <div class="group flex items-center p-4 bg-gray-50 rounded-[24px] border border-gray-100 hover:border-blue-100 hover:bg-blue-50/30 transition-all duration-300">
-                        <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex flex-col items-center justify-center font-black group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
-                            @if($event->starts_at)
-                                <span class="text-base">{{ $event->starts_at->format('d') }}</span>
-                                <span class="text-[8px] uppercase tracking-tighter -mt-1 opacity-70">{{ $event->starts_at->format('M') }}</span>
-                            @else
-                                <span class="text-[10px]">TBD</span>
-                            @endif
-                        </div>
-                        <div class="flex-1 mx-4 min-w-0">
-                            <h3 class="font-bold text-gray-900 text-sm truncate group-hover:text-blue-700 transition-colors">{{ $event->title }}</h3>
-                            <div class="flex items-center gap-3 mt-1">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $event->orders()->where('status', 'paid')->sum('quantity') }} Sold</span>
-                                <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
-                                <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Active</span>
-                            </div>
-                        </div>
-                        <a href="{{ route('organizer.events.show', $event) }}" class="p-2.5 rounded-xl bg-white border border-gray-100 text-gray-400 group-hover:text-blue-600 group-hover:border-blue-100 group-hover:shadow-sm transition-all duration-300">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
-                        </a>
-                    </div>
-                    @empty
-                    <div class="py-12 flex flex-col items-center justify-center grayscale opacity-50">
-                        <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">No events yet</p>
-                    </div>
-                    @endforelse
                 </div>
             </div>
         </div>

@@ -65,14 +65,14 @@
   <div class="max-w-6xl md:max-w-7xl mx-auto px-4 md:px-6 lg:px-10">
 
     {{-- Top: title + location selector --}}
-    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-8">
+    <div class="flex flex-col gap-4 mb-8">
       <div class="flex-1 min-w-0">
         <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-eventbrite-dark mb-1">
           Discover events
         </h1>
         @if($hasQuery)
           <p class="text-sm text-eventbrite-dark">
-            Showing results for <span class="font-semibold">“{{ request('q') }}”</span>
+            Showing results for <span class="font-semibold">"{{ request('q') }}"</span>
           </p>
         @else
           <p class="text-sm text-eventbrite-dark">
