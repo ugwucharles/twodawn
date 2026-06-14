@@ -1,0 +1,52 @@
+services:
+  # Type: Web Service
+  - type: web
+    name: 2dawn-laravel
+    env: php
+    plan: free
+    buildCommand: composer install --no-dev --optimize-autoloader && php artisan key:generate && php artisan config:cache && php artisan route:cache && php artisan view:cache
+    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://2dawn-laravel.onrender.com
+      - key: CACHE_DRIVER
+        value: redis
+      - key: SESSION_DRIVER
+        value: redis
+      - key: QUEUE_CONNECTION
+        value: redis
+      - key: FILESYSTEM_DISK
+        value: public
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: postgres
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: postgres
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: postgres
+          property: password
+
+databases:
+  - name: postgres
+    databaseName: 2dawn
+    user: 2dawn_user
