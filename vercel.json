@@ -2,20 +2,23 @@
   "version": 2,
   "builds": [
     {
-      "src": "Dockerfile",
-      "use": "@vercel/docker"
+      "src": "*.php",
+      "use": "@vercel/php"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/public/$1"
+      "dest": "/index.php"
     }
   ],
   "env": {
     "APP_ENV": "production",
     "APP_DEBUG": "false",
     "APP_URL": "https://your-domain.vercel.app",
-    "FILESYSTEM_DISK": "public"
+    "FILESYSTEM_DISK": "public",
+    "CACHE_DRIVER": "array",
+    "SESSION_DRIVER": "array",
+    "LOG_CHANNEL": "stderr"
   }
 }
