@@ -1,43 +1,53 @@
-# Multi-stage build: Composer + Vite build + final runtime with Nginx + PHP-FPM.
-FROM composer:2 AS composer_deps
+FROM php:8.2-fpm-alpine AS builder
+
+# Install system dependencies
+RUN apk add --no-cache \
+    git \
+    zip \
+    unzip \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    libwebp-dev \
+    libzip-dev \
+    nodejs \
+    npm
+
+# Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp && \
+    docker-php-ext-install gd pdo_sqlite zip
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 WORKDIR /app
+
+# Copy Composer files and install dependencies
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --prefer-dist --no-interaction --no-scripts --no-progress
-COPY . .
-# Ensure cache directories exist before Composer runs scripts that bootstrap Laravel
-RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views bootstrap/cache \
-&& composer install --no-dev --prefer-dist --no-interaction --no-progress
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-FROM node:22-alpine AS assets
-WORKDIR /app
+# Copy Node files and build assets
 COPY package*.json ./
-RUN npm ci
+RUN npm ci && npm run build
+
+# Copy application source code
 COPY . .
-RUN npm run build
 
-FROM php:8.2-fpm-alpine
-# System deps and PHP extensions
-RUN apk add --no-cache nginx curl bash git zip unzip icu-libs libzip libpng libjpeg-turbo freetype gettext postgresql-libs \
- && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS icu-dev libzip-dev libpng-dev libjpeg-turbo-dev freetype-dev oniguruma-dev postgresql-dev curl-dev \
- && docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-install pdo_mysql pdo_pgsql gd zip intl bcmath opcache curl \
- && apk del .build-deps \
- && mkdir -p /run/nginx
+# Stage 2 – Runtime image
+FROM php:8.2-fpm-alpine AS runtime
 
-WORKDIR /app
+# Install runtime dependencies
+RUN apk add --no-cache nginx supervisor
 
-# App code, vendor, and built assets
-COPY --from=composer_deps /app /app
-COPY --from=assets /app/public/build /app/public/build
+# Copy built application from builder stage
+COPY --from=builder /app /var/www/html
 
-# Nginx config template + start script
-COPY docker/nginx/default.conf.template /etc/nginx/templates/default.conf.template
-COPY docker/start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh \
- && chown -R www-data:www-data /app/storage /app/bootstrap/cache \
- && chmod -R 775 /app/storage /app/bootstrap/cache
+# Copy Nginx config
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 
-ENV PORT=8080
+# Copy entrypoint script
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 EXPOSE 8080
 
-CMD ["/usr/local/bin/start.sh"]
+ENTRYPOINT ["entrypoint.sh"]
