@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import AuthLogo from '../components/AuthLogo'
+import GoogleSignInButton from '../components/GoogleSignInButton'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -17,7 +19,6 @@ function Login() {
 
     try {
       const response = await axios.post('/organizer/login', { email, password })
-      // Store token and redirect
       localStorage.setItem('token', response.data.token)
       navigate('/organizer/dashboard')
     } catch (err) {
@@ -27,20 +28,11 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[#8b5cf6]/30 flex items-center justify-center p-4" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+    <div className="min-h-screen bg-white flex items-center justify-center p-4" style={{ fontFamily: 'Montserrat, sans-serif' }}>
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 md:p-10">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <Link to="/">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 454.7 110" className="h-12 w-auto">
-                <path d="M65.7 53.7L40.3 53.7Q38.1 53.7 36.6 55.25Q35.1 56.8 35.1 58.9L35.1 58.9L35.1 64.2L87.6 64.2L87.6 80L40.1 80L35.1 69.2L35.1 80L17.6 80L17.6 58.1Q17.6 53.6 19.3 49.6Q21 45.6 24 42.6Q27 39.6 31 37.9Q35 36.2 39.5 36.2L39.5 36.2L64.9 36.2Q67.1 36.2 68.6 34.7Q70.1 33.2 70.1 31L70.1 31Q70.1 28.8 68.6 27.3Q67.1 25.8 64.9 25.8L64.9 25.8L17.6 25.8L17.6 10L65.7 10Q70.2 10 74.2 11.7Q78.2 13.4 81.2 16.4Q84.2 19.4 85.9 23.35Q87.6 27.3 87.6 31.8L87.6 31.8Q87.6 36.3 85.9 40.3Q84.2 44.3 81.2 47.3Q78.2 50.3 74.2 52Q70.2 53.7 65.7 53.7L65.7 53.7" fill="#000000"/>
-                <path d="M108.1 10L147.5 10Q153.5 10 160 11.35Q166.5 12.7 171.9 16.5Q177.3 20.3 180.8 27.15Q184.3 34 184.3 45L184.3 45Q184.3 52.3 182.7 57.8Q181.1 63.3 178.35 67.15Q175.6 71 171.9 73.5Q168.2 76 164.1 77.45Q160 78.9 155.7 79.45Q151.4 80 147.4 80L147.4 80L131.2 80L125.6 67.6L125.6 80L108.1 80L108.1 10M125.6 64.2L147.3 64.2Q151.1 64.2 154.3 63.4Q157.5 62.6 159.85 60.45Q162.2 58.3 163.5 54.55Q164.8 50.8 164.8 45L164.8 45Q164.8 39.2 163.5 35.45Q162.2 31.7 159.85 29.55Q157.5 27.4 154.3 26.6Q151.1 25.8 147.3 25.8L147.3 25.8L125.6 25.8L125.6 64.2M214.3 10L231.7 10L258 80L240.5 80L236.9 70.4L217.5 70.4L212.8 60.5L205.5 80L188 80L214.3 10M214.8 54.6L231.1 54.6L223 29.2L214.8 54.6M326.2 60.8L343.7 10L361.2 10L334.9 80L314.2 80L307.3 34.2L299.7 80L279.7 80L253.4 10L270.9 10L288.4 60.8L297.5 10L317.1 10L326.2 60.8M420.5 52.3L420.5 10L438 10L438 80L420.5 80L388.4 38.7L388.4 80L370.9 80L370.9 10L388.4 10L388.4 10.1L388.4 10L420.5 52.3" fill="#8B5CF6"/>
-              </svg>
-            </Link>
-          </div>
+        <AuthLogo />
 
-          {/* Header */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 md:p-10">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign In</h1>
             <p className="text-gray-500 text-sm">Access your 2DAWN account</p>
@@ -51,6 +43,19 @@ function Login() {
               {error}
             </div>
           )}
+
+          <div className="mb-6">
+            <GoogleSignInButton onError={setError} disabled={loading} />
+          </div>
+
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">or continue with email</span>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>

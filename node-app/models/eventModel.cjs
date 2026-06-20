@@ -152,7 +152,7 @@ async function listRecentEvents(page = {}) {
        )
      ORDER BY starts_at DESC, id DESC
      LIMIT ? OFFSET ?`,
-    [oneMonthAgo, oneMonthAgo, limit, offset]
+    [oneMonthAgo.toISOString(), oneMonthAgo.toISOString(), limit, offset]
   );
 
   return rows.map(mapEvent);

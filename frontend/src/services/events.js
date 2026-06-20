@@ -19,6 +19,11 @@ export const getEventById = async (id) => {
   return response.data
 }
 
+export const getRecentEvents = async () => {
+  const response = await api.get('/api/v1/events/recent')
+  return response.data
+}
+
 export const getEventBySlug = async (slug) => {
   const response = await api.get(`/event/${slug}`)
   return response.data

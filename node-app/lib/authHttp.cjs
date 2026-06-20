@@ -33,15 +33,21 @@ function sendAuthResult(req, res, result) {
     clearSession(res, req);
   }
 
+  let token = undefined;
   if (result.session) {
-    startSession(res, req, result.session.user, {
+    const sessionData = startSession(res, req, result.session.user, {
       remember: result.session.remember,
       passwordConfirmedAt: result.session.passwordConfirmedAt,
     });
+    token = sessionData.token;
   }
 
   if (wantsJson(req)) {
-    return res.status(result.status).json(result.body);
+    const responseBody = { ...result.body };
+    if (token) {
+      responseBody.token = token;
+    }
+    return res.status(result.status).json(responseBody);
   }
 
   if (result.ok && result.redirect) {

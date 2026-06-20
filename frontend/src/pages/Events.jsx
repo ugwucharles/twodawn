@@ -1,22 +1,23 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import axios from 'axios'
+import { getEvents, getRecentEvents } from '../services/events'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 
-function Events() {
+function Events({ recent = false }) {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     fetchEvents()
-  }, [])
+  }, [recent])
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get('/events')
-      setEvents(response.data.events || [])
+      setLoading(true)
+      const data = recent ? await getRecentEvents() : await getEvents()
+      setEvents(data.events || [])
       setLoading(false)
     } catch (err) {
       setError('Failed to load events')
@@ -52,7 +53,9 @@ function Events() {
       
       <main className="flex-1 pt-8 sm:pt-10 pb-16">
         <div className="max-w-6xl md:max-w-7xl mx-auto px-4 md:px-6 lg:px-10">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Discover events</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">
+            {recent ? 'Recent events' : 'Discover events'}
+          </h1>
           
           {events.length === 0 ? (
             <div className="text-center py-12 text-gray-600">

@@ -7,6 +7,7 @@ const {
   adminLoginResult,
   organizerLoginResult,
   organizerRegisterResult,
+  organizerGoogleLoginResult,
   logoutResult,
   organizerLogoutResult,
   adminSessionResult,
@@ -193,6 +194,11 @@ function createPublicAuthRouter() {
   router.post(
     '/organizer/register',
     asyncRoute(async (req, res) => sendAuthResult(req, res, await organizerRegisterResult(req)))
+  );
+
+  router.post(
+    '/organizer/google-auth',
+    asyncRoute(async (req, res) => sendAuthResult(req, res, await organizerGoogleLoginResult(req)))
   );
 
   router.post('/organizer/logout', requireAuthenticatedFlexible, (req, res) =>

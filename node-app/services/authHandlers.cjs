@@ -250,6 +250,123 @@ async function organizerRegisterResult(req) {
   };
 }
 
+async function organizerGoogleLoginResult(req) {
+  const blocked = ensureSessionReady();
+  if (blocked) return blocked;
+
+  const credential = req.body?.credential;
+  if (!credential) {
+    return {
+      ok: false,
+      status: 400,
+      body: {
+        ok: false,
+        error: 'missing_credential',
+        message: 'Google credential token is required.',
+      },
+    };
+  }
+
+  try {
+    const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+    if (!response.ok) {
+      return {
+        ok: false,
+        status: 401,
+        body: {
+          ok: false,
+          error: 'invalid_google_token',
+          message: 'Failed to verify Google sign-in credential.',
+        },
+      };
+    }
+
+    const payload = await response.json();
+    
+    // Verify client ID / audience matches
+    const expectedClientId = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID;
+    if (!expectedClientId) {
+      return {
+        ok: false,
+        status: 500,
+        body: {
+          ok: false,
+          error: 'google_not_configured',
+          message: 'Google sign-in is not configured on the server.',
+        },
+      };
+    }
+    if (payload.aud !== expectedClientId) {
+      return {
+        ok: false,
+        status: 401,
+        body: {
+          ok: false,
+          error: 'invalid_audience',
+          message: 'Google credential client ID mismatch.',
+        },
+      };
+    }
+
+    const email = normalizeEmail(payload.email);
+    const name = normalizeName(payload.name);
+
+    if (!email) {
+      return {
+        ok: false,
+        status: 400,
+        body: {
+          ok: false,
+          error: 'missing_email',
+          message: 'Google account does not have a valid email address.',
+        },
+      };
+    }
+
+    // Find or create organizer user
+    let user = await findAuthUserByEmail(email);
+    if (!user) {
+      const config = readAuthConfig();
+      // Generate a random secure password for social login fallback
+      const randomPassword = crypto.randomBytes(32).toString('hex');
+      const passwordHash = await bcrypt.hash(randomPassword, config.bcryptRounds);
+      
+      user = await createOrganizerUser({ name, email, passwordHash });
+      
+      // Auto-verify email since it came verified from Google
+      if (payload.email_verified === 'true' || payload.email_verified === true) {
+        user = await markAuthUserEmailVerified(user.id);
+      }
+    }
+
+    const sessionUser = toSessionUser(user);
+    const redirect = sessionUser.is_admin ? '/admin/dashboard' : '/organizer/dashboard';
+
+    return {
+      ok: true,
+      status: 200,
+      body: {
+        ok: true,
+        user: sessionUser,
+        redirect,
+      },
+      redirect,
+      session: { user, remember: true },
+    };
+  } catch (error) {
+    console.error('Google verification error:', error);
+    return {
+      ok: false,
+      status: 500,
+      body: {
+        ok: false,
+        error: 'google_verification_failed',
+        message: 'Internal error during Google token verification.',
+      },
+    };
+  }
+}
+
 function logoutResult() {
   return {
     ok: true,
@@ -622,6 +739,7 @@ module.exports = {
   adminLoginResult,
   organizerLoginResult,
   organizerRegisterResult,
+  organizerGoogleLoginResult,
   logoutResult,
   organizerLogoutResult,
   adminSessionResult,

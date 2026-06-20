@@ -42,6 +42,22 @@ function createApiRouter() {
     }
   });
 
+  // GET /api/v1/events/recent - read-only public API for recent events
+  router.get('/events/recent', async (req, res) => {
+    try {
+      const { getRecentEvents } = require('../services/eventPublicService.cjs');
+      const page = {
+        limit: req.query.limit ? parseInt(req.query.limit, 10) : 12,
+        offset: 0,
+      };
+      const events = await getRecentEvents(page);
+      return res.json({ ok: true, events });
+    } catch (error) {
+      console.error('API recent events error:', error);
+      return res.status(500).json({ ok: false, error: 'Failed to fetch recent events' });
+    }
+  });
+
   // GET /api/v1/events/:id - read-only public API for a single event
   router.get('/events/:id', async (req, res) => {
     try {

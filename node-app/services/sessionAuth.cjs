@@ -49,7 +49,12 @@ async function attachSessionUser(req, res, next) {
   if (!req.auth.configured) return next();
 
   const cookies = parseCookies(req.headers.cookie);
-  const rawToken = cookies[config.sessionCookieName];
+  let rawToken = cookies[config.sessionCookieName];
+
+  if (!rawToken && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    rawToken = req.headers.authorization.split(' ')[1];
+  }
+
   if (!rawToken) return next();
 
   const claims = verifySignedPayload(rawToken, config.sessionSecret);
@@ -98,7 +103,7 @@ function startSession(res, req, user, options = {}) {
     })
   );
 
-  return safeUser;
+  return { user: safeUser, token };
 }
 
 function clearSession(res, req) {

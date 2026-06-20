@@ -62,7 +62,7 @@ function Header() {
         <div className="hidden lg:flex items-center gap-4 shrink-0">
           <nav className="flex items-center text-[16px] font-medium text-zinc-300 mr-2">
             <Link to="/events" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors">Discover events</Link>
-            <Link to="/events/recent" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors">Find my tickets</Link>
+            <Link to="/find-tickets" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors">Find my tickets</Link>
             {!isAuthenticated && (
               <Link to="/organizer/login" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors">Create event</Link>
             )}
@@ -152,7 +152,7 @@ function Header() {
                   Discover events
                 </Link>
                 <Link
-                  to="/events/recent"
+                  to="/find-tickets"
                   className="block px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
                   onClick={() => setIsOpen(false)}
                 >

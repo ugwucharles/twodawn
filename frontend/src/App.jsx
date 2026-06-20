@@ -4,6 +4,7 @@ import Events from './pages/Events'
 import EventDetail from './pages/EventDetail'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import FindTickets from './pages/FindTickets'
 import Checkout from './pages/Checkout'
 import OrderConfirmation from './pages/OrderConfirmation'
 import AdminDashboard from './pages/admin/Dashboard'
@@ -25,6 +26,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/events" element={<Events />} />
+        <Route path="/events/recent" element={<Events recent={true} />} />
+        <Route path="/find-tickets" element={<FindTickets />} />
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/events/:id/checkout" element={<Checkout />} />
         <Route path="/orders/:reference" element={<OrderConfirmation />} />
