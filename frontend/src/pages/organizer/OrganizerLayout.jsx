@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import useAuthStore from '../../store/authStore';
 import { 
   LayoutGrid, 
   Calendar, 
@@ -14,6 +15,8 @@ import {
 export default function OrganizerLayout() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
 
   const isActive = (path) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
@@ -32,8 +35,8 @@ export default function OrganizerLayout() {
   ];
 
   const handleLogout = () => {
-    // TODO: Implement logout
-    console.log('Logout');
+    logout();
+    navigate('/login');
   };
 
   return (
