@@ -1,0 +1,639 @@
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
+const { readAuthConfig, isSessionConfigured, toPublicAuthConfig } = require('../config/auth.cjs');
+const {
+  findAuthUserById,
+  findAuthUserByEmail,
+  createOrganizerUser,
+  updateAuthUserProfile,
+  setPasswordForUser,
+  markAuthUserEmailVerified,
+  deleteAuthUserById,
+  toSessionUser,
+  normalizeEmail,
+} = require('../models/authUserModel.cjs');
+const { issuePasswordResetToken, completePasswordReset } = require('./passwordResetService.cjs');
+const {
+  createEmailVerificationLink,
+  verifyEmailVerificationRequest,
+} = require('./emailVerificationService.cjs');
+const { appendQuery, safeReferer } = require('../lib/authHttp.cjs');
+
+function asBoolean(value, fallback = false) {
+  if (value === undefined || value === null || String(value).trim() === '') return fallback;
+
+  const raw = String(value).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(raw)) return true;
+  if (['0', 'false', 'no', 'off'].includes(raw)) return false;
+
+  return fallback;
+}
+
+function normalizeName(value) {
+  return String(value || '').trim();
+}
+
+function randomRememberToken() {
+  return crypto.randomBytes(40).toString('hex').slice(0, 60);
+}
+
+function resolveOrigin(req) {
+  const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').trim();
+  const protoHeader = String(req.headers['x-forwarded-proto'] || '').trim();
+  const proto = (protoHeader.split(',')[0] || req.protocol || 'https').trim();
+
+  if (!host) return `${proto}://localhost`;
+  return `${proto}://${host}`;
+}
+
+function sessionNotConfiguredResult() {
+  return {
+    ok: false,
+    status: 503,
+    body: {
+      ok: false,
+      error: 'auth_not_configured',
+      message: 'Set NODE_SESSION_SECRET (or APP_KEY) before using Node auth routes.',
+    },
+  };
+}
+
+function validationResult(fields, req, errorRedirect) {
+  return {
+    ok: false,
+    status: 422,
+    body: {
+      ok: false,
+      error: 'validation_error',
+      fields,
+    },
+    errorRedirect: appendQuery(errorRedirect || safeReferer(req), {
+      auth_error: 'validation_error',
+    }),
+  };
+}
+
+function credentialsResult(req, errorRedirect) {
+  return {
+    ok: false,
+    status: 422,
+    body: {
+      ok: false,
+      error: 'invalid_credentials',
+      message: 'The provided credentials do not match our records.',
+    },
+    errorRedirect: appendQuery(errorRedirect || safeReferer(req), {
+      auth_error: 'invalid_credentials',
+    }),
+  };
+}
+
+function ensureSessionReady() {
+  const config = readAuthConfig();
+  if (!isSessionConfigured(config)) {
+    return sessionNotConfiguredResult();
+  }
+  return null;
+}
+
+function authHealthResult() {
+  const config = readAuthConfig();
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      ok: true,
+      auth: toPublicAuthConfig(config),
+      time: new Date().toISOString(),
+    },
+  };
+}
+
+function sessionResult(req) {
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      ok: true,
+      authenticated: Boolean(req.auth?.isAuthenticated),
+      user: req.auth?.user || null,
+    },
+  };
+}
+
+async function adminLoginResult(req) {
+  const blocked = ensureSessionReady();
+  if (blocked) return blocked;
+
+  const email = normalizeEmail(req.body?.email);
+  const password = String(req.body?.password || '');
+  const remember = asBoolean(req.body?.remember, false);
+  const errorRedirect = '/xyz/login';
+
+  const fields = {};
+  if (!email) fields.email = 'Email is required.';
+  if (!password) fields.password = 'Password is required.';
+  if (Object.keys(fields).length > 0) return validationResult(fields, req, errorRedirect);
+
+  const user = await findAuthUserByEmail(email);
+  if (!user || !user.password) return credentialsResult(req, errorRedirect);
+
+  const passwordMatches = await bcrypt.compare(password, user.password);
+  if (!passwordMatches) return credentialsResult(req, errorRedirect);
+
+  if (!user.is_admin) {
+    return {
+      ok: false,
+      status: 403,
+      body: {
+        ok: false,
+        error: 'admin_access_required',
+        message: 'This account does not have admin access.',
+      },
+      errorRedirect: appendQuery(errorRedirect, { auth_error: 'admin_access_required' }),
+    };
+  }
+
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      ok: true,
+      user: toSessionUser(user),
+      redirect: '/admin/events',
+    },
+    redirect: '/admin/events',
+    session: { user, remember },
+  };
+}
+
+async function organizerLoginResult(req) {
+  const blocked = ensureSessionReady();
+  if (blocked) return blocked;
+
+  const email = normalizeEmail(req.body?.email);
+  const password = String(req.body?.password || '');
+  const remember = asBoolean(req.body?.remember, false);
+  const errorRedirect = '/organizer/login';
+
+  const fields = {};
+  if (!email) fields.email = 'Email is required.';
+  if (!password) fields.password = 'Password is required.';
+  if (Object.keys(fields).length > 0) return validationResult(fields, req, errorRedirect);
+
+  const user = await findAuthUserByEmail(email);
+  if (!user || !user.password) return credentialsResult(req, errorRedirect);
+
+  const passwordMatches = await bcrypt.compare(password, user.password);
+  if (!passwordMatches) return credentialsResult(req, errorRedirect);
+
+  const sessionUser = toSessionUser(user);
+  const redirect = sessionUser.is_admin ? '/admin/dashboard' : '/organizer/dashboard';
+
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      ok: true,
+      user: sessionUser,
+      redirect,
+    },
+    redirect,
+    session: { user, remember },
+  };
+}
+
+async function organizerRegisterResult(req) {
+  const blocked = ensureSessionReady();
+  if (blocked) return blocked;
+
+  const name = normalizeName(req.body?.name);
+  const email = normalizeEmail(req.body?.email);
+  const password = String(req.body?.password || '');
+  const passwordConfirmation = String(req.body?.password_confirmation || '');
+  const errorRedirect = '/organizer/register';
+
+  const fields = {};
+  if (!name) fields.name = 'Name is required.';
+  if (!email) fields.email = 'Email is required.';
+  if (!password) fields.password = 'Password is required.';
+  if (password && password.length < 8) fields.password = 'Password must be at least 8 characters.';
+  if (password !== passwordConfirmation) {
+    fields.password_confirmation = 'Password confirmation does not match.';
+  }
+  if (Object.keys(fields).length > 0) return validationResult(fields, req, errorRedirect);
+
+  const config = readAuthConfig();
+  const passwordHash = await bcrypt.hash(password, config.bcryptRounds);
+
+  let user;
+  try {
+    user = await createOrganizerUser({ name, email, passwordHash });
+  } catch (error) {
+    if (error?.code === 'ER_DUP_ENTRY') {
+      return validationResult({ email: 'The email has already been taken.' }, req, errorRedirect);
+    }
+    throw error;
+  }
+
+  return {
+    ok: true,
+    status: 201,
+    body: {
+      ok: true,
+      status: 'Account created successfully! Welcome to your organizer dashboard.',
+      user: toSessionUser(user),
+      redirect: '/organizer/dashboard',
+    },
+    redirect: '/organizer/dashboard',
+    session: { user, remember: false },
+  };
+}
+
+function logoutResult() {
+  return {
+    ok: true,
+    status: 200,
+    body: { ok: true, redirect: '/' },
+    redirect: '/',
+    clearSession: true,
+  };
+}
+
+function organizerLogoutResult() {
+  return {
+    ok: true,
+    status: 200,
+    body: { ok: true, redirect: '/organizer/login' },
+    redirect: '/organizer/login',
+    clearSession: true,
+  };
+}
+
+function adminSessionResult(req) {
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      ok: true,
+      authenticated: true,
+      user: req.auth.user,
+    },
+  };
+}
+
+function profileShowResult(req) {
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      ok: true,
+      user: req.auth.user,
+    },
+  };
+}
+
+async function profileUpdateResult(req) {
+  const name = normalizeName(req.body?.name);
+  const email = normalizeEmail(req.body?.email);
+  const errorRedirect = '/profile';
+
+  const fields = {};
+  if (!name) fields.name = 'Name is required.';
+  if (!email) fields.email = 'Email is required.';
+  if (Object.keys(fields).length > 0) return validationResult(fields, req, errorRedirect);
+
+  let updated;
+  try {
+    updated = await updateAuthUserProfile(req.auth.user.id, { name, email });
+  } catch (error) {
+    if (error?.code === 'ER_DUP_ENTRY') {
+      return validationResult({ email: 'The email has already been taken.' }, req, errorRedirect);
+    }
+    throw error;
+  }
+
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      ok: true,
+      status: 'profile-updated',
+      user: toSessionUser(updated),
+    },
+    redirect: '/profile',
+    session: {
+      user: updated,
+      remember: Boolean(req.auth?.claims?.remember),
+    },
+  };
+}
+
+async function profileDeleteResult(req) {
+  const password = String(req.body?.password || '');
+  const errorRedirect = '/profile';
+
+  if (!password) {
+    return validationResult({ password: 'Password is required.' }, req, errorRedirect);
+  }
+
+  const user = await findAuthUserById(req.auth.user.id);
+  if (!user || !user.password) return credentialsResult(req, errorRedirect);
+
+  const passwordMatches = await bcrypt.compare(password, user.password);
+  if (!passwordMatches) {
+    return validationResult({ password: 'The provided password is incorrect.' }, req, errorRedirect);
+  }
+
+  await deleteAuthUserById(user.id);
+
+  return {
+    ok: true,
+    status: 200,
+    body: { ok: true, deleted: true, redirect: '/' },
+    redirect: '/',
+    clearSession: true,
+  };
+}
+
+async function passwordUpdateResult(req) {
+  const currentPassword = String(req.body?.current_password || '');
+  const password = String(req.body?.password || '');
+  const passwordConfirmation = String(req.body?.password_confirmation || '');
+  const errorRedirect = safeReferer(req, '/profile');
+
+  const fields = {};
+  if (!currentPassword) fields.current_password = 'Current password is required.';
+  if (!password) fields.password = 'Password is required.';
+  if (password && password.length < 8) fields.password = 'Password must be at least 8 characters.';
+  if (password !== passwordConfirmation) {
+    fields.password_confirmation = 'Password confirmation does not match.';
+  }
+  if (Object.keys(fields).length > 0) return validationResult(fields, req, errorRedirect);
+
+  const user = await findAuthUserById(req.auth.user.id);
+  if (!user || !user.password) return credentialsResult(req, errorRedirect);
+
+  const currentPasswordMatches = await bcrypt.compare(currentPassword, user.password);
+  if (!currentPasswordMatches) {
+    return validationResult({ current_password: 'Current password is incorrect.' }, req, errorRedirect);
+  }
+
+  const config = readAuthConfig();
+  const passwordHash = await bcrypt.hash(password, config.bcryptRounds);
+  const updated = await setPasswordForUser(user.id, passwordHash, randomRememberToken());
+
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      ok: true,
+      status: 'password-updated',
+      user: toSessionUser(updated),
+    },
+    redirect: safeReferer(req, '/profile'),
+    session: {
+      user: updated,
+      remember: Boolean(req.auth?.claims?.remember),
+    },
+  };
+}
+
+async function passwordForgotResult(req) {
+  const email = normalizeEmail(req.body?.email);
+  const errorRedirect = '/forgot-password';
+
+  if (!email) {
+    return validationResult({ email: 'Email is required.' }, req, errorRedirect);
+  }
+
+  const issued = await issuePasswordResetToken(email);
+  const config = readAuthConfig();
+  const body = {
+    ok: true,
+    status: 'reset-link-sent',
+  };
+
+  if (config.exposeResetToken && issued.issued && issued.token) {
+    const origin = resolveOrigin(req);
+    body.token = issued.token;
+    body.reset_url = `${origin}/reset-password/${encodeURIComponent(issued.token)}?email=${encodeURIComponent(
+      issued.email
+    )}`;
+  }
+
+  return {
+    ok: true,
+    status: 200,
+    body,
+    redirect: appendQuery('/forgot-password', { status: 'reset-link-sent' }),
+  };
+}
+
+async function passwordResetResult(req) {
+  const email = normalizeEmail(req.body?.email);
+  const token = String(req.body?.token || req.params?.token || '').trim();
+  const password = String(req.body?.password || '');
+  const passwordConfirmation = String(req.body?.password_confirmation || '');
+  const errorRedirect = token
+    ? appendQuery(`/reset-password/${encodeURIComponent(token)}`, { email })
+    : '/forgot-password';
+
+  const fields = {};
+  if (!token) fields.token = 'Token is required.';
+  if (!email) fields.email = 'Email is required.';
+  if (!password) fields.password = 'Password is required.';
+  if (password && password.length < 8) fields.password = 'Password must be at least 8 characters.';
+  if (password !== passwordConfirmation) {
+    fields.password_confirmation = 'Password confirmation does not match.';
+  }
+  if (Object.keys(fields).length > 0) return validationResult(fields, req, errorRedirect);
+
+  const outcome = await completePasswordReset({ email, token, password });
+  if (!outcome.ok) {
+    const reasonToMessage = {
+      invalid_payload: 'Invalid reset payload.',
+      invalid_token: 'The password reset token is invalid.',
+      expired_token: 'The password reset token has expired.',
+      user_not_found: 'Unable to reset password for this account.',
+    };
+
+    return {
+      ok: false,
+      status: 422,
+      body: {
+        ok: false,
+        error: outcome.reason,
+        message: reasonToMessage[outcome.reason] || 'Password reset failed.',
+      },
+      errorRedirect: appendQuery(errorRedirect, { auth_error: outcome.reason }),
+    };
+  }
+
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      ok: true,
+      status: 'password-reset',
+      redirect: '/login',
+    },
+    redirect: '/organizer/login',
+  };
+}
+
+function emailVerificationNoticeResult(req) {
+  const verified = Boolean(req.auth.user.email_verified_at);
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      ok: true,
+      verified,
+      status: verified ? 'already-verified' : 'verification-required',
+    },
+  };
+}
+
+async function emailVerificationNotificationResult(req) {
+  if (req.auth.user.email_verified_at) {
+    return {
+      ok: true,
+      status: 200,
+      body: { ok: true, status: 'already-verified' },
+      redirect: '/verify-email',
+    };
+  }
+
+  const config = readAuthConfig();
+  const verificationUrl = createEmailVerificationLink({
+    user: req.auth.user,
+    origin: resolveOrigin(req),
+    pathPrefix: '/verify-email',
+  });
+
+  const body = {
+    ok: true,
+    status: 'verification-link-sent',
+  };
+
+  if (config.exposeVerificationLink) {
+    body.verification_url = verificationUrl;
+  }
+
+  return {
+    ok: true,
+    status: 200,
+    body,
+    redirect: appendQuery('/verify-email', { status: 'verification-link-sent' }),
+  };
+}
+
+async function emailVerifyResult(req) {
+  const verification = verifyEmailVerificationRequest({
+    user: req.auth.user,
+    routeUserId: req.params.id,
+    routeHash: req.params.hash,
+    expires: req.query.expires,
+    signature: req.query.signature,
+  });
+
+  if (!verification.ok) {
+    return {
+      ok: false,
+      status: 403,
+      body: {
+        ok: false,
+        error: verification.reason,
+        message: 'Invalid or expired verification link.',
+      },
+      errorRedirect: appendQuery('/verify-email', { auth_error: verification.reason }),
+    };
+  }
+
+  const updatedUser = await markAuthUserEmailVerified(req.auth.user.id);
+
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      ok: true,
+      status: 'verified',
+      user: toSessionUser(updatedUser),
+      redirect: '/?verified=1',
+    },
+    redirect: '/?verified=1',
+    session: {
+      user: updatedUser,
+      remember: Boolean(req.auth?.claims?.remember),
+    },
+  };
+}
+
+async function confirmPasswordResult(req) {
+  const password = String(req.body?.password || '');
+  const errorRedirect = '/confirm-password';
+
+  if (!password) {
+    return validationResult({ password: 'Password is required.' }, req, errorRedirect);
+  }
+
+  const user = await findAuthUserById(req.auth.user.id);
+  if (!user || !user.password) return credentialsResult(req, errorRedirect);
+
+  const passwordMatches = await bcrypt.compare(password, user.password);
+  if (!passwordMatches) {
+    return validationResult({ password: 'The provided password is incorrect.' }, req, errorRedirect);
+  }
+
+  const redirect = String(req.body?.redirect || req.query?.redirect || '/').trim() || '/';
+
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      ok: true,
+      status: 'password-confirmed',
+      redirect,
+    },
+    redirect,
+    session: {
+      user,
+      remember: Boolean(req.auth?.claims?.remember),
+      passwordConfirmedAt: Math.floor(Date.now() / 1000),
+    },
+  };
+}
+
+function confirmPasswordNoticeResult() {
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      ok: true,
+      status: 'confirm-password-required',
+    },
+  };
+}
+
+module.exports = {
+  authHealthResult,
+  sessionResult,
+  adminLoginResult,
+  organizerLoginResult,
+  organizerRegisterResult,
+  logoutResult,
+  organizerLogoutResult,
+  adminSessionResult,
+  profileShowResult,
+  profileUpdateResult,
+  profileDeleteResult,
+  passwordUpdateResult,
+  passwordForgotResult,
+  passwordResetResult,
+  emailVerificationNoticeResult,
+  emailVerificationNotificationResult,
+  emailVerifyResult,
+  confirmPasswordResult,
+  confirmPasswordNoticeResult,
+};

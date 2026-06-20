@@ -12,7 +12,7 @@
 /.vscode
 /.zed
 /auth.json
-/node_modules
+node_modules
 # /public/build
 /public/hot
 /public/storage
@@ -24,3 +24,5 @@ Homestead.yaml
 Thumbs.db
 composer.phar
 composer-setup.php
+database.sqlite*
+scratch/
