@@ -6,7 +6,8 @@
         "build": "npm run build --prefix frontend",
         "node:dev": "node node-app/server.cjs",
         "frontend:dev": "npm run dev --prefix frontend",
-        "dev": "concurrently \"npm run node:dev\" \"npm run frontend:dev\""
+        "dev": "concurrently \"npm run node:dev\" \"npm run frontend:dev\"",
+        "vercel:sync-env": "node scripts/sync-env.cjs"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
@@ -22,7 +23,6 @@
     },
     "dependencies": {
         "@libsql/client": "^0.17.4",
-        "@libsql/win32-x64-msvc": "^0.5.29",
         "bcryptjs": "^2.4.3",
         "better-sqlite3": "^12.11.1",
         "chart.js": "^4.5.0",
