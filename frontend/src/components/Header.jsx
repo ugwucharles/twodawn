@@ -40,7 +40,16 @@ function Header() {
 
   return (
     <header className="bg-black border-b border-zinc-800 sticky top-0 z-[100] h-[72px] w-full flex items-center">
-      <div className="w-full px-4 md:px-6 lg:px-10 h-full flex items-center justify-between gap-4">
+      {(isOpen || profileDropdownOpen) && (
+        <div 
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 cursor-default" 
+          onClick={() => {
+            setIsOpen(false)
+            setProfileDropdownOpen(false)
+          }}
+        />
+      )}
+      <div className="w-full px-4 md:px-6 lg:px-10 h-full flex items-center justify-between gap-4 relative z-50">
         
         {/* Left: Logo */}
         <div className="flex items-center shrink-0">
