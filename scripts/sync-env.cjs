@@ -74,25 +74,34 @@ function main() {
   console.log(`Found ${envVars.length} variables. Syncing to Vercel...`);
 
   for (const { key, value } of envVars) {
-    console.log(`\nSyncing ${key}...`);
+    console.log(`Syncing ${key}...`);
 
-    // 1. Remove if already exists on Vercel to allow overwriting
-    spawnSync(v.cmd, [...v.args, 'env', 'rm', key, 'production,preview,development', '--yes'], {
-      stdio: 'ignore',
-      shell: true
-    });
+    const targets = ['production', 'preview', 'development'];
+    let success = true;
 
-    // 2. Add the variable
-    const result = spawnSync(v.cmd, [...v.args, 'env', 'add', key, 'production,preview,development'], {
-      input: value + '\n',
-      stdio: ['pipe', 'inherit', 'inherit'],
-      shell: true
-    });
+    for (const target of targets) {
+      // 1. Remove if already exists on Vercel
+      spawnSync(v.cmd, [...v.args, 'env', 'rm', key, target, '--yes'], {
+        stdio: 'ignore',
+        shell: true
+      });
 
-    if (result.status === 0) {
-      console.log(`✅ Successfully synced ${key}`);
+      // 2. Add the variable for this specific environment
+      const result = spawnSync(v.cmd, [...v.args, 'env', 'add', key, target], {
+        input: value + '\n',
+        stdio: ['pipe', 'ignore', 'ignore'],
+        shell: true
+      });
+
+      if (result.status !== 0) {
+        success = false;
+      }
+    }
+
+    if (success) {
+      console.log(`✅ Successfully synced ${key} to all environments`);
     } else {
-      console.log(`❌ Failed to sync ${key}`);
+      console.log(`⚠️ Partial success/failure syncing ${key}`);
     }
   }
 

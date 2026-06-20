@@ -26,3 +26,6 @@ composer.phar
 composer-setup.php
 database.sqlite*
 scratch/
+
+.vercel
+.env*
