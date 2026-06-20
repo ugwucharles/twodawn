@@ -10,6 +10,14 @@ function runSync(command, args, options = {}) {
   });
 }
 
+function getVercelCommand() {
+  const check = spawnSync('vercel', ['--version'], { shell: true });
+  if (check.status === 0) {
+    return { cmd: 'vercel', args: [] };
+  }
+  return { cmd: 'npx', args: ['vercel'] };
+}
+
 function main() {
   const envPath = path.join(process.cwd(), '.env');
   if (!fs.existsSync(envPath)) {
@@ -18,12 +26,16 @@ function main() {
     process.exit(1);
   }
 
+  const v = getVercelCommand();
+  const commandDisplayName = v.cmd === 'npx' ? 'npx vercel' : 'vercel';
+  console.log(`Using Vercel CLI command: ${commandDisplayName}`);
+
   // Check if project is linked to Vercel
   const vercelDir = path.join(process.cwd(), '.vercel');
   if (!fs.existsSync(vercelDir)) {
     console.log('💡 Project is not linked to Vercel yet. Starting linking process...');
     console.log('Follow the prompts to link your Vercel project.');
-    const linkResult = runSync('npx', ['vercel', 'link']);
+    const linkResult = runSync(v.cmd, [...v.args, 'link']);
     if (linkResult.status !== 0) {
       console.error('❌ Error: Failed to link project to Vercel.');
       process.exit(1);
@@ -65,13 +77,13 @@ function main() {
     console.log(`\nSyncing ${key}...`);
 
     // 1. Remove if already exists on Vercel to allow overwriting
-    spawnSync('npx', ['vercel', 'env', 'rm', key, 'production,preview,development', '--yes'], {
+    spawnSync(v.cmd, [...v.args, 'env', 'rm', key, 'production,preview,development', '--yes'], {
       stdio: 'ignore',
       shell: true
     });
 
     // 2. Add the variable
-    const result = spawnSync('npx', ['vercel', 'env', 'add', key, 'production,preview,development'], {
+    const result = spawnSync(v.cmd, [...v.args, 'env', 'add', key, 'production,preview,development'], {
       input: value + '\n',
       stdio: ['pipe', 'inherit', 'inherit'],
       shell: true
