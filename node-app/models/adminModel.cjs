@@ -11,9 +11,9 @@ async function getAdminStats() {
     SELECT 
       (SELECT COUNT(*) FROM events) as events_total,
       (SELECT COUNT(*) FROM events WHERE is_published = 1) as events_published,
-      (SELECT COUNT(*) FROM orders WHERE DATE(created_at) = CURDATE()) as orders_today,
-      (SELECT COALESCE(SUM(quantity), 0) FROM orders WHERE status = 'paid' AND DATE(created_at) = CURDATE()) as tickets_today,
-      (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE status = 'paid' AND DATE(created_at) = CURDATE()) as revenue_today
+      (SELECT COUNT(*) FROM orders WHERE date(created_at) = date('now')) as orders_today,
+      (SELECT COALESCE(SUM(quantity), 0) FROM orders WHERE status = 'paid' AND date(created_at) = date('now')) as tickets_today,
+      (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE status = 'paid' AND date(created_at) = date('now')) as revenue_today
   `);
 
   return {
@@ -130,7 +130,7 @@ async function createHostToken(eventId, label = null) {
 
   const rows = await query(`
     INSERT INTO host_tokens (event_id, token, label, active, expires_at)
-    VALUES (?, ?, ?, 1, DATE_ADD((SELECT ends_at FROM events WHERE id = ?), INTERVAL 1 DAY))
+    VALUES (?, ?, ?, 1, date((SELECT ends_at FROM events WHERE id = ?), '+1 day'))
   `, [id, token, label || null, id]);
 
   return { id: rows.insertId, token, label, active: true };

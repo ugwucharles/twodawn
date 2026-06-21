@@ -1,15 +1,9 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "node-app/app.cjs",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "node-app/app.cjs"
+      "source": "/(.*)",
+      "destination": "/node-app/app.cjs"
     }
   ]
 }
