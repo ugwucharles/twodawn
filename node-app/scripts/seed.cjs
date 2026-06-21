@@ -1,12 +1,19 @@
+// node-app/scripts/seed.cjs
 const path = require('path');
-const Database = require('better-sqlite3');
+const sqlite3 = require('sqlite3').verbose();   // <-- pure‑js driver
 
-// Resolve the SQLite file path (project root)
-const dbPath = path.resolve(__dirname, '..', '..', 'database.sqlite');
-const db = new Database(dbPath);
+// Path where Vercel will place the file (repo root)
+const dbPath = path.join(__dirname, '..', '..', 'database.sqlite');
 
-// Ensure the events table exists – schema matches the model expectations
-db.exec(`
+// Open (or create) the DB
+const db = new sqlite3.Database(dbPath, err => {
+  if (err) {
+    console.error('❌ Failed to open SQLite DB:', err);
+    process.exit(1);
+  }
+});
+
+const createTableSQL = `
   CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
@@ -27,22 +34,24 @@ db.exec(`
     created_at TEXT,
     updated_at TEXT
   );
-`);
+`;
 
-// Insert a demo event (helps the UI show something after a fresh deploy)
-const insert = db.prepare(`
-  INSERT INTO events (
-    user_id, title, description, venue, state, starts_at, is_published, slug, created_at, updated_at
-  ) VALUES (?, ?, ?, ?, ?, datetime('now'), 1, ?, datetime('now'), datetime('now'))
-`);
+db.exec(createTableSQL, err => {
+  if (err) {
+    console.error('❌ Failed to create table:', err);
+    process.exit(1);
+  }
 
-insert.run(
-  1,
-  'Demo Event',
-  'Demo event created by seed script.',
-  'Demo Venue',
-  'Demo State',
-  'demo-event-' + Math.random().toString(36).substring(2, 8)
-);
+  const demoSQL = `
+    INSERT INTO events (user_id, title, venue, state, starts_at, is_published, slug, created_at, updated_at)
+    VALUES (1, 'Demo Event', 'Demo Venue', 'Demo State', datetime('now'), 1,
+            'demo-event-' || substr(hex(randomblob(4)), 1, 8),
+            datetime('now'), datetime('now'));
+  `;
 
-console.log('✅ SQLite seed completed – database at', dbPath);
+  db.run(demoSQL, err => {
+    if (err) console.warn('⚠️ Could not insert demo event (maybe already exists):', err);
+    console.log('✅ SQLite seed complete – database at', dbPath);
+    db.close();
+  });
+});
