@@ -4,9 +4,10 @@ import react from '@vitejs/plugin-react'
 const proxyTarget = 'http://127.0.0.1:3001'
 
 const htmlBypass = (req) => {
-  if (req.headers.accept && req.headers.accept.indexOf('text/html') !== -1) {
-    return '/index.html'
-  }
+  const accept = String(req.headers.accept || '')
+  // API calls must always proxy to Node, never serve the SPA shell
+  if (accept.includes('application/json')) return
+  if (accept.includes('text/html')) return '/index.html'
 }
 
 export default defineConfig({

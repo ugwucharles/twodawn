@@ -64,20 +64,19 @@ function Register() {
             </div>
           )}
 
-          <div className="mb-6">
-            <GoogleSignInButton onError={setError} disabled={loading} />
-          </div>
-
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">or continue with email</span>
-            </div>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="mb-6">
+              <GoogleSignInButton onError={setError} disabled={loading} />
+            </div>
+
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-gray-500">or continue with email</span>
+              </div>
+            </div>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Name
