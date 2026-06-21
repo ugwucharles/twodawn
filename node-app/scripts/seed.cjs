@@ -2,8 +2,8 @@
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();   // <-- pure‑js driver
 
-// Path where Vercel will place the file (repo root)
-const dbPath = path.join(__dirname, '..', '..', 'database.sqlite');
+// Use Vercel's writable temporary directory
+const dbPath = '/tmp/database.sqlite';
 
 // Open (or create) the DB
 const db = new sqlite3.Database(dbPath, err => {

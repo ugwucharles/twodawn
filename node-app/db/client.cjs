@@ -19,7 +19,7 @@ function getDatabase() {
 
   // Fallback to local SQLite
   if (localDb) return localDb;
-  const dbPath = process.env.DB_PATH || path.join(__dirname, '../../database.sqlite');
+  const dbPath = process.env.DB_PATH || '/tmp/database.sqlite';
   localDb = new Database(dbPath);
   localDb.pragma('journal_mode = WAL');
   isTurso = false;
