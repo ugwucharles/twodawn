@@ -188,11 +188,11 @@ async function listPublishedEventsFiltered(filters = {}, page = {}) {
   }
 
   if (date === 'today') {
-    conditions.push('DATE(starts_at) = CURDATE()');
+    conditions.push('date(starts_at) = date("now")');
   } else if (date === 'weekend') {
-    conditions.push('YEARWEEK(starts_at, 1) = YEARWEEK(CURDATE(), 1)');
+    conditions.push('strftime("%W", starts_at) = strftime("%W", "now")');
   } else if (date === 'next-week') {
-    conditions.push('YEARWEEK(starts_at, 1) = YEARWEEK(DATE_ADD(CURDATE(), INTERVAL 7 DAY), 1)');
+    conditions.push('strftime("%W", starts_at) = strftime("%W", "now", "+7 days")');
   }
 
   if (q) {
