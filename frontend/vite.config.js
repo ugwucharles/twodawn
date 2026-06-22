@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const proxyTarget = 'http://127.0.0.1:3001'
+const proxyTarget = 'http://localhost:3001'
 
 const htmlBypass = (req) => {
   const accept = String(req.headers.accept || '')
