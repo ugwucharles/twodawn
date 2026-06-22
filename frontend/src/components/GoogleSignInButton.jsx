@@ -1,5 +1,5 @@
 import { GoogleLogin } from '@react-oauth/google'
-import axios from 'axios'
+import api from '../services/api'
 import { useNavigate } from 'react-router-dom'
 
 function GoogleSignInButton({ onError, disabled }) {
@@ -7,7 +7,7 @@ function GoogleSignInButton({ onError, disabled }) {
 
   const handleSuccess = async (credentialResponse) => {
     try {
-      const response = await axios.post('/organizer/google-auth', {
+      const response = await api.post('/organizer/google-auth', {
         credential: credentialResponse.credential,
       })
 
@@ -22,15 +22,19 @@ function GoogleSignInButton({ onError, disabled }) {
 
   return (
     <div className={`w-full flex justify-center ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
-      <GoogleLogin
-        onSuccess={handleSuccess}
-        onError={() => onError?.('Google sign-in was cancelled or failed')}
-        theme="outline"
-        size="large"
-        text="continue_with"
-        shape="rectangular"
-        width={384}
-      />
+      <div className="w-full max-w-[300px]">
+        <GoogleLogin
+          onSuccess={handleSuccess}
+          onError={() => onError?.('Google sign-in was cancelled or failed')}
+          theme="outline"
+          size="large"
+          text="continue_with"
+          shape="rectangular"
+          width="300"
+          use_one_tap
+          auto_select={false}
+        />
+      </div>
     </div>
   )
 }

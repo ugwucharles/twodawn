@@ -3,12 +3,13 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "setup": "node setup.js",
+        "setup:vercel": "node scripts/setup-vercel-env.cjs",
         "build": "npm run build --prefix frontend",
         "node:dev": "node node-app/server.cjs",
         "frontend:dev": "npm run dev --prefix frontend",
         "dev": "concurrently \"npm run node:dev\" \"npm run frontend:dev\"",
-        "vercel:sync-env": "node scripts/sync-env.cjs",
-        "postinstall": "node node-app/scripts/seed.cjs"
+        "vercel:sync-env": "node scripts/sync-env.cjs"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",

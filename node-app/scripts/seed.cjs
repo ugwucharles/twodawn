@@ -1,9 +1,16 @@
 // node-app/scripts/seed.cjs
 const path = require('path');
+const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();   // <-- pure‑js driver
 
-// Use Vercel's writable temporary directory
-const dbPath = '/tmp/database.sqlite';
+// Use project root database for local development
+const dbPath = path.join(__dirname, '../../database.sqlite');
+
+// Ensure directory exists before creating database
+const dbDir = path.dirname(dbPath);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
 
 // Open (or create) the DB
 const db = new sqlite3.Database(dbPath, err => {
