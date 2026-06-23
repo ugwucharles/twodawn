@@ -17,6 +17,7 @@ async function seedDatabase() {
       instagram_handle TEXT,
       whatsapp_number TEXT,
       twitter_handle TEXT,
+      avatar_url TEXT,
       username TEXT,
       profile_picture TEXT,
       created_at TEXT,
@@ -61,12 +62,12 @@ async function seedDatabase() {
       console.log('ℹ️ profile_picture column already exists or error:', err.message);
     }
 
-    // Drop avatar_url column if it exists (legacy column)
+    // Add avatar_url column if it doesn't exist
     try {
-      await query(`ALTER TABLE users DROP COLUMN avatar_url`);
-      console.log('✅ Dropped avatar_url column');
+      await query(`ALTER TABLE users ADD COLUMN avatar_url TEXT`);
+      console.log('✅ Added avatar_url column');
     } catch (err) {
-      console.log('ℹ️ avatar_url column does not exist or error:', err.message);
+      console.log('ℹ️ avatar_url column already exists or error:', err.message);
     }
 
     // Insert demo user

@@ -13,6 +13,7 @@ const AUTH_USER_SELECT = `
   instagram_handle,
   whatsapp_number,
   twitter_handle,
+  avatar_url,
   profile_picture,
   created_at,
   updated_at
