@@ -99,7 +99,7 @@ function Checkout() {
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-4 py-20">
-            <div className="w-10 h-10 border-4 border-[#ff5a00] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-4 border-[#8b5cf6] border-t-transparent rounded-full animate-spin"></div>
             <p className="text-gray-500 text-sm font-medium">Loading checkout...</p>
           </div>
         </main>
@@ -115,7 +115,7 @@ function Checkout() {
           <div className="text-center py-20">
             <div className="text-5xl mb-4">😕</div>
             <p className="text-gray-600 font-medium">Event not found</p>
-            <Link to="/events" className="mt-4 inline-block text-[#ff5a00] font-semibold hover:underline">
+            <Link to="/events" className="mt-4 inline-block text-[#8b5cf6] font-semibold hover:underline">
               ← Back to Events
             </Link>
           </div>
@@ -127,7 +127,7 @@ function Checkout() {
   const eventImage = getEventImage(event)
   const hasTicketTypes = event.ticket_types && event.ticket_types.length > 0
 
-  const inputClass = "w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#ff5a00]/40 focus:border-[#ff5a00] text-gray-900 placeholder-gray-400 text-sm transition-all duration-200"
+  const inputClass = "w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/40 focus:border-[#8b5cf6] text-gray-900 placeholder-gray-400 text-sm transition-all duration-200"
   const labelClass = "block text-xs font-bold uppercase tracking-widest text-gray-500 mb-1.5"
 
   return (
@@ -139,9 +139,9 @@ function Checkout() {
 
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-            <Link to="/" className="hover:text-[#ff5a00] transition-colors">Home</Link>
+            <Link to="/" className="hover:text-[#8b5cf6] transition-colors">Home</Link>
             <span>/</span>
-            <Link to={`/events/${event.id}`} className="hover:text-[#ff5a00] transition-colors">{event.title}</Link>
+            <Link to={`/events/${event.id}`} className="hover:text-[#8b5cf6] transition-colors">{event.title}</Link>
             <span>/</span>
             <span className="text-gray-900 font-medium">Checkout</span>
           </div>
@@ -201,7 +201,7 @@ function Checkout() {
                         onClick={() => setTicketType(type.name)}
                         className={`flex items-center justify-between p-4 rounded-xl border-2 text-left transition-all duration-200 ${
                           ticketType === type.name
-                            ? 'border-[#ff5a00] bg-orange-50'
+                            ? 'border-[#8b5cf6] bg-purple-50'
                             : 'border-gray-100 bg-white hover:border-gray-300'
                         }`}
                       >
@@ -209,7 +209,7 @@ function Checkout() {
                           <div className="flex items-center gap-2">
                             <div className={`w-4 h-4 rounded-full border-2 shrink-0 transition-all ${
                               ticketType === type.name
-                                ? 'border-[#ff5a00] bg-[#ff5a00]'
+                                ? 'border-[#8b5cf6] bg-[#8b5cf6]'
                                 : 'border-gray-300 bg-white'
                             }`} />
                             <p className="font-bold text-gray-900">{type.name}</p>
@@ -219,7 +219,7 @@ function Checkout() {
                           )}
                         </div>
                         <span className={`font-extrabold text-lg shrink-0 ml-4 ${
-                          ticketType === type.name ? 'text-[#ff5a00]' : 'text-gray-900'
+                          ticketType === type.name ? 'text-[#8b5cf6]' : 'text-gray-900'
                         }`}>
                           {Number(type.price) === 0 ? 'Free' : `₦${Number(type.price).toLocaleString()}`}
                         </span>
@@ -235,7 +235,7 @@ function Checkout() {
                     <button
                       type="button"
                       onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                      className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-700 hover:border-[#ff5a00] hover:text-[#ff5a00] transition-all font-bold text-lg"
+                      className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-700 hover:border-[#8b5cf6] hover:text-[#8b5cf6] transition-all font-bold text-lg"
                     >
                       −
                     </button>
@@ -243,7 +243,7 @@ function Checkout() {
                     <button
                       type="button"
                       onClick={() => setQuantity(q => Math.min(event.capacity || 10, q + 1))}
-                      className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-700 hover:border-[#ff5a00] hover:text-[#ff5a00] transition-all font-bold text-lg"
+                      className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-700 hover:border-[#8b5cf6] hover:text-[#8b5cf6] transition-all font-bold text-lg"
                     >
                       +
                     </button>
@@ -288,7 +288,7 @@ function Checkout() {
 
                 {/* Event Card */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                  <div className="h-36 bg-gradient-to-br from-orange-100 to-orange-50 relative">
+                  <div className="h-36 bg-gradient-to-br from-purple-100 to-purple-50 relative">
                     {eventImage ? (
                       <img src={eventImage} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
                     ) : (
@@ -339,7 +339,7 @@ function Checkout() {
                       )}
                       <div className="flex justify-between items-center text-base font-extrabold text-gray-900 border-t border-gray-100 pt-3 mt-1">
                         <span>Total</span>
-                        <span className="text-[#ff5a00]">₦{(quote.total || 0).toFixed(2)}</span>
+                        <span className="text-[#8b5cf6]">₦{(quote.total || 0).toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -350,7 +350,7 @@ function Checkout() {
                   type="button"
                   onClick={handleBuyTicket}
                   disabled={processing}
-                  className="w-full bg-[#ff5a00] hover:bg-[#e04e00] disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-base font-extrabold shadow-lg shadow-orange-200 hover:shadow-orange-300 transition-all duration-200 active:scale-95"
+                  className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-base font-extrabold shadow-lg shadow-purple-200 hover:shadow-purple-300 transition-all duration-200 active:scale-95"
                 >
                   {processing ? (
                     <span className="flex items-center justify-center gap-2">
