@@ -260,7 +260,7 @@ function Home() {
                   <Link
                     key={event.id}
                     to={`/events/${event.id}`}
-                    className="flex items-center rounded-2xl border border-gray-100 bg-white hover:shadow-xl hover:border-gray-200 transition-all duration-300 overflow-hidden group h-44"
+                    className="flex items-center rounded-2xl border border-purple-200 bg-white hover:shadow-xl hover:border-purple-300 transition-all duration-300 overflow-hidden group h-44"
                   >
                     {/* Left: Image */}
                     <div className="w-32 sm:w-40 h-full relative bg-gray-50 shrink-0">
