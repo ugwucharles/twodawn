@@ -364,6 +364,7 @@ async function organizerGoogleLoginResult(req) {
     };
   } catch (error) {
     console.error('Google verification error:', error);
+    console.error('Error stack:', error.stack);
     return {
       ok: false,
       status: 500,
@@ -371,6 +372,8 @@ async function organizerGoogleLoginResult(req) {
         ok: false,
         error: 'google_verification_failed',
         message: 'Internal error during Google token verification.',
+        details: error.message,
+        stack: error.stack,
       },
     };
   }
