@@ -20,6 +20,7 @@ import EventDetails from './pages/organizer/EventDetails'
 import EditEvent from './pages/organizer/EditEvent'
 import HostPanel from './pages/HostPanel'
 import Onboarding from './pages/Onboarding'
+import Debug from './pages/Debug'
 
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -71,6 +72,7 @@ function App() {
           <Route path="settings" element={<OrganizerSettings />} />
         </Route>
         <Route path="/h/:token" element={<HostPanel />} />
+        <Route path="/debug" element={<Debug />} />
       </Routes>
     </BrowserRouter>
   )
