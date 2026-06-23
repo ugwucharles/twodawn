@@ -46,23 +46,23 @@ function Debug() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">API Debug Page</h1>
+    <div style={{ minHeight: '100vh', backgroundColor: '#1a1a1a', color: 'white', padding: '20px' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '20px' }}>API Debug Page</h1>
         
         {loading && (
-          <div className="text-yellow-400 mb-4">Testing API endpoints...</div>
+          <div style={{ color: '#fbbf24', marginBottom: '20px' }}>Testing API endpoints...</div>
         )}
 
-        <div className="space-y-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {logs.map((log, index) => (
-            <div key={index} className="bg-gray-800 rounded-lg p-4">
-              <div className="text-gray-400 text-sm mb-2">{log.time}</div>
-              <div className={`font-semibold ${log.message.includes('ERROR') ? 'text-red-400' : 'text-green-400'}`}>
+            <div key={index} style={{ backgroundColor: '#2d2d2d', borderRadius: '8px', padding: '16px' }}>
+              <div style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '8px' }}>{log.time}</div>
+              <div style={{ fontWeight: 'bold', color: log.message.includes('ERROR') ? '#f87171' : '#4ade80' }}>
                 {log.message}
               </div>
               {log.data && (
-                <pre className="mt-2 bg-gray-900 p-3 rounded text-xs overflow-auto">
+                <pre style={{ marginTop: '8px', backgroundColor: '#1a1a1a', padding: '12px', borderRadius: '4px', fontSize: '12px', overflow: 'auto' }}>
                   {JSON.stringify(log.data, null, 2)}
                 </pre>
               )}
@@ -70,8 +70,8 @@ function Debug() {
           ))}
         </div>
 
-        <div className="mt-8 p-4 bg-gray-800 rounded-lg">
-          <h2 className="text-xl font-bold mb-2">API Configuration</h2>
+        <div style={{ marginTop: '32px', padding: '16px', backgroundColor: '#2d2d2d', borderRadius: '8px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '8px' }}>API Configuration</h2>
           <p>API Base URL: {import.meta.env.VITE_API_URL || 'https://twodawn-frontend.vercel.app'}</p>
           <p>Environment: {import.meta.env.DEV ? 'Development' : 'Production'}</p>
         </div>
