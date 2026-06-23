@@ -133,14 +133,14 @@ function Home() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-bold text-gray-900">Top Selling Events</h2>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {topSellingEvents.map((event) => (
                     <Link
                       key={event.id}
                       to={`/events/${event.id}`}
                       className="group"
                     >
-                      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-100 mb-2">
+                      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-100">
                         {getEventImage(event) ? (
                           <img
                             src={getEventImage(event)}
@@ -152,16 +152,21 @@ function Home() {
                             <span className="text-3xl">🎟️</span>
                           </div>
                         )}
+                        {/* Dark overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                        {/* Text inside card */}
+                        <div className="absolute bottom-0 left-0 right-0 p-3">
+                          <h3 className="text-sm font-bold text-white line-clamp-2 mb-1">
+                            {event.title}
+                          </h3>
+                          <p className="text-xs text-white/90">{formatPrice(event)}</p>
+                        </div>
                         {event.capacity !== null && event.capacity <= 0 && (
                           <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
                             <span className="text-white font-extrabold text-xs uppercase tracking-widest px-2 py-1 rounded bg-red-600">Sold Out</span>
                           </div>
                         )}
                       </div>
-                      <h3 className="text-sm font-bold text-gray-900 line-clamp-2 group-hover:text-[#8b5cf6] transition-colors">
-                        {event.title}
-                      </h3>
-                      <p className="text-xs text-gray-500 mt-1">{formatPrice(event)}</p>
                     </Link>
                   ))}
                 </div>
