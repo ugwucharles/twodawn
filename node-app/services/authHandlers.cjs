@@ -268,8 +268,13 @@ async function organizerGoogleLoginResult(req) {
   }
 
   try {
+    console.log('Verifying Google token with tokeninfo endpoint...');
     const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+    console.log('Google tokeninfo response status:', response.status);
+    
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Google tokeninfo error:', errorText);
       return {
         ok: false,
         status: 401,
@@ -277,11 +282,13 @@ async function organizerGoogleLoginResult(req) {
           ok: false,
           error: 'invalid_google_token',
           message: 'Failed to verify Google sign-in credential.',
+          details: errorText,
         },
       };
     }
 
     const payload = await response.json();
+    console.log('Google tokeninfo payload:', payload);
     
     // Verify client ID / audience matches
     const expectedClientId = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID;
