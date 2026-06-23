@@ -71,7 +71,13 @@ async function findEventById(eventId) {
   const id = asPositiveInt(eventId);
   if (!id) return null;
 
-  const rows = await query(`SELECT ${EVENT_SELECT} FROM events WHERE id = ? LIMIT 1`, [id]);
+  const rows = await query(
+    `SELECT e.*, u.username as organizer_username, u.name as organizer_name
+     FROM events e
+     LEFT JOIN users u ON e.user_id = u.id
+     WHERE e.id = ?`,
+    [id]
+  );
   return mapEvent(rows[0]);
 }
 
@@ -80,9 +86,10 @@ async function findEventBySlug(slug) {
   if (!normalizedSlug) return null;
 
   const rows = await query(
-    `SELECT ${EVENT_SELECT}
-     FROM events
-     WHERE slug = ?
+    `SELECT e.*, u.username as organizer_username, u.name as organizer_name
+     FROM events e
+     LEFT JOIN users u ON e.user_id = u.id
+     WHERE e.slug = ?
      LIMIT 1`,
     [normalizedSlug]
   );
@@ -143,14 +150,15 @@ async function listRecentEvents(page = {}) {
   const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
   const rows = await query(
-    `SELECT ${EVENT_SELECT}
-     FROM events
-     WHERE is_published = 1
+    `SELECT e.*, u.username as organizer_username, u.name as organizer_name
+     FROM events e
+     LEFT JOIN users u ON e.user_id = u.id
+     WHERE e.is_published = 1
        AND (
-         (ends_at IS NOT NULL AND ends_at >= ?)
-         OR (ends_at IS NULL AND starts_at >= ?)
+         (e.ends_at IS NOT NULL AND e.ends_at >= ?)
+         OR (e.ends_at IS NULL AND e.starts_at >= ?)
        )
-     ORDER BY starts_at DESC, id DESC
+     ORDER BY e.starts_at DESC, e.id DESC
      LIMIT ? OFFSET ?`,
     [oneMonthAgo.toISOString(), oneMonthAgo.toISOString(), limit, offset]
   );
@@ -204,10 +212,11 @@ async function listPublishedEventsFiltered(filters = {}, page = {}) {
   const whereClause = conditions.join(' AND ');
 
   const rows = await query(
-    `SELECT ${EVENT_SELECT}
-     FROM events
+    `SELECT e.*, u.username as organizer_username, u.name as organizer_name
+     FROM events e
+     LEFT JOIN users u ON e.user_id = u.id
      WHERE ${whereClause}
-     ORDER BY starts_at ASC, id ASC
+     ORDER BY starts_at ASC, e.id ASC
      LIMIT ? OFFSET ?`,
     [...params, limit, offset]
   );

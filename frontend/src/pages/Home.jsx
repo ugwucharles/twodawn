@@ -216,6 +216,7 @@ function Home() {
                       )}
                       <div className="p-5">
                         <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2">{event.title}</h3>
+                        <p className="text-xs text-purple-600 font-semibold mb-2">by {event.organizer_name || event.organizer_username || 'Organizer'}</p>
                         <p className="text-sm text-gray-500 mb-3">{event.venue}</p>
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-semibold text-gray-900">

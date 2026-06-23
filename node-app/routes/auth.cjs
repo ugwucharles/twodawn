@@ -201,6 +201,55 @@ function createPublicAuthRouter() {
     asyncRoute(async (req, res) => sendAuthResult(req, res, await organizerGoogleLoginResult(req)))
   );
 
+  router.post(
+    '/organizer/onboarding',
+    requireAuthenticatedFlexible,
+    asyncRoute(async (req, res) => {
+      const { username } = req.body;
+      const { updateAuthUserUsername } = require('../models/authUserModel.cjs');
+
+      if (!username || !username.trim()) {
+        return res.status(400).json({ ok: false, error: 'missing_username', message: 'Username is required.' });
+      }
+
+      const cleanUsername = String(username).trim().toLowerCase();
+
+      // Check format (alphanumeric and dashes, matching tix.africa style usernames)
+      if (!/^[a-z0-9-]+$/.test(cleanUsername)) {
+        return res.status(400).json({ ok: false, error: 'invalid_format', message: 'Username can only contain lowercase letters, numbers, and dashes.' });
+      }
+
+      try {
+        // Check if username is already taken
+        const { query } = require('../db/client.cjs');
+        const existing = await query('SELECT id FROM users WHERE username = ? LIMIT 1', [cleanUsername]);
+        if (existing.length > 0) {
+          return res.status(400).json({ ok: false, error: 'username_taken', message: 'Username is already taken.' });
+        }
+
+        // Update the username
+        const updatedUser = await updateAuthUserUsername(req.auth.user.id, cleanUsername);
+        
+        return res.json({
+          ok: true,
+          user: {
+            id: updatedUser.id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            username: updatedUser.username,
+            email_verified_at: updatedUser.email_verified_at,
+            is_admin: Boolean(updatedUser.is_admin),
+            is_organizer: Boolean(updatedUser.is_organizer)
+          },
+          redirect: '/organizer/dashboard'
+        });
+      } catch (err) {
+        console.error('Onboarding error:', err);
+        return res.status(500).json({ ok: false, error: 'onboarding_failed', message: 'Failed to complete onboarding.' });
+      }
+    })
+  );
+
   router.post('/organizer/logout', requireAuthenticatedFlexible, (req, res) =>
     sendAuthResult(req, res, organizerLogoutResult())
   );

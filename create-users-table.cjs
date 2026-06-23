@@ -18,6 +18,7 @@ async function createUsersTable() {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         email TEXT NOT NULL UNIQUE,
+        username TEXT UNIQUE,
         email_verified_at TEXT,
         password TEXT NOT NULL,
         remember_token TEXT,

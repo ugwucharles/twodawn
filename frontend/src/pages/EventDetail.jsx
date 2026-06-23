@@ -71,6 +71,11 @@ function EventDetail() {
           <div className="bg-white rounded-lg shadow-md overflow-hidden mt-6">
             <div className="p-8">
               <h1 className="text-3xl font-bold text-gray-900 mb-4">{event.title}</h1>
+              <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
+                <span>Hosted by</span>
+                <span className="font-bold text-gray-900">{event.organizer_name || event.organizer_username || 'Organizer'}</span>
+                {event.organizer_username && <span className="text-gray-400">(@{event.organizer_username})</span>}
+              </div>
               <div className="space-y-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Venue</h3>

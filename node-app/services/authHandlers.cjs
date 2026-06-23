@@ -340,7 +340,8 @@ async function organizerGoogleLoginResult(req) {
     }
 
     const sessionUser = toSessionUser(user);
-    const redirect = sessionUser.is_admin ? '/admin/dashboard' : '/organizer/dashboard';
+    const needsOnboarding = !user.username;
+    const redirect = sessionUser.is_admin ? '/admin/dashboard' : (needsOnboarding ? '/onboarding' : '/organizer/dashboard');
 
     return {
       ok: true,
@@ -349,6 +350,7 @@ async function organizerGoogleLoginResult(req) {
         ok: true,
         user: sessionUser,
         redirect,
+        needsOnboarding,
       },
       redirect,
       session: { user, remember: true },

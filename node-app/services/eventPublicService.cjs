@@ -51,6 +51,8 @@ function formatEventForApi(event) {
     description: event.description,
     capacity: event.capacity,
     ticket_types: event.ticket_types,
+    organizer_username: event.organizer_username || null,
+    organizer_name: event.organizer_name || null,
   };
 }
 

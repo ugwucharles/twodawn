@@ -103,6 +103,9 @@ function Events({ recent = false }) {
                             <span className="truncate">{new Date(event.starts_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
                           </div>
                         )}
+                        <div className="mt-1 text-[11px] text-purple-600 font-bold">
+                          by {event.organizer_name || event.organizer_username || 'Organizer'}
+                        </div>
                       </div>
                       {event.description && (
                         <div className="mt-2 text-[12px] text-gray-400 line-clamp-2 leading-relaxed">

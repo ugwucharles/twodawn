@@ -4,6 +4,7 @@ const AUTH_USER_SELECT = `
   id,
   name,
   email,
+  username,
   email_verified_at,
   password,
   remember_token,
@@ -47,6 +48,7 @@ function toSessionUser(user) {
     id: user.id,
     name: user.name,
     email: user.email,
+    username: user.username || null,
     email_verified_at: user.email_verified_at || null,
     is_admin: Boolean(user.is_admin),
     is_organizer: Boolean(user.is_organizer),
@@ -147,6 +149,21 @@ async function deleteAuthUserById(userId) {
   return Number(result.affectedRows || 0) > 0;
 }
 
+async function updateAuthUserUsername(userId, username) {
+  const id = asPositiveInt(userId);
+  const normalizedUsername = String(username || '').trim().toLowerCase();
+  if (!id || !normalizedUsername) return null;
+
+  await query(
+    `UPDATE users
+     SET username = ?, updated_at = datetime('now')
+     WHERE id = ?`,
+    [normalizedUsername, id]
+  );
+
+  return findAuthUserById(id);
+}
+
 module.exports = {
   normalizeEmail,
   toSessionUser,
@@ -156,5 +173,6 @@ module.exports = {
   updateAuthUserProfile,
   setPasswordForUser,
   markAuthUserEmailVerified,
+  updateAuthUserUsername,
   deleteAuthUserById,
 };

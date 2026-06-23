@@ -33,6 +33,8 @@ function createApiRouter() {
         image_path: event.image_path,
         description: event.description,
         capacity: event.capacity,
+        organizer_username: event.organizer_username || null,
+        organizer_name: event.organizer_name || null,
       }));
 
       return res.json({ ok: true, events: items });
@@ -89,6 +91,8 @@ function createApiRouter() {
         capacity: event.capacity,
         must_know: event.must_know,
         ticket_types: event.ticket_types,
+        organizer_username: event.organizer_username || null,
+        organizer_name: event.organizer_name || null,
       };
 
       return res.json({ ok: true, event: item });

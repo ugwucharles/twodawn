@@ -19,6 +19,7 @@ import CreateEvent from './pages/organizer/CreateEvent'
 import EventDetails from './pages/organizer/EventDetails'
 import EditEvent from './pages/organizer/EditEvent'
 import HostPanel from './pages/HostPanel'
+import Onboarding from './pages/Onboarding'
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/organizer/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/organizer" element={<OrganizerLayout />}>
           <Route path="dashboard" element={<OrganizerDashboard />} />
