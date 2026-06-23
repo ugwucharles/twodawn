@@ -1,6 +1,6 @@
 const express = require('express');
 const { listPublishedEventsFiltered } = require('../models/eventModel.cjs');
-const { getPublicUrl, getImageUrl } = require('../services/eventPublicService.cjs');
+const { getPublicUrl, getImageUrl, getTopSellingEvents } = require('../services/eventPublicService.cjs');
 
 function createApiRouter() {
   const router = express.Router();
@@ -115,6 +115,18 @@ function createApiRouter() {
     } catch (error) {
       console.error('API event error:', error);
       return res.status(500).json({ ok: false, error: 'Failed to fetch event' });
+    }
+  });
+
+  // GET /api/v1/events/top-selling - top selling events
+  router.get('/events/top-selling', async (req, res) => {
+    try {
+      const limit = Math.min(parseInt(req.query.limit || '6', 10), 20);
+      const events = await getTopSellingEvents({ limit });
+      return res.json({ ok: true, events });
+    } catch (error) {
+      console.error('API top-selling events error:', error);
+      return res.status(500).json({ ok: false, error: 'Failed to fetch top selling events' });
     }
   });
 

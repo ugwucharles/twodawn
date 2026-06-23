@@ -63,15 +63,20 @@ function Home() {
 
   const fetchEvents = async () => {
     try {
+      console.log('Fetching events from API...')
       const response = await getEvents()
+      console.log('Events response:', response)
       setEvents(response.events || [])
       
+      console.log('Fetching top selling events...')
       const topSellingResponse = await getTopSellingEvents(6)
+      console.log('Top selling response:', topSellingResponse)
       setTopSellingEvents(topSellingResponse.events || [])
       
       setLoading(false)
     } catch (err) {
       console.error('Failed to load events', err)
+      console.error('Error details:', err.response?.data || err.message)
       setLoading(false)
     }
   }
