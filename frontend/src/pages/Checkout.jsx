@@ -62,6 +62,11 @@ function Checkout() {
     fetchQuote()
   }
 
+  const handleTicketTypeChange = (typeName) => {
+    setTicketType(typeName)
+    // fetchQuote will be called by useEffect when ticketType changes
+  }
+
   const handleBuyTicket = async () => {
     if (!buyerName.trim()) { setError('Please enter your full name.'); return }
     if (!buyerEmail.trim()) { setError('Please enter your email address.'); return }
@@ -198,7 +203,7 @@ function Checkout() {
                       <button
                         key={i}
                         type="button"
-                        onClick={() => setTicketType(type.name)}
+                        onClick={() => handleTicketTypeChange(type.name)}
                         className={`flex items-center justify-between p-4 rounded-xl border-2 text-left transition-all duration-200 ${
                           ticketType === type.name
                             ? 'border-[#8b5cf6] bg-purple-50'
