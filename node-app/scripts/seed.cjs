@@ -54,6 +54,14 @@ async function seedDatabase() {
     await query(createEventsTable);
     console.log('✅ Tables created/verified');
 
+    // Add profile_picture column if it doesn't exist
+    try {
+      await query(`ALTER TABLE users ADD COLUMN profile_picture TEXT`);
+      console.log('✅ Added profile_picture column');
+    } catch (err) {
+      console.log('ℹ️ profile_picture column already exists or error:', err.message);
+    }
+
     // Insert demo user
     await query(`
       INSERT OR IGNORE INTO users (name, email, password, is_admin, is_organizer, username, created_at, updated_at)
