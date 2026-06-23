@@ -157,7 +157,7 @@ function EventDetail() {
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.73-8.835L1.254 2.25H8.08l4.261 5.635 5.903-5.635zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                       </svg>
-                      X / Twitter
+                      Twitter
                     </button>
                     <button
                       onClick={shareOnFacebook}
@@ -191,9 +191,17 @@ function EventDetail() {
                   {event.title}
                 </h1>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#8b5cf6] to-purple-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                    {(event.organizer_name || event.organizer_username || '?')[0].toUpperCase()}
-                  </div>
+                  {event.organizer_profile_picture ? (
+                    <img
+                      src={event.organizer_profile_picture}
+                      alt={event.organizer_name || event.organizer_username || 'Organizer'}
+                      className="w-8 h-8 rounded-full object-cover shrink-0"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#8b5cf6] to-purple-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                      {(event.organizer_name || event.organizer_username || '?')[0].toUpperCase()}
+                    </div>
+                  )}
                   <div>
                     <span className="text-sm text-gray-500">Hosted by </span>
                     {event.organizer_name ? (

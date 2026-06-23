@@ -10,6 +10,9 @@ const USER_SELECT = `
   instagram_handle,
   whatsapp_number,
   twitter_handle,
+  avatar_url,
+  username,
+  profile_picture,
   created_at,
   updated_at
 `;

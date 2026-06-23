@@ -33,3 +33,8 @@ export const getEventRemaining = async (id) => {
   const response = await api.get(`/events/${id}/remaining`)
   return response.data
 }
+
+export const getTopSellingEvents = async (limit = 6) => {
+  const response = await api.get(`/api/v1/events/top-selling?limit=${limit}`)
+  return response.data
+}

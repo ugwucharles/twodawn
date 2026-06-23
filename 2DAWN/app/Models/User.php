@@ -26,6 +26,8 @@ class User extends Authenticatable
         'instagram_handle',
         'whatsapp_number',
         'twitter_handle',
+        'username',
+        'profile_picture',
     ];
 
     /**

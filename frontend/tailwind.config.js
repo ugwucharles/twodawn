@@ -11,6 +11,7 @@ export default {
         'montserrat': ['Montserrat', 'sans-serif'],
       },
       colors: {
+        'tix-orange': '#ff5a00',
         'eventbrite': {
           dark: '#1e0a3c',
           gray: {

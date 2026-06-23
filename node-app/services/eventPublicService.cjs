@@ -4,6 +4,7 @@ const {
   listPublishedEvents,
   listRecentEvents,
   listPublishedEventsFiltered,
+  listTopSellingEvents,
   getEventCapacity,
 } = require('../models/eventModel.cjs');
 
@@ -53,6 +54,7 @@ function formatEventForApi(event) {
     ticket_types: event.ticket_types,
     organizer_username: event.organizer_username || null,
     organizer_name: event.organizer_name || null,
+    organizer_profile_picture: event.organizer_avatar || null,
   };
 }
 
@@ -88,6 +90,11 @@ async function getEventRemaining(eventId) {
     return null;
   }
   return getEventCapacity(eventId);
+}
+
+async function getTopSellingEvents({ limit = 6 } = {}) {
+  const events = await listTopSellingEvents({ limit });
+  return events.map(formatEventForApi);
 }
 
 function generateIcsContent(event) {
@@ -143,6 +150,7 @@ function generateIcsContent(event) {
 module.exports = {
   getEventsIndex,
   getRecentEvents,
+  getTopSellingEvents,
   getEventById,
   getEventBySlug,
   getEventRemaining,

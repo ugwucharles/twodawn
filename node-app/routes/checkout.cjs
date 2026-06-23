@@ -35,7 +35,33 @@ function createCheckoutRouter() {
       }
 
       const quote = calculateQuote(event, quantity, couponCode, selectedTicketType);
-      return res.json({ ok: true, ...quote });
+
+      // Resolve ticket type display name + unit price
+      let ticketTypeName = null;
+      let unitPrice = 0;
+      if (selectedTicketType && Array.isArray(event.ticket_types)) {
+        const matched = event.ticket_types.find(
+          (t) => t.name && String(t.name).toLowerCase() === String(selectedTicketType).toLowerCase()
+        );
+        if (matched) {
+          ticketTypeName = matched.name;
+          unitPrice = Number(matched.price) || 0;
+        }
+      } else {
+        unitPrice = event.price ? Number(event.price) : 0;
+      }
+
+      return res.json({
+        ok: true,
+        subtotal: quote.subtotal_kobo / 100,
+        fee: quote.fees_kobo / 100,
+        discount: quote.discount_kobo / 100,
+        total: quote.total_kobo / 100,
+        unit_price: unitPrice,
+        quantity,
+        ticket_type: ticketTypeName,
+        coupon_valid: quote.coupon_valid,
+      });
     } catch (error) {
       console.error('Quote error:', error);
       return res.status(500).json({ ok: false, message: 'Failed to compute quote' });

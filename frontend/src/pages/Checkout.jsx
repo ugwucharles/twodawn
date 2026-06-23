@@ -270,8 +270,8 @@ function Checkout() {
                     Apply
                   </button>
                 </div>
-                {couponApplied && quote?.discount > 0 && (
-                  <p className="mt-2 text-sm text-green-600 font-semibold">✓ Coupon applied! You saved ₦{quote.discount.toFixed(2)}</p>
+                {couponApplied && quote?.discount_kobo > 0 && (
+                  <p className="mt-2 text-sm text-green-600 font-semibold">✓ Coupon applied! You saved ₦{((quote.discount_kobo || 0) / 100).toFixed(2)}</p>
                 )}
               </div>
 
@@ -325,21 +325,21 @@ function Checkout() {
                     <div className="flex flex-col gap-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Subtotal</span>
-                        <span className="font-semibold text-gray-900">₦{(quote.subtotal || 0).toFixed(2)}</span>
+                        <span className="font-semibold text-gray-900">₦{((quote.subtotal_kobo || 0) / 100).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Service Fee</span>
-                        <span className="font-semibold text-gray-900">₦{(quote.fee || 0).toFixed(2)}</span>
+                        <span className="font-semibold text-gray-900">₦{((quote.fees_kobo || 0) / 100).toFixed(2)}</span>
                       </div>
-                      {quote.discount > 0 && (
+                      {(quote.discount_kobo || 0) > 0 && (
                         <div className="flex justify-between text-green-600">
                           <span>Discount</span>
-                          <span className="font-semibold">-₦{(quote.discount || 0).toFixed(2)}</span>
+                          <span className="font-semibold">-₦{((quote.discount_kobo || 0) / 100).toFixed(2)}</span>
                         </div>
                       )}
                       <div className="flex justify-between items-center text-base font-extrabold text-gray-900 border-t border-gray-100 pt-3 mt-1">
                         <span>Total</span>
-                        <span className="text-[#8b5cf6]">₦{(quote.total || 0).toFixed(2)}</span>
+                        <span className="text-[#8b5cf6]">₦{((quote.total_kobo || 0) / 100).toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -361,7 +361,7 @@ function Checkout() {
                       Processing...
                     </span>
                   ) : (
-                    `Pay ${quote ? `₦${(quote.total || 0).toFixed(2)}` : 'Now'}`
+                    `Pay ${quote ? `₦${((quote.total_kobo || 0) / 100).toFixed(2)}` : 'Now'}`
                   )}
                 </button>
                 <p className="text-center text-xs text-gray-400">🔒 Secure checkout powered by Paystack</p>

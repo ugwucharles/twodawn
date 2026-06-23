@@ -205,6 +205,7 @@ Route::prefix('organizer')->name('organizer.')->group(function () {
             Route::get('/orders', [App\Http\Controllers\Organizer\OrderController::class , 'index'])->name('orders.index');
             Route::get('/settings', [App\Http\Controllers\Organizer\SettingsController::class , 'edit'])->name('settings.edit');
             Route::patch('/settings', [App\Http\Controllers\Organizer\SettingsController::class , 'update'])->name('settings.update');
+            Route::post('/settings/profile-picture', [App\Http\Controllers\Organizer\SettingsController::class , 'uploadProfilePicture'])->name('settings.profile-picture');
             Route::get('/wallet', [OrganizerWalletController::class , 'index'])->name('wallet.index');
             Route::post('/wallet/withdraw', [OrganizerWalletController::class , 'createWithdrawal'])->name('wallet.withdraw');
             // QR Scanner
@@ -281,6 +282,8 @@ Route::get('/paystack/health', PaystackHealthController::class)->name('paystack.
 // Public API v1 (read-only)
 Route::prefix('api/v1')->middleware('throttle:60,1')->group(function () {
     Route::get('/events', [App\Http\Controllers\Api\PublicApiController::class , 'events']);
+    Route::get('/events/{id}', [App\Http\Controllers\Api\PublicApiController::class , 'show']);
+    Route::get('/events/top-selling', [App\Http\Controllers\Api\PublicApiController::class , 'topSelling']);
 });
 
 require __DIR__ . '/auth.php';

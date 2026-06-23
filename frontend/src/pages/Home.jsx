@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { getEvents } from '../services/events'
+import { getEvents, getTopSellingEvents } from '../services/events'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { formatPrice } from '../utils/price'
@@ -14,6 +14,7 @@ function Home() {
   const [locationLabel, setLocationLabel] = useState('Lagos')
   const [typeLabel, setTypeLabel] = useState('All events')
   const [events, setEvents] = useState([])
+  const [topSellingEvents, setTopSellingEvents] = useState([])
   const [loading, setLoading] = useState(true)
 
   const ngStates = {
@@ -64,6 +65,10 @@ function Home() {
     try {
       const response = await getEvents()
       setEvents(response.events || [])
+      
+      const topSellingResponse = await getTopSellingEvents(6)
+      setTopSellingEvents(topSellingResponse.events || [])
+      
       setLoading(false)
     } catch (err) {
       console.error('Failed to load events', err)
@@ -116,6 +121,47 @@ function Home() {
                 )}
               </div>
             </div>
+
+            {/* Top Selling Events */}
+            {topSellingEvents.length > 0 && (
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-gray-900">Top Selling Events</h2>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                  {topSellingEvents.map((event) => (
+                    <Link
+                      key={event.id}
+                      to={`/events/${event.id}`}
+                      className="group"
+                    >
+                      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-100 mb-2">
+                        {getEventImage(event) ? (
+                          <img
+                            src={getEventImage(event)}
+                            alt={event.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center">
+                            <span className="text-3xl">🎟️</span>
+                          </div>
+                        )}
+                        {event.capacity !== null && event.capacity <= 0 && (
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+                            <span className="text-white font-extrabold text-xs uppercase tracking-widest px-2 py-1 rounded bg-red-600">Sold Out</span>
+                          </div>
+                        )}
+                      </div>
+                      <h3 className="text-sm font-bold text-gray-900 line-clamp-2 group-hover:text-[#8b5cf6] transition-colors">
+                        {event.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1">{formatPrice(event)}</p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Filters row + Popular events heading */}
             <div className="flex flex-col gap-4 mb-6">
@@ -201,33 +247,61 @@ function Home() {
                 </div>
               ) : (
                 events.map((event) => (
-                  <Link key={event.id} to={`/events/${event.id}`} className="group">
-                    <div className="bg-white rounded-2xl overflow-hidden shadow-[0_2px_10px_-3px_rgba(0,0,0,0.08)] border border-gray-100 hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.12)] transition-all duration-300">
-                      {event.image_path ? (
-                        <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
-                          <img 
-                            src={getEventImage(event)} 
-                            alt={event.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
+                  <Link
+                    key={event.id}
+                    to={`/events/${event.id}`}
+                    className="flex items-center rounded-2xl border border-gray-100 bg-white hover:shadow-xl hover:border-gray-200 transition-all duration-300 overflow-hidden group h-44"
+                  >
+                    {/* Left: Image */}
+                    <div className="w-32 sm:w-40 h-full relative bg-gray-50 shrink-0">
+                      {getEventImage(event) ? (
+                        <img 
+                          src={getEventImage(event)} 
+                          alt={event.title}
+                          className="absolute inset-0 h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 h-full w-full bg-gradient-to-br from-indigo-100 to-indigo-200"></div>
+                      )}
+                      {event.capacity !== null && event.capacity <= 0 ? (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+                          <span className="text-white font-extrabold text-[10px] uppercase tracking-widest px-2 py-0.5 rounded bg-red-600">Sold Out</span>
                         </div>
                       ) : (
-                        <div className="aspect-[4/3] bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center">
-                          <span className="text-4xl font-bold text-purple-200">{event.title.charAt(0)}</span>
-                        </div>
+                        <div className="absolute inset-0 bg-black/5"></div>
                       )}
-                      <div className="p-5">
-                        <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2">{event.title}</h3>
-                        <p className="text-xs text-purple-600 font-semibold mb-2">by {event.organizer_name || event.organizer_username || 'Organizer'}</p>
-                        <p className="text-sm text-gray-500 mb-3">{event.venue}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-gray-900">
-                            {formatPrice(event)}
-                          </span>
-                          <span className="text-xs text-gray-400">
-                            {new Date(event.starts_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </span>
+                    </div>
+                    {/* Right: Details */}
+                    <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between min-w-0 h-full">
+                      <div>
+                        <h3 className="text-sm sm:text-[15px] font-bold text-gray-900 line-clamp-2 transition-colors group-hover:text-[#8b5cf6] leading-snug">
+                          {event.title}
+                        </h3>
+                        <div className="mt-1 text-[13px] text-gray-500 font-medium">
+                          {event.starts_at && (
+                            <div className="flex items-center gap-1.5">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              <span className="truncate">
+                                {new Date(event.starts_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                              </span>
+                            </div>
+                          )}
+                          <div className="mt-1 text-[11px] text-purple-600 font-bold">
+                            by {event.organizer_name || event.organizer_username || 'Organizer'}
+                          </div>
                         </div>
+                        {event.description && (
+                          <div className="mt-2 text-[12px] text-gray-400 line-clamp-2 leading-relaxed">
+                            {event.description.replace(/<[^>]*>/g, '').substring(0, 100)}...
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-[15px] font-black text-[#8b5cf6]">
+                          {formatPrice(event)}
+                        </span>
                       </div>
                     </div>
                   </Link>

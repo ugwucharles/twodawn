@@ -21,6 +21,24 @@ const db = new sqlite3.Database(dbPath, err => {
 });
 
 const createTableSQL = `
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    email TEXT,
+    email_verified_at TEXT,
+    password TEXT,
+    is_admin INTEGER DEFAULT 0,
+    is_organizer INTEGER DEFAULT 0,
+    instagram_handle TEXT,
+    whatsapp_number TEXT,
+    twitter_handle TEXT,
+    avatar_url TEXT,
+    username TEXT,
+    profile_picture TEXT,
+    created_at TEXT,
+    updated_at TEXT
+  );
+
   CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,

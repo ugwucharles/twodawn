@@ -32,6 +32,20 @@ const uploadStorage = new CloudinaryStorage({
 
 const upload = multer({ storage: uploadStorage });
 
+// Configure upload storage for profile pictures using Cloudinary
+const profilePicStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'profile-pictures',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [
+      { width: 200, height: 200, crop: 'fill' }
+    ]
+  },
+});
+
+const profilePicUpload = multer({ storage: profilePicStorage });
+
 function createOrganizerRouter() {
   const router = express.Router();
 
@@ -228,7 +242,8 @@ function createOrganizerRouter() {
           name: user.name || '',
           instagram_handle: user.instagram_handle || '',
           whatsapp_number: user.whatsapp_number || '',
-          twitter_handle: user.twitter_handle || ''
+          twitter_handle: user.twitter_handle || '',
+          profile_picture: user.profile_picture || ''
         }
       });
     } catch (error) {
@@ -266,12 +281,44 @@ function createOrganizerRouter() {
           name: updated.name || '',
           instagram_handle: updated.instagram_handle || '',
           whatsapp_number: updated.whatsapp_number || '',
-          twitter_handle: updated.twitter_handle || ''
+          twitter_handle: updated.twitter_handle || '',
+          profile_picture: updated.profile_picture || ''
         }
       });
     } catch (error) {
       console.error('Update settings error:', error);
       return res.status(500).json({ ok: false, error: 'Failed to update settings' });
+    }
+  });
+
+  // POST /organizer/settings/profile-picture - upload profile picture
+  router.post('/settings/profile-picture', profilePicUpload.single('profile_picture'), async (req, res) => {
+    try {
+      if (!req.auth || !req.auth.isAuthenticated) {
+        return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ ok: false, error: 'No file uploaded' });
+      }
+
+      const userId = req.auth.user.id;
+      const profilePictureUrl = req.file.path;
+
+      await query(`
+        UPDATE users 
+        SET profile_picture = ?, updated_at = datetime('now')
+        WHERE id = ?
+      `, [profilePictureUrl, userId]);
+
+      return res.json({
+        ok: true,
+        profile_picture: profilePictureUrl,
+        message: 'Profile picture updated successfully'
+      });
+    } catch (error) {
+      console.error('Profile picture upload error:', error);
+      return res.status(500).json({ ok: false, error: 'Failed to upload profile picture' });
     }
   });
 

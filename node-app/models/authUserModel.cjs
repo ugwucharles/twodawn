@@ -13,6 +13,8 @@ const AUTH_USER_SELECT = `
   instagram_handle,
   whatsapp_number,
   twitter_handle,
+  avatar_url,
+  profile_picture,
   created_at,
   updated_at
 `;
@@ -164,7 +166,7 @@ async function updateAuthUserUsername(userId, username) {
   return findAuthUserById(id);
 }
 
-async function updateOrganizerSettings(userId, { name, instagramHandle, twitterHandle, whatsappNumber }) {
+async function updateOrganizerSettings(userId, { name, instagramHandle, twitterHandle, whatsappNumber, avatarUrl }) {
   const id = asPositiveInt(userId);
   if (!id) return null;
 
@@ -175,6 +177,7 @@ async function updateOrganizerSettings(userId, { name, instagramHandle, twitterH
   if (instagramHandle !== undefined) { updates.push('instagram_handle = ?'); params.push(instagramHandle ? String(instagramHandle).trim() : null); }
   if (twitterHandle !== undefined) { updates.push('twitter_handle = ?'); params.push(twitterHandle ? String(twitterHandle).trim() : null); }
   if (whatsappNumber !== undefined) { updates.push('whatsapp_number = ?'); params.push(whatsappNumber ? String(whatsappNumber).trim() : null); }
+  if (avatarUrl !== undefined) { updates.push('avatar_url = ?'); params.push(avatarUrl ? String(avatarUrl).trim() : null); }
 
   await query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, [...params, id]);
   return findAuthUserById(id);

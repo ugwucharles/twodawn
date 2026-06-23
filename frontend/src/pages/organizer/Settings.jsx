@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { User, MessageCircle, Link, AtSign, CheckCircle, AlertCircle, Lock } from 'lucide-react';
+import { User, MessageCircle, Link, AtSign, CheckCircle, AlertCircle, Lock, Camera, Upload } from 'lucide-react';
 import api from '../../services/api';
 
 function OrganizerSettings() {
@@ -8,10 +8,12 @@ function OrganizerSettings() {
     instagram_handle: '',
     whatsapp_number: '',
     twitter_handle: '',
+    profile_picture: '',
   });
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errors, setErrors] = useState([]);
 
@@ -29,6 +31,7 @@ function OrganizerSettings() {
         instagram_handle: s.instagram_handle || '',
         whatsapp_number: s.whatsapp_number || '',
         twitter_handle: s.twitter_handle || '',
+        profile_picture: s.profile_picture || '',
       });
     } catch (err) {
       console.error('Failed to load settings', err);
@@ -41,6 +44,46 @@ function OrganizerSettings() {
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setErrors([]);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setErrors(['Please select an image file.']);
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors(['Image must be less than 5MB.']);
+      return;
+    }
+
+    setUploading(true);
+    setErrors([]);
+
+    try {
+      const formData = new FormData();
+      formData.append('profile_picture', file);
+
+      const response = await api.post('/organizer/settings/profile-picture', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setFormData(prev => ({ ...prev, profile_picture: response.data.profile_picture }));
+      setSuccessMessage('Profile picture updated successfully!');
+      setTimeout(() => setSuccessMessage(''), 4000);
+    } catch (err) {
+      console.error('Failed to upload profile picture', err);
+      setErrors([err.response?.data?.message || 'Failed to upload profile picture.']);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -105,6 +148,58 @@ function OrganizerSettings() {
           <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider pb-1 border-b border-gray-100">
             Profile
           </h2>
+
+          {/* Profile Picture */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              <span className="flex items-center gap-2">
+                <Camera className="w-4 h-4 text-purple-500" />
+                Profile Picture
+              </span>
+            </label>
+            <div className="flex items-center gap-4">
+              <div className="relative w-20 h-20 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-200">
+                {formData.profile_picture ? (
+                  <img
+                    src={formData.profile_picture}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-50">
+                    <User className="w-8 h-8 text-purple-400" />
+                  </div>
+                )}
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <input
+                  type="file"
+                  id="profile_picture"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="profile_picture"
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition cursor-pointer ${
+                    uploading
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
+                  }`}
+                >
+                  <Upload className="w-4 h-4" />
+                  {uploading ? 'Uploading...' : 'Upload New'}
+                </label>
+                <p className="text-xs text-gray-400 mt-1.5">JPG, PNG or GIF. Max 5MB.</p>
+              </div>
+            </div>
+          </div>
 
           {/* Username — read-only */}
           <div>
