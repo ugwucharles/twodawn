@@ -205,8 +205,7 @@ function createPublicAuthRouter() {
     '/organizer/onboarding',
     requireAuthenticatedFlexible,
     asyncRoute(async (req, res) => {
-      const { username } = req.body;
-      const { updateAuthUserUsername } = require('../models/authUserModel.cjs');
+      const { username, name, instagramHandle, twitterHandle, whatsappNumber } = req.body;
 
       if (!username || !username.trim()) {
         return res.status(400).json({ ok: false, error: 'missing_username', message: 'Username is required.' });
@@ -227,8 +226,28 @@ function createPublicAuthRouter() {
           return res.status(400).json({ ok: false, error: 'username_taken', message: 'Username is already taken.' });
         }
 
-        // Update the username
-        const updatedUser = await updateAuthUserUsername(req.auth.user.id, cleanUsername);
+        // Update the username and optional branding details
+        await query(
+          `UPDATE users 
+           SET username = ?, 
+               name = COALESCE(?, name), 
+               instagram_handle = COALESCE(?, instagram_handle), 
+               twitter_handle = COALESCE(?, twitter_handle), 
+               whatsapp_number = COALESCE(?, whatsapp_number),
+               updated_at = datetime('now')
+           WHERE id = ?`,
+          [
+            cleanUsername,
+            name ? String(name).trim() : null,
+            instagramHandle ? String(instagramHandle).trim() : null,
+            twitterHandle ? String(twitterHandle).trim() : null,
+            whatsappNumber ? String(whatsappNumber).trim() : null,
+            req.auth.user.id
+          ]
+        );
+
+        const { findAuthUserById } = require('../models/authUserModel.cjs');
+        const updatedUser = await findAuthUserById(req.auth.user.id);
         
         return res.json({
           ok: true,
