@@ -106,7 +106,7 @@ async function updateAuthUserProfile(userId, { name, email }) {
 
   updates.push("updated_at = datetime('now')");
 
-  await query(`UPDATE users SET ${updates.join(', ')} WHERE id = ? LIMIT 1`, [...params, id]);
+  await query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, [...params, id]);
   return findAuthUserById(id);
 }
 
@@ -118,8 +118,7 @@ async function setPasswordForUser(userId, passwordHash, rememberToken = null) {
   await query(
     `UPDATE users
      SET password = ?, remember_token = ?, updated_at = datetime('now')
-     WHERE id = ?
-     LIMIT 1`,
+     WHERE id = ?`,
     [normalizedPasswordHash, rememberToken, id]
   );
 
@@ -133,8 +132,7 @@ async function markAuthUserEmailVerified(userId) {
   await query(
     `UPDATE users
      SET email_verified_at = COALESCE(email_verified_at, datetime('now')), updated_at = datetime('now')
-     WHERE id = ?
-     LIMIT 1`,
+     WHERE id = ?`,
     [id]
   );
 
@@ -145,7 +143,7 @@ async function deleteAuthUserById(userId) {
   const id = asPositiveInt(userId);
   if (!id) return false;
 
-  const result = await query(`DELETE FROM users WHERE id = ? LIMIT 1`, [id]);
+  const result = await query(`DELETE FROM users WHERE id = ?`, [id]);
   return Number(result.affectedRows || 0) > 0;
 }
 

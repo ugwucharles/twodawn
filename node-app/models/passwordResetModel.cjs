@@ -38,7 +38,7 @@ async function deletePasswordResetToken(email) {
   const normalizedEmail = normalizeEmail(email);
   if (!normalizedEmail) return;
 
-  await query(`DELETE FROM password_reset_tokens WHERE email = ? LIMIT 1`, [normalizedEmail]);
+  await query(`DELETE FROM password_reset_tokens WHERE email = ?`, [normalizedEmail]);
 }
 
 module.exports = {
