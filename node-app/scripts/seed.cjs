@@ -68,10 +68,22 @@ db.exec(createTableSQL, err => {
   }
 
   const demoSQL = `
-    INSERT INTO events (user_id, title, venue, state, starts_at, is_published, slug, created_at, updated_at)
-    VALUES (1, 'Demo Event', 'Demo Venue', 'Demo State', datetime('now'), 1,
-            'demo-event-' || substr(hex(randomblob(4)), 1, 8),
-            datetime('now'), datetime('now'));
+    -- Insert demo user first
+    INSERT OR IGNORE INTO users (name, email, password, is_admin, is_organizer, username, created_at, updated_at)
+    VALUES ('Demo Organizer', 'demo@twodawn.com', 'demo_password_hash', 0, 1, 'demoorganizer', datetime('now'), datetime('now'));
+
+    -- Insert demo events
+    INSERT INTO events (user_id, title, venue, state, starts_at, is_published, slug, created_at, updated_at, price, capacity, description)
+    VALUES 
+      (1, 'Demo Event', 'Demo Venue', 'Lagos', datetime('now'), 1,
+       'demo-event-' || substr(hex(randomblob(4)), 1, 8),
+       datetime('now'), datetime('now'), 5000, 100, 'This is a demo event for testing'),
+      (1, 'Music Festival', 'National Stadium', 'Lagos', datetime('now', '+7 days'), 1,
+       'music-festival-' || substr(hex(randomblob(4)), 1, 8),
+       datetime('now'), datetime('now'), 10000, 500, 'Annual music festival with top artists'),
+      (1, 'Tech Conference', 'Convention Center', 'Abuja', datetime('now', '+14 days'), 1,
+       'tech-conference-' || substr(hex(randomblob(4)), 1, 8),
+       datetime('now'), datetime('now'), 15000, 200, 'Technology conference for developers');
   `;
 
   db.run(demoSQL, err => {
