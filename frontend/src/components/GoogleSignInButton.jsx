@@ -2,7 +2,7 @@ import { GoogleLogin } from '@react-oauth/google'
 import api from '../services/api'
 import { useNavigate } from 'react-router-dom'
 
-function GoogleSignInButton({ onError, disabled }) {
+function GoogleSignInButton({ onError, disabled, onSuccess }) {
   const navigate = useNavigate()
 
   const handleSuccess = async (credentialResponse) => {
@@ -14,7 +14,10 @@ function GoogleSignInButton({ onError, disabled }) {
       if (response.data.token) {
         localStorage.setItem('token', response.data.token)
       }
-      navigate(response.data.redirect || '/organizer/dashboard')
+      onSuccess?.()
+      setTimeout(() => {
+        navigate(response.data.redirect || '/organizer/dashboard')
+      }, 2000)
     } catch (err) {
       const errorData = {
         message: err.message,
