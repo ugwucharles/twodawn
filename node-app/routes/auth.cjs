@@ -269,6 +269,58 @@ function createPublicAuthRouter() {
     })
   );
 
+  // GET /organizer/settings — return the current organizer's profile fields
+  router.get(
+    '/organizer/settings',
+    requireAuthenticatedFlexible,
+    asyncRoute(async (req, res) => {
+      const { findAuthUserById } = require('../models/authUserModel.cjs');
+      const user = await findAuthUserById(req.auth.user.id);
+      if (!user) return res.status(404).json({ ok: false, message: 'User not found.' });
+      return res.json({
+        ok: true,
+        settings: {
+          username: user.username || '',
+          name: user.name || '',
+          instagram_handle: user.instagram_handle || '',
+          twitter_handle: user.twitter_handle || '',
+          whatsapp_number: user.whatsapp_number || '',
+        },
+      });
+    })
+  );
+
+  // PATCH /organizer/settings — update name and social handles (username is read-only after onboarding)
+  router.patch(
+    '/organizer/settings',
+    requireAuthenticatedFlexible,
+    asyncRoute(async (req, res) => {
+      const { updateOrganizerSettings } = require('../models/authUserModel.cjs');
+      const { name, instagram_handle, twitter_handle, whatsapp_number } = req.body;
+
+      const updated = await updateOrganizerSettings(req.auth.user.id, {
+        name,
+        instagramHandle: instagram_handle,
+        twitterHandle: twitter_handle,
+        whatsappNumber: whatsapp_number,
+      });
+
+      if (!updated) return res.status(404).json({ ok: false, message: 'User not found.' });
+
+      return res.json({
+        ok: true,
+        message: 'Settings updated successfully.',
+        settings: {
+          username: updated.username || '',
+          name: updated.name || '',
+          instagram_handle: updated.instagram_handle || '',
+          twitter_handle: updated.twitter_handle || '',
+          whatsapp_number: updated.whatsapp_number || '',
+        },
+      });
+    })
+  );
+
   router.post('/organizer/logout', requireAuthenticatedFlexible, (req, res) =>
     sendAuthResult(req, res, organizerLogoutResult())
   );

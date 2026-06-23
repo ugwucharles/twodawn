@@ -149,6 +149,7 @@ function createOrganizerRouter() {
         pass_fees_to_buyer: body.pass_fees_to_buyer === 'true' || body.pass_fees_to_buyer === true || body.pass_fees_to_buyer === '1',
         ticket_types: ticketTypes,
         image_path,
+        custom_slug: body.custom_slug ? String(body.custom_slug).trim().toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/(^-|-$)/g, '') : null,
       };
 
       const eventId = await createEvent(req.auth.user.id, eventData);
@@ -217,14 +218,17 @@ function createOrganizerRouter() {
         return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
       }
 
-      const user = req.auth.user;
-      
+      const { findAuthUserById } = require('../models/authUserModel.cjs');
+      const user = await findAuthUserById(req.auth.user.id);
+
       return res.json({
         ok: true,
         settings: {
-          instagram_handle: user.instagram_handle || null,
-          whatsapp_number: user.whatsapp_number || null,
-          twitter_handle: user.twitter_handle || null
+          username: user.username || '',
+          name: user.name || '',
+          instagram_handle: user.instagram_handle || '',
+          whatsapp_number: user.whatsapp_number || '',
+          twitter_handle: user.twitter_handle || ''
         }
       });
     } catch (error) {
@@ -240,18 +244,30 @@ function createOrganizerRouter() {
         return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
       }
 
-      const { instagram_handle, whatsapp_number, twitter_handle } = req.body;
+      const { instagram_handle, whatsapp_number, twitter_handle, name } = req.body;
       const userId = req.auth.user.id;
 
       await query(`
         UPDATE users 
-        SET instagram_handle = ?, whatsapp_number = ?, twitter_handle = ?
+        SET name = COALESCE(?, name),
+            instagram_handle = ?, whatsapp_number = ?, twitter_handle = ?,
+            updated_at = datetime('now')
         WHERE id = ?
-      `, [instagram_handle || null, whatsapp_number || null, twitter_handle || null, userId]);
+      `, [name || null, instagram_handle || null, whatsapp_number || null, twitter_handle || null, userId]);
+
+      const { findAuthUserById } = require('../models/authUserModel.cjs');
+      const updated = await findAuthUserById(userId);
 
       return res.json({
         ok: true,
-        message: 'Settings updated successfully'
+        message: 'Settings updated successfully',
+        settings: {
+          username: updated.username || '',
+          name: updated.name || '',
+          instagram_handle: updated.instagram_handle || '',
+          whatsapp_number: updated.whatsapp_number || '',
+          twitter_handle: updated.twitter_handle || ''
+        }
       });
     } catch (error) {
       console.error('Update settings error:', error);
@@ -435,6 +451,38 @@ function createOrganizerRouter() {
     } catch (error) {
       console.error('Update event error:', error);
       return res.status(500).json({ ok: false, error: 'Failed to update event' });
+    }
+  });
+
+  // PATCH /organizer/events/:id/toggle-publish — organizer can publish or unpublish their own event
+  router.patch('/events/:id/toggle-publish', async (req, res) => {
+    try {
+      if (!req.auth || !req.auth.isAuthenticated) {
+        return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
+      }
+
+      const eventId = parseInt(req.params.id, 10);
+      const event = await findEventById(eventId);
+
+      if (!event) return res.status(404).json({ ok: false, error: 'Event not found' });
+      if (event.user_id !== req.auth.user.id) {
+        return res.status(403).json({ ok: false, error: 'You do not have permission to modify this event' });
+      }
+
+      const newStatus = event.is_published ? 0 : 1;
+      await query(
+        `UPDATE events SET is_published = ?, updated_at = datetime('now') WHERE id = ?`,
+        [newStatus, eventId]
+      );
+
+      return res.json({
+        ok: true,
+        is_published: Boolean(newStatus),
+        message: newStatus ? 'Event published.' : 'Event unpublished.'
+      });
+    } catch (error) {
+      console.error('Toggle publish error:', error);
+      return res.status(500).json({ ok: false, error: 'Failed to toggle publish status' });
     }
   });
 

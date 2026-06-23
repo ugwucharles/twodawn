@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Link } from 'lucide-react';
+import api from '../../services/api';
 
 function CreateEvent() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',
+    custom_slug: '',
     description: '',
     must_know: '',
     venue: '',
@@ -99,7 +100,7 @@ function CreateEvent() {
         }
       });
 
-      await axios.post('/organizer/events', data, {
+      await api.post('/organizer/events', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       navigate('/organizer/events');
@@ -152,12 +153,40 @@ function CreateEvent() {
               <input
                 type="text"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                onChange={(e) => {
+                  const title = e.target.value;
+                  const autoSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                  setFormData({ ...formData, title, custom_slug: formData.custom_slug || autoSlug });
+                }}
+                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all"
                 placeholder="Enter event title"
                 required
                 autoFocus
               />
+            </div>
+
+            {/* Custom URL slug */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                <Link className="w-4 h-4 text-purple-500" />
+                Custom Event URL
+              </label>
+              <div className="flex rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                <span className="inline-flex items-center px-3 text-gray-400 text-sm bg-gray-50 border-r border-gray-200 whitespace-nowrap">
+                  twodawn.com.ng/e/
+                </span>
+                <input
+                  type="text"
+                  value={formData.custom_slug}
+                  onChange={(e) => {
+                    const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                    setFormData({ ...formData, custom_slug: val });
+                  }}
+                  className="w-full px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+                  placeholder="my-event-name"
+                />
+              </div>
+              <p className="text-xs text-gray-400 mt-1.5">Lowercase letters, numbers, and dashes only. Auto-filled from title — edit to customize.</p>
             </div>
 
             <div className="md:col-span-2">

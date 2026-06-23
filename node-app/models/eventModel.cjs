@@ -267,13 +267,27 @@ async function createEvent(userId, data) {
   const pass_fees_to_buyer = data.pass_fees_to_buyer ? 1 : 0;
   const image_path = data.image_path || null;
   
-  // Generate slug
-  const baseSlug = String(title || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-  const rand = Math.random().toString(36).substring(2, 8);
-  const slug = `${baseSlug}-${rand}`;
+  // Generate slug — use organizer's custom slug if provided, else auto-generate from title
+  let slug;
+  if (data.custom_slug) {
+    // Check if custom slug is taken
+    const existing = await query(`SELECT id FROM events WHERE slug = ? LIMIT 1`, [data.custom_slug]);
+    if (existing.length > 0) {
+      // Append random suffix to avoid collision
+      const rand = Math.random().toString(36).substring(2, 6);
+      slug = `${data.custom_slug}-${rand}`;
+    } else {
+      slug = data.custom_slug;
+    }
+  } else {
+    const baseSlug = String(title || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+    const rand = Math.random().toString(36).substring(2, 8);
+    slug = `${baseSlug}-${rand}`;
+  }
+
 
   const ticket_types = data.ticket_types ? JSON.stringify(data.ticket_types) : null;
   

@@ -164,6 +164,22 @@ async function updateAuthUserUsername(userId, username) {
   return findAuthUserById(id);
 }
 
+async function updateOrganizerSettings(userId, { name, instagramHandle, twitterHandle, whatsappNumber }) {
+  const id = asPositiveInt(userId);
+  if (!id) return null;
+
+  const updates = ["updated_at = datetime('now')"];
+  const params = [];
+
+  if (name !== undefined) { updates.push('name = ?'); params.push(name ? String(name).trim() : null); }
+  if (instagramHandle !== undefined) { updates.push('instagram_handle = ?'); params.push(instagramHandle ? String(instagramHandle).trim() : null); }
+  if (twitterHandle !== undefined) { updates.push('twitter_handle = ?'); params.push(twitterHandle ? String(twitterHandle).trim() : null); }
+  if (whatsappNumber !== undefined) { updates.push('whatsapp_number = ?'); params.push(whatsappNumber ? String(whatsappNumber).trim() : null); }
+
+  await query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, [...params, id]);
+  return findAuthUserById(id);
+}
+
 module.exports = {
   normalizeEmail,
   toSessionUser,
@@ -174,5 +190,6 @@ module.exports = {
   setPasswordForUser,
   markAuthUserEmailVerified,
   updateAuthUserUsername,
+  updateOrganizerSettings,
   deleteAuthUserById,
 };

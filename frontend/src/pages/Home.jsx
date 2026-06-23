@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { getEvents } from '../services/events'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import { formatPrice } from '../utils/price'
+import { getEventImage } from '../utils/image'
 
 function Home() {
   const [showLocation, setShowLocation] = useState(false)
@@ -204,7 +206,7 @@ function Home() {
                       {event.image_path ? (
                         <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
                           <img 
-                            src={`/storage/${event.image_path}`} 
+                            src={getEventImage(event)} 
                             alt={event.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
@@ -220,7 +222,7 @@ function Home() {
                         <p className="text-sm text-gray-500 mb-3">{event.venue}</p>
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-semibold text-gray-900">
-                            {event.price > 0 ? `₦${event.price.toLocaleString()}` : 'Free'}
+                            {formatPrice(event)}
                           </span>
                           <span className="text-xs text-gray-400">
                             {new Date(event.starts_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}

@@ -21,10 +21,29 @@ import EditEvent from './pages/organizer/EditEvent'
 import HostPanel from './pages/HostPanel'
 import Onboarding from './pages/Onboarding'
 
-function App() {
+import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+function NavigationPersist(){
+  const location = useLocation();
+  const navigate = useNavigate();
+  useEffect(()=>{
+    // Store last visited path
+    localStorage.setItem('lastPath', location.pathname);
+  },[location]);
+  useEffect(()=>{
+    // On first load (no route match), redirect to stored path if exists
+    if(location.pathname==='/' && localStorage.getItem('lastPath')){
+      const path = localStorage.getItem('lastPath');
+      if(path && path!=="/") navigate(path, {replace:true});
+    }
+  },[]);
+  return null;
+}
+
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Routes>
+      <NavigationPersist />
         <Route path="/" element={<Home />} />
         <Route path="/events" element={<Events />} />
         <Route path="/events/recent" element={<Events recent={true} />} />
