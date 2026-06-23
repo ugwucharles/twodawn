@@ -7,15 +7,21 @@ function GoogleSignInButton({ onError, disabled }) {
 
   const handleSuccess = async (credentialResponse) => {
     try {
+      console.log('Google sign-in success, sending credential to backend...')
       const response = await api.post('/organizer/google-auth', {
         credential: credentialResponse.credential,
       })
+
+      console.log('Backend response:', response.data)
 
       if (response.data.token) {
         localStorage.setItem('token', response.data.token)
       }
       navigate(response.data.redirect || '/organizer/dashboard')
     } catch (err) {
+      console.error('Google sign-in error:', err)
+      console.error('Error response:', err.response?.data)
+      console.error('Error status:', err.response?.status)
       onError?.(err.response?.data?.message || 'Google sign-in failed')
     }
   }
@@ -25,7 +31,10 @@ function GoogleSignInButton({ onError, disabled }) {
       <div className="w-full max-w-[300px]">
         <GoogleLogin
           onSuccess={handleSuccess}
-          onError={() => onError?.('Google sign-in was cancelled or failed')}
+          onError={(error) => {
+            console.error('Google login widget error:', error)
+            onError?.('Google sign-in was cancelled or failed')
+          }}
           theme="outline"
           size="large"
           text="continue_with"

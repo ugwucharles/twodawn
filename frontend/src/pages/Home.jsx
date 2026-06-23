@@ -138,7 +138,7 @@ function Home() {
                     <Link
                       key={event.id}
                       to={`/events/${event.id}`}
-                      className="group shrink-0 w-48"
+                      className="group shrink-0 w-56"
                     >
                       <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-100">
                         {getEventImage(event) ? (
@@ -152,14 +152,14 @@ function Home() {
                             <span className="text-3xl">🎟️</span>
                           </div>
                         )}
-                        {/* Dark overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                        {/* Dark overlay - darker at bottom for text readability */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
                         {/* Text inside card */}
-                        <div className="absolute bottom-0 left-0 right-0 p-3">
-                          <h3 className="text-sm font-bold text-white line-clamp-2 mb-1">
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <h3 className="text-base font-bold text-white line-clamp-2 mb-1">
                             {event.title}
                           </h3>
-                          <p className="text-xs text-white/90">{formatPrice(event)}</p>
+                          <p className="text-sm text-white/90">{formatPrice(event)}</p>
                         </div>
                         {event.capacity !== null && event.capacity <= 0 && (
                           <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
