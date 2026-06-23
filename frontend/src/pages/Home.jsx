@@ -133,12 +133,12 @@ function Home() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-bold text-gray-900">Top Selling Events</h2>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                   {topSellingEvents.map((event) => (
                     <Link
                       key={event.id}
                       to={`/events/${event.id}`}
-                      className="group"
+                      className="group shrink-0 w-48"
                     >
                       <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-100">
                         {getEventImage(event) ? (
