@@ -41,6 +41,13 @@ function Debug() {
         })
       }
 
+      // Check for Google sign-in errors from localStorage
+      const googleError = localStorage.getItem('google_signin_error')
+      if (googleError) {
+        addLog('Google Sign-in Error (from localStorage)', JSON.parse(googleError))
+        localStorage.removeItem('google_signin_error')
+      }
+
       setLoading(false)
     }
 
