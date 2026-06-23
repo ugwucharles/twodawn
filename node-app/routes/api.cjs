@@ -8,6 +8,7 @@ function createApiRouter() {
   // GET /api/v1/events - read-only public API
   router.get('/events', async (req, res) => {
     try {
+      console.log('API /events called');
       const filters = {
         mood: req.query.mood,
         state: req.query.state,
@@ -19,7 +20,9 @@ function createApiRouter() {
       const limit = Math.min(parseInt(req.query.limit || '50', 10), 100);
       const offset = 0;
 
+      console.log('Fetching events with filters:', filters, 'limit:', limit);
       const events = await listPublishedEventsFiltered(filters, { limit, offset });
+      console.log('Events fetched:', events.length);
 
       const items = events.map((event) => ({
         id: event.id,
@@ -40,7 +43,7 @@ function createApiRouter() {
       return res.json({ ok: true, events: items });
     } catch (error) {
       console.error('API events error:', error);
-      return res.status(500).json({ ok: false, error: 'Failed to fetch events' });
+      return res.status(500).json({ ok: false, error: 'Failed to fetch events', message: error.message });
     }
   });
 
