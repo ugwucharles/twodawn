@@ -72,7 +72,7 @@ async function findEventById(eventId) {
   if (!id) return null;
 
   const rows = await query(
-    `SELECT e.*, u.username as organizer_username, u.name as organizer_name, u.avatar_url as organizer_avatar
+    `SELECT e.*, u.username as organizer_username, u.name as organizer_name, u.profile_picture as organizer_avatar
      FROM events e
      LEFT JOIN users u ON e.user_id = u.id
      WHERE e.id = ?`,
@@ -86,7 +86,7 @@ async function findEventBySlug(slug) {
   if (!normalizedSlug) return null;
 
   const rows = await query(
-    `SELECT e.*, u.username as organizer_username, u.name as organizer_name, u.avatar_url as organizer_avatar
+    `SELECT e.*, u.username as organizer_username, u.name as organizer_name, u.profile_picture as organizer_avatar
      FROM events e
      LEFT JOIN users u ON e.user_id = u.id
      WHERE e.slug = ?
@@ -150,7 +150,7 @@ async function listRecentEvents(page = {}) {
   const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
   const rows = await query(
-    `SELECT e.*, u.username as organizer_username, u.name as organizer_name, u.avatar_url as organizer_avatar
+    `SELECT e.*, u.username as organizer_username, u.name as organizer_name, u.profile_picture as organizer_avatar
      FROM events e
      LEFT JOIN users u ON e.user_id = u.id
      WHERE e.is_published = 1
@@ -212,7 +212,7 @@ async function listPublishedEventsFiltered(filters = {}, page = {}) {
   const whereClause = conditions.join(' AND ');
 
   const rows = await query(
-    `SELECT e.*, u.username as organizer_username, u.name as organizer_name, u.avatar_url as organizer_avatar
+    `SELECT e.*, u.username as organizer_username, u.name as organizer_name, u.profile_picture as organizer_avatar
      FROM events e
      LEFT JOIN users u ON e.user_id = u.id
      WHERE ${whereClause}
@@ -229,7 +229,7 @@ async function listTopSellingEvents({ limit = 6 } = {}) {
   const now = new Date().toISOString();
 
   const rows = await query(
-    `SELECT e.*, u.username as organizer_username, u.name as organizer_name, u.avatar_url as organizer_avatar,
+    `SELECT e.*, u.username as organizer_username, u.name as organizer_name, u.profile_picture as organizer_avatar,
             COALESCE(o.sold_quantity, 0) as sold_quantity
      FROM events e
      LEFT JOIN users u ON e.user_id = u.id
