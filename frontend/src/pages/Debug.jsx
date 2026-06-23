@@ -4,12 +4,14 @@ import { getEvents, getTopSellingEvents } from '../services/events'
 function Debug() {
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
   const addLog = (message, data = null) => {
     setLogs(prev => [...prev, { time: new Date().toISOString(), message, data }])
   }
 
   useEffect(() => {
+    setMounted(true)
     const testApi = async () => {
       addLog('Starting API test...')
       
@@ -44,6 +46,8 @@ function Debug() {
 
     testApi()
   }, [])
+
+  if (!mounted) return <div>Loading...</div>
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#1a1a1a', color: 'white', padding: '20px' }}>
