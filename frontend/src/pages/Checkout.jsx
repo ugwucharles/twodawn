@@ -82,17 +82,22 @@ function Checkout() {
         buyer_phone: buyerPhone.trim(),
         quantity,
         ticket_type: ticketType,
-        coupon_code: couponCode,
+        coupon: couponCode,
       }
 
+      console.log('Creating order with data:', orderData)
       const response = await createOrder(id, orderData)
+      console.log('Order response:', response)
 
       if (response.authorization_url) {
         window.location.href = response.authorization_url
       } else if (response.order) {
         navigate(`/orders/${response.order.paystack_reference}`)
+      } else if (response.reference) {
+        navigate(`/orders/${response.reference}`)
       }
     } catch (err) {
+      console.error('Order creation error:', err)
       setError('Failed to create order. Please try again.')
       setProcessing(false)
     }
