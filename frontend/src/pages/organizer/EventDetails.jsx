@@ -92,10 +92,23 @@ function EventDetails() {
           </div>
         </div>
         <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
-          <p className="text-sm font-medium text-gray-500 mb-2">Ticket Price</p>
-          <p className="text-3xl font-bold text-gray-900">
-            {event.price > 0 ? `₦${event.price.toFixed(2)}` : 'Free'}
-          </p>
+          <p className="text-sm font-medium text-gray-500 mb-2">Ticket Types</p>
+          {event.ticket_types && event.ticket_types.length > 0 ? (
+            <div className="space-y-1">
+              {event.ticket_types.map((ticket, idx) => (
+                <div key={idx} className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-900">{ticket.name}</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {ticket.price > 0 ? `₦${ticket.price.toLocaleString()}` : 'Free'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-3xl font-bold text-gray-900">
+              {event.price > 0 ? `₦${event.price.toFixed(2)}` : 'Free'}
+            </p>
+          )}
         </div>
         <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
           <p className="text-sm font-medium text-gray-500 mb-2">Total Revenue</p>
