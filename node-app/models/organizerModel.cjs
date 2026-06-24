@@ -108,12 +108,7 @@ async function getOrganizerEvents(userId) {
       GROUP BY event_id
     ) o ON o.event_id = e.id
     WHERE e.user_id = ?
-      AND e.is_published = 1
-      AND (
-        (e.ends_at IS NOT NULL AND e.ends_at >= datetime('now'))
-        OR (e.ends_at IS NULL AND e.starts_at >= datetime('now'))
-      )
-    ORDER BY e.starts_at ASC
+    ORDER BY e.starts_at DESC
   `, [id]);
 
   return rows;

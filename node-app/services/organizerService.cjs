@@ -9,15 +9,26 @@ async function getDashboardData(userId) {
   const events = await getOrganizerEvents(userId);
   const recentOrders = await getOrganizerOrders(userId, { limit: 5, offset: 0 });
 
+  // Map image_path to image_url for Cloudinary URLs
+  const eventsWithImages = events.map(event => ({
+    ...event,
+    image_url: event.image_path || null
+  }));
+
   return {
     stats,
-    events,
+    events: eventsWithImages,
     recent_orders: recentOrders,
   };
 }
 
 async function getEvents(userId) {
-  return await getOrganizerEvents(userId);
+  const events = await getOrganizerEvents(userId);
+  // Map image_path to image_url for Cloudinary URLs
+  return events.map(event => ({
+    ...event,
+    image_url: event.image_path || null
+  }));
 }
 
 async function getOrders(userId, page = {}) {
