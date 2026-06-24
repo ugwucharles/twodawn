@@ -25,7 +25,18 @@ function PaymentSuccess() {
         setLoading(false);
       } catch (err) {
         console.error('Failed to load order:', err);
-        setError(`Failed to load order: ${err.message || 'Unknown error'}`);
+        const errorMessage = `Failed to load order: ${err.message || 'Unknown error'}`;
+        setError(errorMessage);
+        
+        // Save error to localStorage for debug page
+        localStorage.setItem('payment_error', JSON.stringify({
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status,
+          reference: reference,
+          timestamp: new Date().toISOString()
+        }));
+        
         setLoading(false);
       }
     };
@@ -33,7 +44,12 @@ function PaymentSuccess() {
     if (reference) {
       fetch();
     } else {
-      setError('No reference provided in URL');
+      const noRefError = 'No reference provided in URL';
+      setError(noRefError);
+      localStorage.setItem('payment_error', JSON.stringify({
+        message: noRefError,
+        timestamp: new Date().toISOString()
+      }));
       setLoading(false);
     }
   }, [reference]);
