@@ -318,34 +318,8 @@ function Scanner() {
             <video ref={videoRef} playsInline autoPlay muted className="w-full h-full object-cover"></video>
             <canvas ref={canvasRef} className="hidden"></canvas>
 
-            {/* Countdown overlay */}
-            {countdown !== null && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm gap-3">
-                <div className="w-24 h-24 rounded-full border-4 border-purple-400 flex items-center justify-center">
-                  <span className="text-5xl font-black text-white countdown-num">{countdown}</span>
-                </div>
-                <p className="text-white text-sm font-bold tracking-wide">Verifying ticket…</p>
-              </div>
-            )}
-
-            {/* Scan line */}
-            {running && countdown === null && (
-              <div className="scan-line pointer-events-none absolute left-4 right-4 h-0.5 rounded-full bg-gradient-to-r from-transparent via-purple-400 to-transparent"
-                   style={{ animation: 'scanLine 2.4s ease-in-out infinite' }}></div>
-            )}
-
-            {/* Corner brackets */}
-            {running && countdown === null && (
-              <div className="corner-pulse pointer-events-none absolute inset-0">
-                <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-purple-400 rounded-tl-lg"></div>
-                <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-purple-400 rounded-tr-lg"></div>
-                <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-purple-400 rounded-bl-lg"></div>
-                <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 border-purple-400 rounded-br-lg"></div>
-              </div>
-            )}
-
             {/* Idle overlay */}
-            {!running && countdown === null && (
+            {!running && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white">
                 <Camera className="w-14 h-14 text-black" />
                 <p className="text-sm font-extrabold tracking-wide text-black">Press &quot;Start Camera&quot; to begin</p>
@@ -356,6 +330,20 @@ function Scanner() {
 
         {/* Manual entry + image upload */}
         <div className="space-y-4">
+          {/* Inline status */}
+          {inlineResult && (
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-3xl p-5 shadow-sm">
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold mb-2 ${
+                inlineResult.kind === 'ok' ? 'bg-emerald-100 text-emerald-700' :
+                inlineResult.kind === 'warn' ? 'bg-amber-100 text-amber-700' :
+                'bg-red-100 text-red-700'
+              }`}>
+                {inlineResult.kind === 'ok' ? '✓ Checked In' : inlineResult.kind === 'warn' ? '⚠ Already Scanned' : '✕ Invalid'}
+              </span>
+              <p className="text-sm text-black font-medium">{inlineResult.msg}</p>
+            </div>
+          )}
+
           {/* Manual entry */}
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-3xl p-6 shadow-sm">
             <p className="text-sm font-bold text-black mb-3">Enter reference manually</p>
@@ -398,20 +386,6 @@ function Scanner() {
               <p className="text-sm font-semibold text-gray-900">Drop image here or <span className="text-purple-600 underline">click to browse</span></p>
             </label>
           </div>
-
-          {/* Inline status */}
-          {inlineResult && (
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-3xl p-5 shadow-sm">
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold mb-2 ${
-                inlineResult.kind === 'ok' ? 'bg-emerald-100 text-emerald-700' :
-                inlineResult.kind === 'warn' ? 'bg-amber-100 text-amber-700' :
-                'bg-red-100 text-red-700'
-              }`}>
-                {inlineResult.kind === 'ok' ? '✓ Checked In' : inlineResult.kind === 'warn' ? '⚠ Already Scanned' : '✕ Invalid'}
-              </span>
-              <p className="text-sm text-black font-medium">{inlineResult.msg}</p>
-            </div>
-          )}
         </div>
       </div>
 
