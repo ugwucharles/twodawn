@@ -118,23 +118,9 @@ function PaymentSuccess() {
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
       <main className="flex-1 flex flex-col items-center justify-center py-8">
-        {/* Debug Info */}
-        <div className="fixed top-20 right-4 bg-gray-100 p-4 rounded-lg text-xs max-w-xs z-50">
-          <div className="font-bold mb-2">Debug Info:</div>
-          <div>Reference: {reference || 'none'}</div>
-          <div>Loading: {loading ? 'yes' : 'no'}</div>
-          <div>Error: {error || 'none'}</div>
-          <div>Order: {order ? 'loaded' : 'null'}</div>
-          {order && (
-            <div className="mt-2">
-              <div>Order ID: {order.id}</div>
-              <div>Status: {order.status}</div>
-            </div>
-          )}
-        </div>
 
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Your Ticket is Ready</h1>
-        <div className="bg-white p-6 rounded-xl shadow-lg">
+        <div className="bg-white p-6 rounded-xl shadow-lg relative">
           <QRCodeSVG
             id="qrCanvas"
             value={order?.qr_data || reference}
@@ -142,6 +128,9 @@ function PaymentSuccess() {
             level="H"
             includeMargin={true}
           />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-2 rounded-lg shadow-md">
+            <div className="text-2xl font-bold text-[#8b5cf6]">2D</div>
+          </div>
         </div>
         <button
           onClick={downloadQR}
@@ -150,7 +139,7 @@ function PaymentSuccess() {
           Download QR Code
         </button>
         <p className="mt-4 text-sm text-gray-600">
-          Remember your email in case you lose the QR code or screenshot it.
+          💡 Tip: Save a screenshot of this QR code for easy access at the event.
         </p>
         <button
           onClick={() => navigate('/')}
