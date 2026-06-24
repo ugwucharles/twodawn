@@ -172,29 +172,45 @@ function Scanner() {
   const handleFileUpload = async (file) => {
     if (!file) return;
     setStatusMsg('Decoding image…', 'scanning');
+    console.log('File uploaded:', file.name, file.type, file.size);
     try {
       const reader = new FileReader();
       reader.onload = async (e) => {
+        console.log('FileReader loaded, data length:', e.target.result.length);
         const img = new Image();
         img.onload = () => {
+          console.log('Image loaded, dimensions:', img.width, 'x', img.height);
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           canvas.width = img.width;
           canvas.height = img.height;
           ctx.drawImage(img, 0, 0);
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          console.log('Image data extracted, size:', imageData.data.length);
           const code = jsQR(imageData.data, imageData.width, imageData.height);
+          console.log('jsQR result:', code);
           
           if (code) {
             console.log('QR code detected from image:', code.data);
             setDebugInfo(prev => ({ ...prev, qrData: code.data }));
             verifyText(code.data);
           } else {
+            console.log('No QR code detected in image');
             setStatusMsg('Error', 'err');
             showInlineResult('err', 'No QR code found in image.');
           }
         };
+        img.onerror = (err) => {
+          console.error('Image load error:', err);
+          setStatusMsg('Error', 'err');
+          showInlineResult('err', 'Failed to load image.');
+        };
         img.src = e.target.result;
+      };
+      reader.onerror = (err) => {
+        console.error('FileReader error:', err);
+        setStatusMsg('Error', 'err');
+        showInlineResult('err', 'Failed to read file.');
       };
       reader.readAsDataURL(file);
     } catch (e) {
