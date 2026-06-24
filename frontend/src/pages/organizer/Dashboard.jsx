@@ -14,10 +14,12 @@ function OrganizerDashboard() {
   const fetchDashboard = async () => {
     try {
       const response = await axios.get('/organizer/dashboard');
+      console.log('Dashboard response:', response.data);
       setStats(response.data);
       setLoading(false);
     } catch (err) {
       console.error('Failed to load dashboard', err);
+      console.error('Error response:', err.response?.data);
       setLoading(false);
     }
   };
