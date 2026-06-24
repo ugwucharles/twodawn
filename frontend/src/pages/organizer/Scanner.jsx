@@ -339,9 +339,15 @@ function Scanner() {
           )}
 
           {/* Debug Info */}
-          {(debugInfo.qrData || debugInfo.apiResponse) && (
+          {(debugInfo.qrData || debugInfo.apiResponse || codeInput) && (
             <div className="bg-gray-900 border border-gray-700 rounded-3xl p-4 shadow-sm">
               <p className="text-xs font-bold text-gray-400 mb-2">DEBUG INFO</p>
+              {codeInput && (
+                <div className="mb-3">
+                  <p className="text-xs font-semibold text-yellow-400 mb-1">Manual Input:</p>
+                  <p className="text-xs text-gray-300 break-all font-mono">{codeInput}</p>
+                </div>
+              )}
               {debugInfo.qrData && (
                 <div className="mb-3">
                   <p className="text-xs font-semibold text-green-400 mb-1">QR Code Detected:</p>
