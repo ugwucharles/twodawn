@@ -129,8 +129,8 @@ function PaymentSuccess() {
             includeMargin={true}
             imageSettings={{
               src: "/logo.svg",
-              height: 48,
-              width: 48,
+              height: 64,
+              width: 64,
               excavate: true,
             }}
           />
