@@ -239,6 +239,7 @@ function createOrganizerRouter() {
         ok: true,
         settings: {
           username: user.username || '',
+          email: user.email || '',
           name: user.name || '',
           instagram_handle: user.instagram_handle || '',
           whatsapp_number: user.whatsapp_number || '',
@@ -278,6 +279,7 @@ function createOrganizerRouter() {
         message: 'Settings updated successfully',
         settings: {
           username: updated.username || '',
+          email: updated.email || '',
           name: updated.name || '',
           instagram_handle: updated.instagram_handle || '',
           whatsapp_number: updated.whatsapp_number || '',

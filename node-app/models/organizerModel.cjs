@@ -98,9 +98,22 @@ async function getOrganizerEvents(userId) {
   if (!id) return [];
 
   const rows = await query(`
-    SELECT * FROM events 
-    WHERE user_id = ?
-    ORDER BY created_at DESC
+    SELECT e.*,
+           COALESCE(o.orders_count, 0) as orders_count
+    FROM events e
+    LEFT JOIN (
+      SELECT event_id, COUNT(*) as orders_count
+      FROM orders
+      WHERE status = 'paid'
+      GROUP BY event_id
+    ) o ON o.event_id = e.id
+    WHERE e.user_id = ?
+      AND e.is_published = 1
+      AND (
+        (e.ends_at IS NOT NULL AND e.ends_at >= datetime('now'))
+        OR (e.ends_at IS NULL AND e.starts_at >= datetime('now'))
+      )
+    ORDER BY e.starts_at ASC
   `, [id]);
 
   return rows;

@@ -281,6 +281,7 @@ function createPublicAuthRouter() {
         ok: true,
         settings: {
           username: user.username || '',
+          email: user.email || '',
           name: user.name || '',
           instagram_handle: user.instagram_handle || '',
           twitter_handle: user.twitter_handle || '',
@@ -312,6 +313,7 @@ function createPublicAuthRouter() {
         message: 'Settings updated successfully.',
         settings: {
           username: updated.username || '',
+          email: updated.email || '',
           name: updated.name || '',
           instagram_handle: updated.instagram_handle || '',
           twitter_handle: updated.twitter_handle || '',

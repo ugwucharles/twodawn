@@ -11,13 +11,32 @@ const {
 } = require('../services/checkoutService.cjs');
 const { proxyRequest } = require('../services/proxyRequest.cjs');
 const { isJsonRequest } = require('../lib/authHttp.cjs');
+const { ensureOrdersSchema } = require('../db/ensureOrdersSchema.cjs');
+const { resolvePaystackCallbackUrl: resolvePaystackCallbackUrlFromRequest } = require('../lib/filtering.cjs');
+
+function resolvePaystackCallbackUrl(req) {
+  return resolvePaystackCallbackUrlFromRequest(req);
+}
+
+function resolveFrontendUrl() {
+  return process.env.FRONTEND_URL || 'https://twodawn-frontend-real.vercel.app';
+}
+
+function resolveOrderConfirmationUrl(reference) {
+  return `${String(resolveFrontendUrl()).replace(/\/$/, '')}/payment-success?reference=${encodeURIComponent(reference)}`;
+}
 
 function createCheckoutRouter() {
   const router = express.Router();
 
+  router.use(express.json({ limit: '1mb' }));
+  router.use(express.urlencoded({ extended: false }));
+
   // GET /events/:id/quote - pricing quote
   router.get('/events/:id/quote', async (req, res) => {
     try {
+      await ensureOrdersSchema();
+
       const eventId = parseInt(req.params.id, 10);
       const event = await findEventById(eventId);
 
@@ -27,14 +46,13 @@ function createCheckoutRouter() {
 
       const data = req.query;
       const quantity = parseInt(data.quantity || '1', 10);
-      const couponCode = data.coupon || null;
       const selectedTicketType = data.ticket_type || null;
 
       if (quantity < 1) {
         return res.status(400).json({ ok: false, message: 'Invalid quantity' });
       }
 
-      const quote = calculateQuote(event, quantity, couponCode, selectedTicketType);
+      const quote = calculateQuote(event, quantity, selectedTicketType);
 
       // Resolve ticket type display name + unit price
       let ticketTypeName = null;
@@ -60,7 +78,6 @@ function createCheckoutRouter() {
         unit_price: unitPrice,
         quantity,
         ticket_type: ticketTypeName,
-        coupon_valid: quote.coupon_valid,
       });
     } catch (error) {
       console.error('Quote error:', error);
@@ -102,6 +119,8 @@ function createCheckoutRouter() {
   // POST /events/:id/orders - create order
   router.post('/events/:id/orders', async (req, res) => {
     try {
+      await ensureOrdersSchema();
+
       const eventId = parseInt(req.params.id, 10);
       const event = await findEventById(eventId);
 
@@ -126,7 +145,12 @@ function createCheckoutRouter() {
       }
 
       // Validate request
-      const { buyer_name, buyer_email, buyer_phone, quantity, coupon, ticket_type } = req.body;
+      const body = req.body || {};
+      const buyer_name = body.buyer_name;
+      const buyer_email = body.buyer_email;
+      const buyer_phone = body.buyer_phone;
+      const quantity = body.quantity;
+      const ticket_type = body.ticket_type;
       
       if (!buyer_name || !buyer_email || !quantity) {
         if (isJsonRequest(req)) {
@@ -152,7 +176,7 @@ function createCheckoutRouter() {
       }
 
       // Calculate pricing
-      const quote = calculateQuote(event, orderQuantity, coupon, ticket_type);
+      const quote = calculateQuote(event, orderQuantity, ticket_type);
       
       // Check free ticket promo
       let isFreeTicketPromo = false;
@@ -185,7 +209,7 @@ function createCheckoutRouter() {
         buyer_name,
         buyer_email,
         buyer_phone: buyer_phone || null,
-        coupon_code: coupon || null,
+        coupon_code: null,
         quantity: orderQuantity,
         amount: finalAmount,
         paystack_reference: reference,
@@ -209,7 +233,7 @@ function createCheckoutRouter() {
       }
 
       // Initialize Paystack payment
-      const callbackUrl = `${process.env.APP_URL || 'https://twodawn.com.ng'}/paystack/callback`;
+      const callbackUrl = resolvePaystackCallbackUrl(req);
       const authUrl = await initializePaystackPayment(order, callbackUrl);
 
       if (isJsonRequest(req)) {
@@ -220,7 +244,10 @@ function createCheckoutRouter() {
     } catch (error) {
       console.error('Order creation error:', error);
       if (isJsonRequest(req)) {
-        return res.status(500).json({ ok: false, message: 'Failed to create order' });
+        return res.status(500).json({
+          ok: false,
+          message: error.message || 'Failed to create order',
+        });
       }
       return proxyRequest(req, res);
     }
@@ -231,7 +258,7 @@ function createCheckoutRouter() {
     try {
       const reference = req.query.reference;
       if (!reference) {
-        return proxyRequest(req, res);
+        return res.redirect(`${resolveFrontendUrl()}/events`);
       }
 
       const result = await finalizePayment(reference);
@@ -240,11 +267,10 @@ function createCheckoutRouter() {
         if (isJsonRequest(req)) {
           return res.status(400).json({ ok: false, message: result.error });
         }
-        return proxyRequest(req, res);
+        return res.redirect(`${resolveFrontendUrl()}/events?payment=failed`);
       }
 
-      // Redirect to order success page
-      return res.redirect(`/orders/${reference}`);
+      return res.redirect(resolveOrderConfirmationUrl(reference));
     } catch (error) {
       console.error('Callback error:', error);
       return proxyRequest(req, res);

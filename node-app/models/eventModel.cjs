@@ -170,46 +170,81 @@ async function listPublishedEventsFiltered(filters = {}, page = {}) {
   const { limit, offset } = normalizePage(page);
   const { mood, state, price, date, q } = filters;
 
+  console.log('🔍 listPublishedEventsFiltered called with filters:', filters);
+
   const conditions = ['is_published = 1'];
   const params = [];
 
-  // Base condition: upcoming events
+  // Base condition: upcoming events (use JavaScript to get current time)
+  const now = new Date().toISOString();
   conditions.push(`(
-    (ends_at IS NULL AND starts_at >= datetime('now'))
-    OR (ends_at IS NOT NULL AND ends_at >= datetime('now'))
+    (ends_at IS NULL AND starts_at >= ?)
+    OR (ends_at IS NOT NULL AND ends_at >= ?)
   )`);
+  params.push(now, now);
 
   if (mood) {
     conditions.push('mood = ?');
     params.push(mood);
+    console.log('🎭 Mood filter applied:', mood);
   }
 
   if (state) {
-    conditions.push('state = ?');
+    conditions.push('LOWER(state) = LOWER(?)');
     params.push(state);
+    console.log('📍 State filter applied:', state);
   }
 
-  if (price === 'free') {
-    conditions.push('(price IS NULL OR price <= 0)');
-  } else if (price === 'paid') {
-    conditions.push('price > 0');
+  if (price === 'free' || price === 'paid') {
+    console.log(`💰 Price filter: ${price}`);
   }
 
   if (date === 'today') {
-    conditions.push('date(starts_at) = date("now")');
+    // Calculate today's date range using local time
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000; // offset in milliseconds
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    
+    conditions.push('starts_at >= ? AND starts_at <= ?');
+    params.push(new Date(todayStart.getTime() - offset).toISOString(), new Date(todayEnd.getTime() - offset).toISOString());
+    console.log('📅 Date filter: today (local)', new Date(todayStart.getTime() - offset).toISOString(), new Date(todayEnd.getTime() - offset).toISOString());
   } else if (date === 'weekend') {
-    conditions.push('strftime("%W", starts_at) = strftime("%W", "now")');
+    // Calculate Friday and Sunday of current week using local time
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const dayOfWeek = now.getDay();
+    const daysUntilFriday = (5 - dayOfWeek + 7) % 7;
+    const friday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (dayOfWeek <= 5 ? daysUntilFriday : daysUntilFriday + 7), 0, 0, 0, 0);
+    const sunday = new Date(friday.getFullYear(), friday.getMonth(), friday.getDate() + 2, 23, 59, 59, 999);
+    
+    conditions.push('starts_at >= ? AND starts_at <= ?');
+    params.push(new Date(friday.getTime() - offset).toISOString(), new Date(sunday.getTime() - offset).toISOString());
+    console.log('📅 Date filter: weekend (Friday-Sunday local)', new Date(friday.getTime() - offset).toISOString(), new Date(sunday.getTime() - offset).toISOString());
   } else if (date === 'next-week') {
-    conditions.push('strftime("%W", starts_at) = strftime("%W", "now", "+7 days")');
+    // Calculate next Monday and Sunday using local time
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const dayOfWeek = now.getDay();
+    const daysUntilMonday = (1 - dayOfWeek + 7) % 7;
+    const nextMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilMonday + 7, 0, 0, 0, 0);
+    const nextSunday = new Date(nextMonday.getFullYear(), nextMonday.getMonth(), nextMonday.getDate() + 6, 23, 59, 59, 999);
+    
+    conditions.push('starts_at >= ? AND starts_at <= ?');
+    params.push(new Date(nextMonday.getTime() - offset).toISOString(), new Date(nextSunday.getTime() - offset).toISOString());
+    console.log('📅 Date filter: next-week (Monday-Sunday local)', new Date(nextMonday.getTime() - offset).toISOString(), new Date(nextSunday.getTime() - offset).toISOString());
   }
 
   if (q) {
     const searchTerm = `%${q}%`;
     conditions.push('(title LIKE ? OR venue LIKE ? OR description LIKE ? OR mood LIKE ?)');
     params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+    console.log('🔎 Search filter applied:', q);
   }
 
   const whereClause = conditions.join(' AND ');
+  console.log('🔍 Final WHERE clause:', whereClause);
+  console.log('🔍 Params:', params);
 
   const rows = await query(
     `SELECT e.*, u.username as organizer_username, u.name as organizer_name, u.profile_picture as organizer_avatar
@@ -221,12 +256,90 @@ async function listPublishedEventsFiltered(filters = {}, page = {}) {
     [...params, limit, offset]
   );
 
-  return rows.map(mapEvent);
+  const mappedRows = rows.map(mapEvent);
+
+  console.log('📊 Events returned from DB:', mappedRows.length);
+  return mappedRows;
 }
 
-async function listTopSellingEvents({ limit = 6 } = {}) {
+async function listTopSellingEvents({ limit = 6, filters = {} } = {}) {
   const normalizedLimit = Math.min(Math.max(Number(limit) || 6, 1), 20);
+  const { mood, state, price, date, q } = filters;
   const now = new Date().toISOString();
+
+  console.log('🏆 listTopSellingEvents called with limit:', normalizedLimit, 'filters:', filters);
+
+  const conditions = ['e.is_published = 1'];
+  const params = [];
+
+  // Base condition: upcoming events
+  conditions.push(`(
+    (e.ends_at IS NULL AND e.starts_at >= ?)
+    OR (e.ends_at IS NOT NULL AND e.ends_at >= ?)
+  )`);
+  params.push(now, now);
+
+  if (mood) {
+    conditions.push('e.mood = ?');
+    params.push(mood);
+    console.log('🎭 Mood filter applied:', mood);
+  }
+
+  if (state) {
+    conditions.push('LOWER(e.state) = LOWER(?)');
+    params.push(state);
+    console.log('📍 State filter applied:', state);
+  }
+
+  if (price === 'free' || price === 'paid') {
+    console.log(`💰 Price filter: ${price}`);
+  }
+
+  if (date === 'today') {
+    // Calculate today's date range using local time
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000; // offset in milliseconds
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    
+    conditions.push('e.starts_at >= ? AND e.starts_at <= ?');
+    params.push(new Date(todayStart.getTime() - offset).toISOString(), new Date(todayEnd.getTime() - offset).toISOString());
+    console.log('📅 Date filter: today (local)', new Date(todayStart.getTime() - offset).toISOString(), new Date(todayEnd.getTime() - offset).toISOString());
+  } else if (date === 'weekend') {
+    // Calculate Friday and Sunday of current week using local time
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const dayOfWeek = now.getDay();
+    const daysUntilFriday = (5 - dayOfWeek + 7) % 7;
+    const friday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (dayOfWeek <= 5 ? daysUntilFriday : daysUntilFriday + 7), 0, 0, 0, 0);
+    const sunday = new Date(friday.getFullYear(), friday.getMonth(), friday.getDate() + 2, 23, 59, 59, 999);
+    
+    conditions.push('e.starts_at >= ? AND e.starts_at <= ?');
+    params.push(new Date(friday.getTime() - offset).toISOString(), new Date(sunday.getTime() - offset).toISOString());
+    console.log('📅 Date filter: weekend (Friday-Sunday local)', new Date(friday.getTime() - offset).toISOString(), new Date(sunday.getTime() - offset).toISOString());
+  } else if (date === 'next-week') {
+    // Calculate next Monday and Sunday using local time
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const dayOfWeek = now.getDay();
+    const daysUntilMonday = (1 - dayOfWeek + 7) % 7;
+    const nextMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilMonday + 7, 0, 0, 0, 0);
+    const nextSunday = new Date(nextMonday.getFullYear(), nextMonday.getMonth(), nextMonday.getDate() + 6, 23, 59, 59, 999);
+    
+    conditions.push('e.starts_at >= ? AND e.starts_at <= ?');
+    params.push(new Date(nextMonday.getTime() - offset).toISOString(), new Date(nextSunday.getTime() - offset).toISOString());
+    console.log('📅 Date filter: next-week (Monday-Sunday local)', new Date(nextMonday.getTime() - offset).toISOString(), new Date(nextSunday.getTime() - offset).toISOString());
+  }
+
+  if (q) {
+    const searchTerm = `%${q}%`;
+    conditions.push('(e.title LIKE ? OR e.venue LIKE ? OR e.description LIKE ? OR e.mood LIKE ?)');
+    params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+    console.log('🔎 Search filter applied:', q);
+  }
+
+  const whereClause = conditions.join(' AND ');
+  console.log('🔍 Final WHERE clause for top-selling:', whereClause);
 
   const rows = await query(
     `SELECT e.*, u.username as organizer_username, u.name as organizer_name, u.profile_picture as organizer_avatar,
@@ -239,17 +352,19 @@ async function listTopSellingEvents({ limit = 6 } = {}) {
        WHERE status = 'paid'
        GROUP BY event_id
      ) o ON o.event_id = e.id
-     WHERE e.is_published = 1
-       AND (
-         (e.ends_at IS NOT NULL AND e.ends_at >= ?)
-         OR (e.ends_at IS NULL AND e.starts_at >= ?)
-       )
+     WHERE ${whereClause}
      ORDER BY sold_quantity DESC, e.starts_at ASC
      LIMIT ?`,
-    [now, now, normalizedLimit]
+    [...params, normalizedLimit]
   );
 
-  return rows.map(mapEvent);
+  const mappedRows = rows.map(mapEvent);
+
+  console.log('🏆 Top selling events returned from DB:', mappedRows.length);
+  mappedRows.forEach((row, i) => {
+    console.log(`  ${i + 1}. ${row.title} - Sold: ${row.sold_quantity}`);
+  });
+  return mappedRows;
 }
 
 async function getEventCapacity(eventId) {

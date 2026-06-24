@@ -13,7 +13,7 @@ function generateReference() {
   return 'PA_' + crypto.randomBytes(8).toString('hex');
 }
 
-function calculateQuote(event, quantity, couponCode = null, selectedTicketType = null) {
+function calculateQuote(event, quantity, selectedTicketType = null) {
   const now = new Date();
   
   // Base/early-bird unit price or Custom Ticket Type
@@ -42,23 +42,13 @@ function calculateQuote(event, quantity, couponCode = null, selectedTicketType =
     feesKobo = Math.max(0, perTicketFeeKobo * quantity);
   }
   
-  // Coupon discount (simplified - assumes coupon is valid)
-  let discountKobo = 0;
-  let validCoupon = false;
-  if (couponCode) {
-    // In a full implementation, we would validate the coupon against the database
-    // For now, we'll return the quote structure with coupon validation flag
-    validCoupon = false; // Will be validated in the route handler
-  }
-  
-  const totalKobo = Math.max(0, subtotalKobo - discountKobo + feesKobo);
+  const totalKobo = Math.max(0, subtotalKobo + feesKobo);
   
   return {
     subtotal_kobo: subtotalKobo,
     fees_kobo: feesKobo,
-    discount_kobo: discountKobo,
+    discount_kobo: 0,
     total_kobo: totalKobo,
-    coupon_valid: validCoupon,
     unit_price_kobo: Math.round(unitPrice * 100),
   };
 }
@@ -78,6 +68,9 @@ async function initializePaystackPayment(order, callbackUrl) {
     throw new Error('Paystack secret key not configured');
   }
   
+  // Use environment variable if set, otherwise fallback to hardcoded Vercel URL
+  const finalCallbackUrl = callbackUrl || 'https://twodawn-frontend.vercel.app/paystack/callback';
+  
   const response = await fetch('https://api.paystack.co/transaction/initialize', {
     method: 'POST',
     headers: {
@@ -88,7 +81,7 @@ async function initializePaystackPayment(order, callbackUrl) {
       email: order.buyer_email,
       amount: order.amount,
       reference: order.paystack_reference,
-      callback_url: callbackUrl,
+      callback_url: finalCallbackUrl,
       currency: 'NGN',
     }),
   });
@@ -96,7 +89,8 @@ async function initializePaystackPayment(order, callbackUrl) {
   const data = await response.json();
   
   if (!response.ok || !data.status) {
-    throw new Error('Paystack initialization failed');
+    const paystackMessage = data?.message || 'Paystack initialization failed';
+    throw new Error(paystackMessage);
   }
   
   return data.data.authorization_url;
@@ -170,10 +164,10 @@ async function finalizeZeroCostOrder(order) {
       await incrementCouponUses(order.coupon_code);
     }
     
-    const updatedOrder = await updateOrderStatus(order.id, 'paid');
+    const updatedOrder = await updateOrderStatusByReference(order.paystack_reference, 'paid');
     return { success: true, order: updatedOrder };
   } catch (error) {
-    await updateOrderStatus(order.id, 'failed');
+    await updateOrderStatusByReference(order.paystack_reference, 'failed');
     return { success: false, error: error.message };
   }
 }

@@ -109,6 +109,7 @@ function forbiddenResult(req, message = 'Forbidden.', fallback = '/') {
 
 module.exports = {
   wantsJson,
+  isJsonRequest: wantsJson,
   safeReferer,
   appendQuery,
   sendAuthResult,

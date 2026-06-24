@@ -18,6 +18,7 @@ const {
   verifyEmailVerificationRequest,
 } = require('./emailVerificationService.cjs');
 const { appendQuery, safeReferer } = require('../lib/authHttp.cjs');
+const { ensureUsersSchema } = require('../db/ensureUsersSchema.cjs');
 
 function asBoolean(value, fallback = false) {
   if (value === undefined || value === null || String(value).trim() === '') return fallback;
@@ -226,6 +227,8 @@ async function organizerRegisterResult(req) {
   const config = readAuthConfig();
   const passwordHash = await bcrypt.hash(password, config.bcryptRounds);
 
+  await ensureUsersSchema();
+
   let user;
   try {
     user = await createOrganizerUser({ name, email, passwordHash });
@@ -236,16 +239,33 @@ async function organizerRegisterResult(req) {
     throw error;
   }
 
+  if (!user) {
+    return {
+      ok: false,
+      status: 500,
+      body: {
+        ok: false,
+        error: 'user_creation_failed',
+        message: 'Failed to create account. Please try again.',
+      },
+    };
+  }
+
+  const sessionUser = toSessionUser(user);
+  const needsOnboarding = !user.username;
+  const redirect = needsOnboarding ? '/onboarding' : '/organizer/dashboard';
+
   return {
     ok: true,
     status: 201,
     body: {
       ok: true,
-      status: 'Account created successfully! Welcome to your organizer dashboard.',
-      user: toSessionUser(user),
-      redirect: '/organizer/dashboard',
+      status: 'Account created successfully!',
+      user: sessionUser,
+      redirect,
+      needsOnboarding,
     },
-    redirect: '/organizer/dashboard',
+    redirect,
     session: { user, remember: false },
   };
 }
@@ -268,6 +288,8 @@ async function organizerGoogleLoginResult(req) {
   }
 
   try {
+    await ensureUsersSchema();
+
     console.log('Verifying Google token with tokeninfo endpoint...');
     const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
     console.log('Google tokeninfo response status:', response.status);
@@ -339,11 +361,34 @@ async function organizerGoogleLoginResult(req) {
       const passwordHash = await bcrypt.hash(randomPassword, config.bcryptRounds);
       
       user = await createOrganizerUser({ name, email, passwordHash });
-      
+      if (!user) {
+        return {
+          ok: false,
+          status: 500,
+          body: {
+            ok: false,
+            error: 'user_creation_failed',
+            message: 'Failed to create account from Google sign-in.',
+          },
+        };
+      }
+
       // Auto-verify email since it came verified from Google
       if (payload.email_verified === 'true' || payload.email_verified === true) {
         user = await markAuthUserEmailVerified(user.id);
       }
+    }
+
+    if (!user) {
+      return {
+        ok: false,
+        status: 500,
+        body: {
+          ok: false,
+          error: 'user_not_found',
+          message: 'Unable to load account after Google sign-in.',
+        },
+      };
     }
 
     const sessionUser = toSessionUser(user);
@@ -365,15 +410,17 @@ async function organizerGoogleLoginResult(req) {
   } catch (error) {
     console.error('Google verification error:', error);
     console.error('Error stack:', error.stack);
+    const isDev = String(process.env.NODE_ENV || '').toLowerCase() !== 'production';
     return {
       ok: false,
       status: 500,
       body: {
         ok: false,
         error: 'google_verification_failed',
-        message: 'Internal error during Google token verification.',
-        details: error.message,
-        stack: error.stack,
+        message: isDev
+          ? `Google sign-in failed: ${error.message}`
+          : 'Internal error during Google token verification.',
+        ...(isDev ? { details: error.message } : {}),
       },
     };
   }

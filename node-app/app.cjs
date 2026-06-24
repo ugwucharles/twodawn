@@ -3,6 +3,16 @@ const express = require('express');
 const { attachRequestContext } = require('./middleware/requestContext.cjs');
 const { registerRoutes } = require('./routes/index.cjs');
 const { createUpstreamProxy } = require('./services/upstreamProxy.cjs');
+const { ensureUsersSchema } = require('./db/ensureUsersSchema.cjs');
+const { ensureOrdersSchema } = require('./db/ensureOrdersSchema.cjs');
+
+ensureUsersSchema().catch((error) => {
+  console.error('Failed to ensure users schema:', error.message);
+});
+
+ensureOrdersSchema().catch((error) => {
+  console.error('Failed to ensure orders schema:', error.message);
+});
 
 function createApp() {
   const app = express();
@@ -11,6 +21,9 @@ function createApp() {
   app.set('trust proxy', true);
 
   app.use(attachRequestContext);
+
+  app.use(express.json({ limit: '1mb' }));
+  app.use(express.urlencoded({ extended: false }));
 
   app.use((req, res, next) => {
     const origin = req.headers.origin;
@@ -30,8 +43,7 @@ function createApp() {
 
   registerRoutes(app);
 
-  // During migration, everything not yet implemented in Node falls back to Laravel.
-  // Disabled for now since we don't want to use Laravel
+  // Legacy Laravel proxy support has been removed. The app now runs entirely on the Node stack.
   // app.use(createUpstreamProxy());
 
   return app;

@@ -1,6 +1,7 @@
 const express = require('express');
 const { listPublishedEventsFiltered } = require('../models/eventModel.cjs');
 const { getPublicUrl, getImageUrl, getTopSellingEvents } = require('../services/eventPublicService.cjs');
+const { buildEventFiltersFromQuery } = require('../lib/filtering.cjs');
 
 function createApiRouter() {
   const router = express.Router();
@@ -9,19 +10,11 @@ function createApiRouter() {
   router.get('/events', async (req, res) => {
     try {
       console.log('API /events called');
-      const filters = {
-        mood: req.query.mood,
-        state: req.query.state,
-        price: req.query.price,
-        date: req.query.date,
-        q: req.query.q,
-      };
-      
       const limit = Math.min(parseInt(req.query.limit || '50', 10), 100);
       const offset = 0;
 
-      console.log('Fetching events with filters:', filters, 'limit:', limit);
-      const events = await listPublishedEventsFiltered(filters, { limit, offset });
+      console.log('Fetching events without filters, limit:', limit);
+      const events = await listPublishedEventsFiltered({}, { limit, offset });
       console.log('Events fetched:', events.length);
 
       const items = events.map((event) => ({
@@ -36,8 +29,10 @@ function createApiRouter() {
         image_path: event.image_path,
         description: event.description,
         capacity: event.capacity,
+        ticket_types: event.ticket_types,
         organizer_username: event.organizer_username || null,
         organizer_name: event.organizer_name || null,
+        state: event.state,
       }));
 
       return res.json({ ok: true, events: items });
@@ -68,7 +63,9 @@ function createApiRouter() {
     try {
       const { getTopSellingEvents } = require('../services/eventPublicService.cjs');
       const limit = Math.min(parseInt(req.query.limit || '6', 10), 20);
-      const events = await getTopSellingEvents({ limit });
+      const filters = buildEventFiltersFromQuery(req.query);
+      console.log('API /events/top-selling called with filters:', filters);
+      const events = await getTopSellingEvents({ limit, filters });
       return res.json({ ok: true, events });
     } catch (error) {
       console.error('API top-selling events error:', error);
@@ -115,18 +112,6 @@ function createApiRouter() {
     } catch (error) {
       console.error('API event error:', error);
       return res.status(500).json({ ok: false, error: 'Failed to fetch event' });
-    }
-  });
-
-  // GET /api/v1/events/top-selling - top selling events
-  router.get('/events/top-selling', async (req, res) => {
-    try {
-      const limit = Math.min(parseInt(req.query.limit || '6', 10), 20);
-      const events = await getTopSellingEvents({ limit });
-      return res.json({ ok: true, events });
-    } catch (error) {
-      console.error('API top-selling events error:', error);
-      return res.status(500).json({ ok: false, error: 'Failed to fetch top selling events' });
     }
   });
 

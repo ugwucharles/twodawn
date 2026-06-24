@@ -92,8 +92,8 @@ async function getEventRemaining(eventId) {
   return getEventCapacity(eventId);
 }
 
-async function getTopSellingEvents({ limit = 6 } = {}) {
-  const events = await listTopSellingEvents({ limit });
+async function getTopSellingEvents({ limit = 6, filters = {} } = {}) {
+  const events = await listTopSellingEvents({ limit, filters });
   return events.map(formatEventForApi);
 }
 

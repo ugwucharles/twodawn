@@ -1,4 +1,5 @@
 const { query } = require('../db/client.cjs');
+const { ensureOrdersSchema } = require('../db/ensureOrdersSchema.cjs');
 
 const ORDER_SELECT = `
   id,
@@ -96,6 +97,8 @@ async function sumPaidQuantityForEvent(eventId) {
 }
 
 async function createOrder(orderData) {
+  await ensureOrdersSchema();
+
   const {
     event_id,
     ticket_type,
@@ -112,8 +115,9 @@ async function createOrder(orderData) {
   const rows = await query(
     `INSERT INTO orders (
       event_id, ticket_type, buyer_name, buyer_email, buyer_phone,
-      coupon_code, quantity, amount, paystack_reference, status, created_ip
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
+      coupon_code, quantity, amount, paystack_reference, status, created_ip,
+      created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, datetime('now'), datetime('now'))`,
     [
       event_id,
       ticket_type || null,
@@ -152,8 +156,8 @@ async function decrementEventCapacity(eventId, quantity) {
   if (!id) return null;
 
   await query(
-    `UPDATE events SET capacity = GREATEST(0, capacity - ?) WHERE id = ? AND capacity IS NOT NULL`,
-    [quantity, id]
+    `UPDATE events SET capacity = CASE WHEN capacity - ? < 0 THEN 0 ELSE capacity - ? END WHERE id = ? AND capacity IS NOT NULL`,
+    [quantity, quantity, id]
   );
 
   const eventRows = await query(`SELECT capacity FROM events WHERE id = ? LIMIT 1`, [id]);
