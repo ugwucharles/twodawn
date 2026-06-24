@@ -137,12 +137,9 @@ function OrganizerDashboard() {
           </div>
 
           <div className="space-y-4">
-            {events.length > 0 ? (
-              events.slice(0, 4).map((event) => (
-                <div key={event.id} className="flex items-center relative p-4 bg-white rounded-xl border border-gray-100/50 hover:bg-gray-50/50 transition-all duration-300">
-                  <span className="absolute top-0 right-0 m-2 bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                    Live
-                  </span>
+            {events.filter(e => e.is_published).length > 0 ? (
+              events.filter(e => e.is_published).slice(0, 4).map((event) => (
+                <div key={event.id} className="flex items-center p-4 bg-white rounded-xl border border-gray-100/50 hover:bg-gray-50/50 transition-all duration-300">
                   <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex flex-col items-center justify-center font-bold text-gray-900 shrink-0">
                     {event.starts_at ? (
                       <>
@@ -173,7 +170,7 @@ function OrganizerDashboard() {
             ) : (
               <div className="py-12 flex flex-col items-center justify-center grayscale opacity-50">
                 <Calendar className="w-12 h-12 text-black mb-2" />
-                <p className="text-xs font-bold text-black uppercase tracking-widest">No events yet</p>
+                <p className="text-xs font-bold text-black uppercase tracking-widest">No published events yet</p>
               </div>
             )}
           </div>

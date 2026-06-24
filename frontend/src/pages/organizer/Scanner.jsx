@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Scan, Camera, X, Upload, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { Scan, Camera, X, Upload, CheckCircle, AlertTriangle, XCircle, Camera as CameraIcon } from 'lucide-react';
 import axios from 'axios';
 
 function Scanner() {
@@ -9,6 +9,7 @@ function Scanner() {
   const [inlineResult, setInlineResult] = useState(null);
   const [modal, setModal] = useState(null);
   const [codeInput, setCodeInput] = useState('');
+  const [facingMode, setFacingMode] = useState('environment'); // 'environment' for back, 'user' for front
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
@@ -75,7 +76,10 @@ function Scanner() {
   const startCamera = async () => {
     try {
       setStatusMsg('Starting…', 'scanning');
-      const s = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      const s = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: facingMode }, 
+        audio: false 
+      });
       if (!s) throw new Error('No camera found');
       setStream(s);
       if (videoRef.current) {
@@ -89,6 +93,15 @@ function Scanner() {
       console.error('Camera start error:', e);
       setStatusMsg('Camera blocked: ' + (e?.message || e), 'err');
       showInlineResult('err', 'Allow camera access, or use the image upload / manual entry.');
+    }
+  };
+
+  const switchCamera = async () => {
+    const wasRunning = running;
+    stopCamera();
+    setFacingMode(prev => prev === 'environment' ? 'user' : 'environment');
+    if (wasRunning) {
+      await startCamera();
     }
   };
 
@@ -182,6 +195,13 @@ function Scanner() {
               className="px-5 py-2.5 rounded-xl bg-white border border-purple-200 text-gray-600 text-sm font-bold hover:bg-purple-50 transition-colors"
             >
               Stop
+            </button>
+            <button
+              onClick={switchCamera}
+              className="px-5 py-2.5 rounded-xl bg-white border border-purple-200 text-gray-600 text-sm font-bold hover:bg-purple-50 transition-colors flex items-center gap-2"
+            >
+              <CameraIcon className="w-4 h-4" />
+              Switch
             </button>
           </div>
 
