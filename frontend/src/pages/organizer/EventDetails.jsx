@@ -18,12 +18,14 @@ function EventDetails() {
   const fetchEventDetails = async () => {
     try {
       const response = await axios.get(`/organizer/events/${id}`);
+      console.log('Event details response:', response.data);
       setEvent(response.data.event);
       setStats(response.data.stats);
       setOrders(response.data.orders || []);
       setLoading(false);
     } catch (err) {
       console.error('Failed to load event details', err);
+      console.error('Error response:', err.response?.data);
       setLoading(false);
     }
   };
