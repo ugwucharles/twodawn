@@ -56,9 +56,12 @@ function createOrganizerRouter() {
     try {
       if (wantsJson(req)) {
         if (!req.auth || !req.auth.isAuthenticated) {
+          console.log('Dashboard: Unauthenticated request');
           return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
         }
+        console.log('Dashboard: Fetching data for user ID:', req.auth.user.id);
         const data = await getDashboardData(req.auth.user.id);
+        console.log('Dashboard: Data returned:', JSON.stringify(data, null, 2));
         return res.json({ ok: true, ...data });
       }
       // Proxy to Laravel for HTML
@@ -401,18 +404,24 @@ function createOrganizerRouter() {
   router.get('/events/:id', async (req, res) => {
     try {
       if (!req.auth || !req.auth.isAuthenticated) {
+        console.log('Event details: Unauthenticated request');
         return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
       }
 
       const eventId = parseInt(req.params.id, 10);
+      console.log('Event details: Fetching event ID:', eventId, 'for user ID:', req.auth.user.id);
       const event = await findEventById(eventId);
+      console.log('Event details: Event found:', event ? 'yes' : 'no');
 
       if (!event) {
+        console.log('Event details: Event not found in database');
         return res.status(404).json({ ok: false, error: 'Event not found' });
       }
 
+      console.log('Event details: Event owner ID:', event.user_id, 'Request user ID:', req.auth.user.id);
       // Check if user owns this event
       if (event.user_id !== req.auth.user.id) {
+        console.log('Event details: Permission denied - user does not own this event');
         return res.status(403).json({ ok: false, error: 'You do not have permission to view this event' });
       }
 
@@ -434,7 +443,7 @@ function createOrganizerRouter() {
       const totalSold = orders.reduce((sum, order) => sum + (order.quantity || 0), 0);
       const totalRevenue = orders.reduce((sum, order) => sum + (order.amount || 0), 0);
 
-      return res.json({
+      const responseData = {
         ok: true,
         event: {
           ...event,
@@ -445,7 +454,9 @@ function createOrganizerRouter() {
           totalRevenue
         },
         orders
-      });
+      };
+      console.log('Event details: Returning data:', JSON.stringify(responseData, null, 2));
+      return res.json(responseData);
     } catch (error) {
       console.error('Event details error:', error);
       return res.status(500).json({ ok: false, error: 'Failed to fetch event details' });
