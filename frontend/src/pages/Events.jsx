@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { getEvents, getRecentEvents } from '../services/events'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import { formatPrice } from '../utils/price'
+import { getEventImage } from '../utils/image'
 
 function Events({ recent = false }) {
   const [events, setEvents] = useState([])
@@ -71,9 +73,9 @@ function Events({ recent = false }) {
                 >
                   {/* Left: Image */}
                   <div className="w-32 sm:w-40 h-full relative bg-gray-50 shrink-0">
-                    {event.image_url ? (
+                    {getEventImage(event) ? (
                       <img 
-                        src={event.image_url} 
+                        src={getEventImage(event)} 
                         alt={event.title}
                         className="absolute inset-0 h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
@@ -115,7 +117,7 @@ function Events({ recent = false }) {
                     </div>
                     <div>
                       <span className="text-[15px] font-black text-[#8b5cf6]">
-                        {event.price && event.price > 0 ? `₦${event.price.toLocaleString()}` : 'Free'}
+                        {formatPrice(event)}
                       </span>
                     </div>
                   </div>

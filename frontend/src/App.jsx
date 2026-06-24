@@ -7,6 +7,7 @@ import Register from './pages/Register'
 import FindTickets from './pages/FindTickets'
 import Checkout from './pages/Checkout'
 import OrderConfirmation from './pages/OrderConfirmation'
+import PaymentSuccess from './pages/PaymentSuccess'
 import AdminDashboard from './pages/admin/Dashboard'
 import OrganizerDashboard from './pages/organizer/Dashboard'
 import OrganizerLayout from './pages/organizer/OrganizerLayout'
@@ -55,6 +56,7 @@ function App() {
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/events/:id/checkout" element={<Checkout />} />
         <Route path="/orders/:reference" element={<OrderConfirmation />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/login" element={<Login />} />
         <Route path="/organizer/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

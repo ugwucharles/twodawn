@@ -5,7 +5,6 @@ import { getEventById } from '../services/events'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { getEventImage } from '../utils/image'
-import { formatPrice } from '../utils/price'
 
 function Checkout() {
   const { id } = useParams()
@@ -14,14 +13,12 @@ function Checkout() {
   const [quote, setQuote] = useState(null)
   const [quantity, setQuantity] = useState(1)
   const [ticketType, setTicketType] = useState('')
-  const [couponCode, setCouponCode] = useState('')
   const [buyerName, setBuyerName] = useState('')
   const [buyerEmail, setBuyerEmail] = useState('')
   const [buyerPhone, setBuyerPhone] = useState('')
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState(null)
-  const [couponApplied, setCouponApplied] = useState(false)
 
   useEffect(() => {
     fetchEvent()
@@ -31,13 +28,12 @@ function Checkout() {
     if (event) {
       fetchQuote()
     }
-  }, [event, quantity, ticketType, couponCode])
+  }, [event, quantity, ticketType])
 
   const fetchEvent = async () => {
     try {
       const response = await getEventById(id)
       setEvent(response.event)
-      // Auto-select first ticket type if available
       if (response.event?.ticket_types?.length > 0) {
         setTicketType(response.event.ticket_types[0].name)
       }
@@ -50,21 +46,15 @@ function Checkout() {
 
   const fetchQuote = async () => {
     try {
-      const response = await getQuote(id, { quantity, ticket_type: ticketType, coupon_code: couponCode })
+      const response = await getQuote(id, { quantity, ticket_type: ticketType })
       setQuote(response)
     } catch (err) {
       console.error('Failed to fetch quote', err)
     }
   }
 
-  const handleApplyCoupon = () => {
-    setCouponApplied(true)
-    fetchQuote()
-  }
-
   const handleTicketTypeChange = (typeName) => {
     setTicketType(typeName)
-    // fetchQuote will be called by useEffect when ticketType changes
   }
 
   const handleBuyTicket = async () => {
@@ -82,23 +72,28 @@ function Checkout() {
         buyer_phone: buyerPhone.trim(),
         quantity,
         ticket_type: ticketType,
-        coupon: couponCode,
       }
 
-      console.log('Creating order with data:', orderData)
       const response = await createOrder(id, orderData)
-      console.log('Order response:', response)
 
       if (response.authorization_url) {
         window.location.href = response.authorization_url
-      } else if (response.order) {
-        navigate(`/orders/${response.order.paystack_reference}`)
-      } else if (response.reference) {
-        navigate(`/orders/${response.reference}`)
+        return
       }
+      if (response.order) {
+        navigate(`/orders/${response.order.paystack_reference}`)
+        return
+      }
+      if (response.reference) {
+        navigate(`/orders/${response.reference}`)
+        return
+      }
+
+      setError('Unexpected response from payment server. Please try again.')
+      setProcessing(false)
     } catch (err) {
       console.error('Order creation error:', err)
-      setError('Failed to create order. Please try again.')
+      setError(err.response?.data?.message || 'Failed to create order. Please try again.')
       setProcessing(false)
     }
   }
@@ -147,7 +142,6 @@ function Checkout() {
       <main className="flex-1 py-8 sm:py-12">
         <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-10">
 
-          {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
             <Link to="/" className="hover:text-[#8b5cf6] transition-colors">Home</Link>
             <span>/</span>
@@ -158,10 +152,8 @@ function Checkout() {
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
-            {/* Left: Form */}
             <div className="lg:col-span-3 flex flex-col gap-6">
 
-              {/* Buyer Info */}
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                 <h2 className="text-lg font-extrabold text-gray-900 mb-5">Your Details</h2>
                 <div className="flex flex-col gap-4">
@@ -198,7 +190,6 @@ function Checkout() {
                 </div>
               </div>
 
-              {/* Ticket Selection */}
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                 <h2 className="text-lg font-extrabold text-gray-900 mb-5">Select Tickets</h2>
 
@@ -238,7 +229,6 @@ function Checkout() {
                   </div>
                 ) : null}
 
-                {/* Quantity */}
                 <div>
                   <label className={labelClass}>Quantity</label>
                   <div className="flex items-center gap-3">
@@ -261,30 +251,6 @@ function Checkout() {
                 </div>
               </div>
 
-              {/* Coupon */}
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <h2 className="text-lg font-extrabold text-gray-900 mb-4">Have a Coupon?</h2>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={couponCode}
-                    onChange={(e) => { setCouponCode(e.target.value); setCouponApplied(false) }}
-                    className={`${inputClass} flex-1`}
-                    placeholder="Enter coupon code"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleApplyCoupon}
-                    className="px-5 py-3 rounded-xl bg-gray-900 text-white text-sm font-bold hover:bg-gray-700 transition-colors whitespace-nowrap"
-                  >
-                    Apply
-                  </button>
-                </div>
-                {couponApplied && quote?.discount_kobo > 0 && (
-                  <p className="mt-2 text-sm text-green-600 font-semibold">✓ Coupon applied! You saved ₦{((quote.discount_kobo || 0) / 100).toFixed(2)}</p>
-                )}
-              </div>
-
               {error && (
                 <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 font-medium">
                   {error}
@@ -292,11 +258,9 @@ function Checkout() {
               )}
             </div>
 
-            {/* Right: Order Summary + CTA */}
             <div className="lg:col-span-2">
               <div className="sticky top-8 flex flex-col gap-4">
 
-                {/* Event Card */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                   <div className="h-36 bg-gradient-to-br from-purple-100 to-purple-50 relative">
                     {eventImage ? (
@@ -328,25 +292,26 @@ function Checkout() {
                   </div>
                 </div>
 
-                {/* Order Summary */}
                 {quote && (
                   <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                     <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4">Order Summary</h3>
                     <div className="flex flex-col gap-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Subtotal</span>
-                        <span className="font-semibold text-gray-900">₦{((quote.subtotal_kobo || 0) / 100).toFixed(2)}</span>
-                      </div>
+                      {ticketType && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">{ticketType} × {quantity}</span>
+                          <span className="font-semibold text-gray-900">₦{((quote.subtotal_kobo || 0) / 100).toFixed(2)}</span>
+                        </div>
+                      )}
+                      {!ticketType && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Subtotal</span>
+                          <span className="font-semibold text-gray-900">₦{((quote.subtotal_kobo || 0) / 100).toFixed(2)}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between">
                         <span className="text-gray-600">Service Fee</span>
                         <span className="font-semibold text-gray-900">₦{((quote.fees_kobo || 0) / 100).toFixed(2)}</span>
                       </div>
-                      {(quote.discount_kobo || 0) > 0 && (
-                        <div className="flex justify-between text-green-600">
-                          <span>Discount</span>
-                          <span className="font-semibold">-₦{((quote.discount_kobo || 0) / 100).toFixed(2)}</span>
-                        </div>
-                      )}
                       <div className="flex justify-between items-center text-base font-extrabold text-gray-900 border-t border-gray-100 pt-3 mt-1">
                         <span>Total</span>
                         <span className="text-[#8b5cf6]">₦{((quote.total_kobo || 0) / 100).toFixed(2)}</span>
@@ -355,7 +320,6 @@ function Checkout() {
                   </div>
                 )}
 
-                {/* Pay Button */}
                 <button
                   type="button"
                   onClick={handleBuyTicket}

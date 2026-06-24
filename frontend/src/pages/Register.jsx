@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import AuthLogo from '../components/AuthLogo'
 import GoogleSignInButton from '../components/GoogleSignInButton'
+import AuthFeedbackBanner from '../components/AuthFeedbackOverlay'
 
 function Register() {
   const [name, setName] = useState('')
@@ -13,7 +14,7 @@ function Register() {
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
+  const [feedback, setFeedback] = useState(null)
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
@@ -35,19 +36,31 @@ function Register() {
         password_confirmation: passwordConfirmation,
       })
       localStorage.setItem('token', response.data.token)
-      setShowSuccess(true)
+
+      const redirect = response.data.redirect || '/onboarding'
+      setFeedback({
+        success: true,
+        message: 'Sign up successful!',
+      })
+
       setTimeout(() => {
-        navigate('/organizer/dashboard')
+        navigate(redirect)
       }, 2000)
     } catch (err) {
-      if (err.response?.data?.fields) {
-        const fields = err.response.data.fields
-        const errorMessages = Object.values(fields).join(' ')
-        setError(errorMessages || 'Registration failed')
-      } else {
-        setError(err.response?.data?.message || 'Registration failed')
-      }
-      setLoading(false)
+      const errorMessage = err.response?.data?.fields
+        ? Object.values(err.response.data.fields).join(' ')
+        : err.response?.data?.message || 'Registration failed'
+
+      setFeedback({
+        success: false,
+        message: errorMessage,
+      })
+      setError(errorMessage)
+
+      setTimeout(() => {
+        setFeedback(null)
+        setLoading(false)
+      }, 2000)
     }
   }
 
@@ -62,13 +75,11 @@ function Register() {
             <p className="text-gray-500 text-sm">Create your 2DAWN account</p>
           </div>
 
-          {showSuccess && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 text-sm text-center">
-              Sign up successful! Redirecting...
-            </div>
+          {feedback && (
+            <AuthFeedbackBanner success={feedback.success} message={feedback.message} />
           )}
 
-          {error && (
+          {error && !feedback && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
               {error}
             </div>
@@ -76,10 +87,10 @@ function Register() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="mb-6">
-              <GoogleSignInButton 
-                onError={setError} 
-                disabled={loading} 
-                onSuccess={() => setShowSuccess(true)}
+              <GoogleSignInButton
+                onError={setError}
+                onFeedback={setFeedback}
+                disabled={loading}
               />
             </div>
 

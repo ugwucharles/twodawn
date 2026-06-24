@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { User, MessageCircle, Link, AtSign, CheckCircle, AlertCircle, Lock, Camera, Upload } from 'lucide-react';
+import { User, MessageCircle, AtSign, CheckCircle, AlertCircle, Lock, Camera, Upload, Mail } from 'lucide-react';
 import api from '../../services/api';
 
 function OrganizerSettings() {
@@ -11,6 +11,7 @@ function OrganizerSettings() {
     profile_picture: '',
   });
   const [username, setUsername] = useState('');
+  const [accountEmail, setAccountEmail] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -26,6 +27,7 @@ function OrganizerSettings() {
       const response = await api.get('/organizer/settings');
       const s = response.data.settings || {};
       setUsername(s.username || '');
+      setAccountEmail(s.email || '');
       setFormData({
         name: s.name || '',
         instagram_handle: s.instagram_handle || '',
@@ -225,6 +227,29 @@ function OrganizerSettings() {
               </span>
             </div>
             <p className="text-xs text-gray-400 mt-1.5">Your username cannot be changed after onboarding.</p>
+          </div>
+
+          {/* Account Email — read-only */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <span className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-purple-500" />
+                Account Email
+              </span>
+            </label>
+            <div className="flex rounded-xl shadow-sm overflow-hidden border border-gray-200 bg-gray-50">
+              <input
+                type="email"
+                value={accountEmail}
+                readOnly
+                className="w-full px-4 py-3 bg-gray-50 text-gray-500 text-sm cursor-not-allowed"
+              />
+              <span className="inline-flex items-center px-3 text-xs text-gray-400 bg-gray-50 border-l border-gray-200 whitespace-nowrap">
+                <Lock className="w-4 h-4 mr-1" />
+                Read only
+              </span>
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5">Your login email cannot be changed here.</p>
           </div>
 
           {/* Display Name */}

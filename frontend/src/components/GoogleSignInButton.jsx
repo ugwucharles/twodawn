@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import { GoogleLogin } from '@react-oauth/google'
 import api from '../services/api'
 import { useNavigate } from 'react-router-dom'
 
-function GoogleSignInButton({ onError, disabled, onSuccess }) {
+function GoogleSignInButton({ onError, onFeedback, disabled }) {
   const navigate = useNavigate()
 
   const handleSuccess = async (credentialResponse) => {
@@ -14,19 +15,30 @@ function GoogleSignInButton({ onError, disabled, onSuccess }) {
       if (response.data.token) {
         localStorage.setItem('token', response.data.token)
       }
-      onSuccess?.()
+
+      const redirect = response.data.redirect || '/organizer/dashboard'
+      const isNewUser = Boolean(response.data.needsOnboarding)
+      const message = isNewUser ? 'Sign up successful!' : 'Sign in successful!'
+      onFeedback?.({ success: true, message })
+
       setTimeout(() => {
-        navigate(response.data.redirect || '/organizer/dashboard')
+        navigate(redirect)
       }, 2000)
     } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Google sign-in failed'
       const errorData = {
         message: err.message,
         response: err.response?.data,
         status: err.response?.status,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
       localStorage.setItem('google_signin_error', JSON.stringify(errorData))
-      onError?.(err.response?.data?.message || 'Google sign-in failed')
+      onFeedback?.({ success: false, message: errorMessage })
+      onError?.(errorMessage)
+
+      setTimeout(() => {
+        onFeedback?.(null)
+      }, 2000)
     }
   }
 
@@ -39,10 +51,13 @@ function GoogleSignInButton({ onError, disabled, onSuccess }) {
             const errorData = {
               message: 'Google login widget error',
               error: error,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
             }
             localStorage.setItem('google_signin_error', JSON.stringify(errorData))
-            onError?.('Google sign-in was cancelled or failed')
+            const message = 'Google sign-in was cancelled or failed'
+            onFeedback?.({ success: false, message })
+            onError?.(message)
+            setTimeout(() => onFeedback?.(null), 2000)
           }}
           theme="outline"
           size="large"

@@ -58,15 +58,25 @@ function Header() {
           </Link>
         </div>
 
-        {/* Right: Desktop Navigation */}
+        {/* Center: Desktop Navigation */}
+        <nav className="hidden lg:flex items-center text-[15px] font-light tracking-wide text-zinc-300">
+          <Link to="/events" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors font-light">Discover events</Link>
+          <Link to="/find-tickets" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors font-light">Find my tickets</Link>
+          {!isAuthenticated && (
+            <Link to="/organizer/login" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors font-light">Create event</Link>
+          )}
+        </nav>
+
+        {/* Right: Desktop Actions */}
         <div className="hidden lg:flex items-center gap-4 shrink-0">
-          <nav className="flex items-center text-[15px] font-light tracking-wide text-zinc-300 mr-2">
-            <Link to="/events" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors font-light">Discover events</Link>
-            <Link to="/find-tickets" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors font-light">Find my tickets</Link>
-            {!isAuthenticated && (
-              <Link to="/organizer/login" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors font-light">Create event</Link>
-            )}
-          </nav>
+          {!isAuthenticated && (
+            <Link 
+              to="/organizer/login" 
+              className="px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              Sign in
+            </Link>
+          )}
 
           {isAuthenticated && (
             <div className="relative">
@@ -160,13 +170,22 @@ function Header() {
                 </Link>
 
                 {!isAuthenticated ? (
-                  <Link
-                    to="/organizer/login"
-                    className="block px-4 py-3 text-sm font-light tracking-wide text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors border-t border-gray-100 mt-1 pt-3"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Create event
-                  </Link>
+                  <>
+                    <Link
+                      to="/organizer/login"
+                      className="block px-4 py-3 text-sm font-light tracking-wide text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors border-t border-gray-100 mt-1 pt-3"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Create event
+                    </Link>
+                    <Link
+                      to="/organizer/login"
+                      className="block px-4 py-3 text-sm font-medium text-[#7c3aed] hover:bg-purple-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Sign in
+                    </Link>
+                  </>
                 ) : (
                   <>
                     <div className="border-t border-gray-100 my-2"></div>

@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import AuthLogo from '../components/AuthLogo'
 import GoogleSignInButton from '../components/GoogleSignInButton'
+import AuthFeedbackBanner from '../components/AuthFeedbackOverlay'
 
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [feedback, setFeedback] = useState(null)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
@@ -38,7 +40,11 @@ function Login() {
             <p className="text-gray-500 text-sm">Access your 2DAWN account</p>
           </div>
 
-          {error && (
+          {feedback && (
+            <AuthFeedbackBanner success={feedback.success} message={feedback.message} />
+          )}
+
+          {error && !feedback && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
               {error}
             </div>
@@ -46,7 +52,7 @@ function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="mb-6">
-              <GoogleSignInButton onError={setError} disabled={loading} />
+              <GoogleSignInButton onError={setError} onFeedback={setFeedback} disabled={loading} />
             </div>
 
             <div className="relative mb-6">

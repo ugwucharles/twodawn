@@ -21,7 +21,7 @@ function Footer() {
             <Link to="/events" className="hover:text-[#7c3aed] transition-colors duration-200">
               Discover events
             </Link>
-            <Link to="/events/recent" className="hover:text-[#7c3aed] transition-colors duration-200">
+            <Link to="/find-tickets" className="hover:text-[#7c3aed] transition-colors duration-200">
               Find my tickets
             </Link>
             <Link to="/organizer/login" className="hover:text-[#7c3aed] transition-colors duration-200">
