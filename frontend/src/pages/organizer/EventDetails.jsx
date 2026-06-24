@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { ArrowLeft, ExternalLink, Edit, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Edit, AlertTriangle, Download } from 'lucide-react';
 
 function EventDetails() {
   const { id } = useParams();
@@ -28,6 +28,35 @@ function EventDetails() {
       console.error('Error response:', err.response?.data);
       setLoading(false);
     }
+  };
+
+  const exportAttendees = () => {
+    if (!orders || orders.length === 0) {
+      alert('No attendees to export');
+      return;
+    }
+
+    const headers = ['Name', 'Email', 'Quantity', 'Amount Paid', 'Date'];
+    const csvContent = [
+      headers.join(','),
+      ...orders.map(order => [
+        `"${order.buyer_name || 'Unknown'}"`,
+        `"${order.buyer_email || 'Unknown'}"`,
+        order.quantity || 0,
+        `₦${(order.amount / 100).toFixed(2)}`,
+        new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `attendees-${event?.title || 'event'}-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (loading) {
@@ -134,8 +163,18 @@ function EventDetails() {
       {/* Attendees Table */}
       <div className="bg-white rounded-2xl p-0 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] overflow-hidden">
         <div className="p-6 flex justify-between items-center border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900">Attendees</h2>
-          <span className="text-sm font-medium text-gray-500 bg-gray-50 px-3 py-1 rounded-lg">{orders.length} total orders</span>
+          <div className="flex items-center gap-4">
+            <h2 className="text-lg font-bold text-gray-900">Attendees</h2>
+            <span className="text-sm font-medium text-gray-500 bg-gray-50 px-3 py-1 rounded-lg">{orders.length} total orders</span>
+          </div>
+          <button
+            onClick={exportAttendees}
+            disabled={orders.length === 0}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl px-4 py-2 shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
         </div>
 
         <div className="overflow-x-auto">
