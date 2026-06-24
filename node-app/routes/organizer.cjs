@@ -350,7 +350,7 @@ function createOrganizerRouter() {
         SELECT o.*, e.title as event_title, e.user_id as organizer_id
         FROM orders o
         LEFT JOIN events e ON o.event_id = e.id
-        WHERE o.reference = ? OR o.ticket_code = ?
+        WHERE o.paystack_reference = ? OR o.ticket_code = ?
         LIMIT 1
       `, [code, code]);
       console.log('Scanner verify: Query result:', orderRows);
