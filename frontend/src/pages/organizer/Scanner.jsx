@@ -163,6 +163,8 @@ function Scanner() {
 
   const handleManualVerify = async () => {
     const v = codeInput.trim();
+    console.log('Manual verify input:', v);
+    console.log('Input length:', v.length);
     if (v) await verifyText(v);
     else showInlineResult('err', 'Please enter a reference code.');
   };
@@ -171,9 +173,32 @@ function Scanner() {
     if (!file) return;
     setStatusMsg('Decoding image…', 'scanning');
     try {
-      // Note: In production, you'd use a QR library to decode the image
-      showInlineResult('err', 'QR code detection requires a library like jsQR');
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+          
+          if (code) {
+            console.log('QR code detected from image:', code.data);
+            setDebugInfo(prev => ({ ...prev, qrData: code.data }));
+            verifyText(code.data);
+          } else {
+            setStatusMsg('Error', 'err');
+            showInlineResult('err', 'No QR code found in image.');
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     } catch (e) {
+      console.error('Image upload error:', e);
       setStatusMsg('Error', 'err');
       showInlineResult('err', 'Failed to decode image.');
     }
