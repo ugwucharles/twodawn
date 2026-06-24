@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Scan, Camera, X, Upload, CheckCircle, AlertTriangle, XCircle, Camera as CameraIcon } from 'lucide-react';
-import axios from 'axios';
+import api from '../../services/api';
+import jsQR from 'jsqr';
 
 function Scanner() {
   const [stream, setStream] = useState(null);
@@ -39,7 +40,7 @@ function Scanner() {
   const verifyText = async (text) => {
     setStatusMsg('Verifying…', 'scanning');
     try {
-      const res = await axios.post('/organizer/scanner/verify', { text });
+      const res = await api.post('/organizer/scanner/verify', { text });
       const data = res.data;
 
       if (data.valid) {
@@ -133,8 +134,16 @@ function Scanner() {
           canvas.width = W;
           canvas.height = H;
           ctx.drawImage(videoRef.current, 0, 0, W, H);
-          // Note: In production, you'd use a QR library like jsQR here
-          // For now, this is a placeholder for QR detection
+          
+          const imageData = ctx.getImageData(0, 0, W, H);
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+          
+          if (code) {
+            console.log('QR code detected:', code.data);
+            verifyText(code.data);
+            stopCamera();
+            return;
+          }
         }
       } catch (_) {}
       rafRef.current = requestAnimationFrame(tick);
