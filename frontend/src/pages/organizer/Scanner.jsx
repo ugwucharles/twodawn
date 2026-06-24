@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { Scan, Camera, X, Upload, CheckCircle, AlertTriangle, XCircle, Camera as CameraIcon } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Camera, Upload, CheckCircle, AlertTriangle, XCircle, Camera as CameraIcon } from 'lucide-react';
 import api from '../../services/api';
 import jsQR from 'jsqr';
 
@@ -10,16 +10,27 @@ function Scanner() {
   const [inlineResult, setInlineResult] = useState(null);
   const [modal, setModal] = useState(null);
   const [codeInput, setCodeInput] = useState('');
-  const [facingMode, setFacingMode] = useState('environment'); // 'environment' for back, 'user' for front
+  const [facingMode, setFacingMode] = useState('environment');
   const [debugInfo, setDebugInfo] = useState({ qrData: null, apiResponse: null });
+
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
+  // Use a ref for running so the animation-frame loop always reads the latest value
+  const runningRef = useRef(false);
+  const streamRef = useRef(null);
+  const facingModeRef = useRef('environment');
+
+  // Keep facingModeRef in sync
+  useEffect(() => {
+    facingModeRef.current = facingMode;
+  }, [facingMode]);
 
   useEffect(() => {
     return () => {
       stopCamera();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setStatusMsg = (msg, kind = 'idle') => {
@@ -38,18 +49,23 @@ function Scanner() {
     setModal(null);
   };
 
-  const verifyText = async (text) => {
+  const verifyText = useCallback(async (text) => {
+    const trimmed = (text || '').trim();
+    if (!trimmed) {
+      showInlineResult('err', 'Please enter a ticket code.');
+      return;
+    }
     setStatusMsg('Verifying…', 'scanning');
     try {
-      console.log('Sending verification request for:', text);
-      const res = await api.post('/organizer/scanner/verify', { code: text });
+      console.log('Sending verification request for:', trimmed);
+      const res = await api.post('/organizer/scanner/verify', { code: trimmed });
       const data = res.data;
       console.log('Verification response:', data);
       setDebugInfo(prev => ({ ...prev, apiResponse: data }));
 
       if (data.valid) {
         setStatusMsg('Approved', 'ok');
-        showInlineResult('ok', `${data.buyer?.name} checked in to ${data.event?.title}`);
+        showInlineResult('ok', `${data.buyer?.name || 'Guest'} checked in to "${data.event?.title || 'event'}"`);
         openModal('ok', {
           title: '✓ Check-in Approved!',
           sub: data.event?.title || '',
@@ -58,7 +74,7 @@ function Scanner() {
         });
       } else if (data.already) {
         setStatusMsg('Already used', 'warn');
-        showInlineResult('warn', `Ticket was already used. Buyer: ${data.buyer?.name} (${data.buyer?.email})`);
+        showInlineResult('warn', `Ticket already used. Buyer: ${data.buyer?.name || 'Unknown'} (${data.buyer?.email || ''})`);
         openModal('warn', {
           title: 'Already Checked In',
           sub: data.event?.title || '',
@@ -75,45 +91,75 @@ function Scanner() {
     } catch (e) {
       console.error('Verification error:', e);
       console.error('Error response:', e.response?.data);
+      const errMsg = e.response?.data?.message || e.message || 'Network error.';
       setDebugInfo(prev => ({ ...prev, apiResponse: { error: e.message, response: e.response?.data } }));
       setStatusMsg('Error', 'err');
-      showInlineResult('err', 'Network error.');
+      showInlineResult('err', errMsg);
     }
-  };
+  }, []);
+
+  // The scan loop — uses runningRef so it never goes stale
+  const tick = useCallback(() => {
+    if (!runningRef.current) return;
+    try {
+      if (videoRef.current && canvasRef.current) {
+        const video = videoRef.current;
+        // Only scan when video is actually playing and has dimensions
+        if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext('2d');
+          const W = video.videoWidth;
+          const H = video.videoHeight;
+          canvas.width = W;
+          canvas.height = H;
+          ctx.drawImage(video, 0, 0, W, H);
+          const imageData = ctx.getImageData(0, 0, W, H);
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: 'dontInvert',
+          });
+          if (code && code.data) {
+            console.log('QR code detected:', code.data);
+            setDebugInfo(prev => ({ ...prev, qrData: code.data }));
+            // Stop camera before verifying so we don't re-scan
+            stopCamera();
+            verifyText(code.data);
+            return;
+          }
+        }
+      }
+    } catch (_) { /* ignore canvas errors */ }
+    rafRef.current = requestAnimationFrame(tick);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verifyText]);
 
   const startCamera = async () => {
     try {
       setStatusMsg('Starting…', 'scanning');
-      const s = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: facingMode }, 
-        audio: false 
+      const s = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: facingModeRef.current },
+        audio: false,
       });
       if (!s) throw new Error('No camera found');
+      streamRef.current = s;
       setStream(s);
       if (videoRef.current) {
         videoRef.current.srcObject = s;
         await videoRef.current.play();
       }
+      runningRef.current = true;
       setRunning(true);
       setStatusMsg('Scanning…', 'scanning');
-      scanCanvas();
+      // Start the loop on the next frame
+      rafRef.current = requestAnimationFrame(tick);
     } catch (e) {
       console.error('Camera start error:', e);
-      setStatusMsg('Camera blocked: ' + (e?.message || e), 'err');
+      setStatusMsg('Camera error: ' + (e?.message || e), 'err');
       showInlineResult('err', 'Allow camera access, or use the image upload / manual entry.');
     }
   };
 
-  const switchCamera = async () => {
-    const wasRunning = running;
-    stopCamera();
-    setFacingMode(prev => prev === 'environment' ? 'user' : 'environment');
-    if (wasRunning) {
-      await startCamera();
-    }
-  };
-
   const stopCamera = () => {
+    runningRef.current = false;
     setRunning(false);
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
@@ -123,48 +169,30 @@ function Scanner() {
       videoRef.current.pause?.();
       videoRef.current.srcObject = null;
     }
-    if (stream) {
-      stream.getTracks().forEach(t => t.stop());
+    const s = streamRef.current;
+    if (s) {
+      s.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
       setStream(null);
     }
     setStatusMsg('Ready');
   };
 
-  const scanCanvas = () => {
-    const tick = () => {
-      if (!running) return;
-      try {
-        if (videoRef.current && canvasRef.current) {
-          const canvas = canvasRef.current;
-          const ctx = canvas.getContext('2d');
-          const W = 480, H = 360;
-          canvas.width = W;
-          canvas.height = H;
-          ctx.drawImage(videoRef.current, 0, 0, W, H);
-          
-          const imageData = ctx.getImageData(0, 0, W, H);
-          const code = jsQR(imageData.data, imageData.width, imageData.height);
-          
-          if (code) {
-            console.log('QR code detected:', code.data);
-            console.log('QR code data type:', typeof code.data);
-            console.log('QR code data length:', code.data.length);
-            setDebugInfo(prev => ({ ...prev, qrData: code.data }));
-            verifyText(code.data);
-            stopCamera();
-            return;
-          }
-        }
-      } catch (_) {}
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
+  const switchCamera = async () => {
+    const wasRunning = runningRef.current;
+    stopCamera();
+    const next = facingModeRef.current === 'environment' ? 'user' : 'environment';
+    facingModeRef.current = next;
+    setFacingMode(next);
+    if (wasRunning) {
+      // Wait a tick for state to settle before restarting
+      setTimeout(() => startCamera(), 150);
+    }
   };
 
   const handleManualVerify = async () => {
     const v = codeInput.trim();
     console.log('Manual verify input:', v);
-    console.log('Input length:', v.length);
     if (v) await verifyText(v);
     else showInlineResult('err', 'Please enter a reference code.');
   };
@@ -176,39 +204,33 @@ function Scanner() {
     try {
       const reader = new FileReader();
       reader.onload = async (e) => {
-        console.log('FileReader loaded, data length:', e.target.result.length);
         const img = new Image();
         img.onload = () => {
-          console.log('Image loaded, dimensions:', img.width, 'x', img.height);
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           canvas.width = img.width;
           canvas.height = img.height;
           ctx.drawImage(img, 0, 0);
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          console.log('Image data extracted, size:', imageData.data.length);
-          const code = jsQR(imageData.data, imageData.width, imageData.height);
-          console.log('jsQR result:', code);
-          
-          if (code) {
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: 'dontInvert',
+          });
+          if (code && code.data) {
             console.log('QR code detected from image:', code.data);
             setDebugInfo(prev => ({ ...prev, qrData: code.data }));
             verifyText(code.data);
           } else {
-            console.log('No QR code detected in image');
             setStatusMsg('Error', 'err');
-            showInlineResult('err', 'No QR code found in image.');
+            showInlineResult('err', 'No QR code found in image. Try a clearer photo.');
           }
         };
-        img.onerror = (err) => {
-          console.error('Image load error:', err);
+        img.onerror = () => {
           setStatusMsg('Error', 'err');
           showInlineResult('err', 'Failed to load image.');
         };
         img.src = e.target.result;
       };
-      reader.onerror = (err) => {
-        console.error('FileReader error:', err);
+      reader.onerror = () => {
         setStatusMsg('Error', 'err');
         showInlineResult('err', 'Failed to read file.');
       };
@@ -246,13 +268,15 @@ function Scanner() {
           <div className="flex items-center gap-3 mb-4">
             <button
               onClick={startCamera}
-              className="px-5 py-2.5 rounded-xl bg-purple-600 text-black border border-black text-sm font-bold hover:bg-purple-700 transition-colors shadow-md shadow-purple-200"
+              disabled={running}
+              className="px-5 py-2.5 rounded-xl bg-purple-600 text-black border border-black text-sm font-bold hover:bg-purple-700 transition-colors shadow-md shadow-purple-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Start Camera
             </button>
             <button
               onClick={stopCamera}
-              className="px-5 py-2.5 rounded-xl bg-white border border-purple-200 text-gray-600 text-sm font-bold hover:bg-purple-50 transition-colors"
+              disabled={!running}
+              className="px-5 py-2.5 rounded-xl bg-white border border-purple-200 text-gray-600 text-sm font-bold hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Stop
             </button>
@@ -290,7 +314,7 @@ function Scanner() {
             {!running && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white">
                 <Camera className="w-14 h-14 text-black" />
-                <p className="text-sm font-extrabold tracking-wide text-black">Press "Start Camera" to begin</p>
+                <p className="text-sm font-extrabold tracking-wide text-black">Press &quot;Start Camera&quot; to begin</p>
               </div>
             )}
           </div>
@@ -307,7 +331,7 @@ function Scanner() {
                 value={codeInput}
                 onChange={(e) => setCodeInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleManualVerify()}
-                placeholder="PA_..."
+                placeholder="Ticket code or PA_..."
                 className="flex-1 rounded-xl border border-purple-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
               />
               <button

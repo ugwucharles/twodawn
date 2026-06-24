@@ -333,33 +333,35 @@ function createOrganizerRouter() {
       console.log('Scanner verify request received');
       if (!req.auth || !req.auth.isAuthenticated) {
         console.log('Scanner verify: Unauthenticated request');
-        return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
+        return res.status(401).json({ ok: false, valid: false, error: 'unauthenticated', message: 'Authentication required.' });
       }
 
       const { code } = req.body;
-      console.log('Scanner verify: Code received:', code);
+      const trimmedCode = (code || '').trim();
+      console.log('Scanner verify: Code received:', trimmedCode);
 
-      if (!code) {
+      if (!trimmedCode) {
         console.log('Scanner verify: No code provided');
-        return res.status(400).json({ ok: false, error: 'Ticket code is required' });
+        return res.status(400).json({ ok: false, valid: false, message: 'Ticket code is required' });
       }
 
-      // Find order by ticket code
-      console.log('Scanner verify: Querying for order with code:', code);
+      // Find order by ticket code or paystack reference (case-insensitive)
+      console.log('Scanner verify: Querying for order with code:', trimmedCode);
       const orderRows = await query(`
         SELECT o.*, e.title as event_title, e.user_id as organizer_id
         FROM orders o
         LEFT JOIN events e ON o.event_id = e.id
-        WHERE o.paystack_reference = ? OR o.ticket_code = ?
+        WHERE lower(o.paystack_reference) = lower(?) OR lower(o.ticket_code) = lower(?)
         LIMIT 1
-      `, [code, code]);
+      `, [trimmedCode, trimmedCode]);
       console.log('Scanner verify: Query result:', orderRows);
 
       if (!orderRows[0]) {
         console.log('Scanner verify: Order not found');
         return res.json({
           ok: false,
-          message: 'Ticket not found'
+          valid: false,
+          message: 'Ticket not found. Please check the code and try again.'
         });
       }
 
@@ -369,44 +371,68 @@ function createOrganizerRouter() {
       // Check if user owns the event
       if (order.organizer_id !== req.auth.user.id) {
         console.log('Scanner verify: Permission denied');
-        return res.status(403).json({ ok: false, error: 'You do not have permission to verify this ticket' });
+        return res.status(403).json({ ok: false, valid: false, message: 'You do not have permission to verify this ticket' });
       }
+
+      // Check if order is confirmed/paid (not pending)
+      if (order.status !== 'confirmed' && order.status !== 'used' && order.status !== 'paid') {
+        console.log('Scanner verify: Order not confirmed, status:', order.status);
+        return res.json({
+          ok: false,
+          valid: false,
+          message: `Ticket payment not confirmed (status: ${order.status}). Cannot check in.`
+        });
+      }
+
+      // Build buyer + event objects for frontend
+      const buyer = {
+        name: order.buyer_name,
+        email: order.buyer_email,
+        phone: order.buyer_phone || null,
+      };
+      const event = {
+        title: order.event_title,
+        id: order.event_id,
+      };
 
       // Check if already used
       if (order.status === 'used') {
         console.log('Scanner verify: Ticket already used');
         return res.json({
           ok: false,
+          valid: false,
+          already: true,
           message: 'Ticket already used',
-          ticket: {
-            buyer_name: order.buyer_name,
-            event_title: order.event_title,
-            quantity: order.quantity,
-            used_at: order.updated_at
-          }
+          buyer,
+          event,
+          quantity: order.quantity,
+          last_checkin_at: order.updated_at
         });
       }
 
       // Mark as used
+      const now = new Date().toISOString();
       await query(`
         UPDATE orders 
-        SET status = 'used', updated_at = datetime('now')
+        SET status = 'used', updated_at = ?
         WHERE id = ?
-      `, [order.id]);
+      `, [now, order.id]);
 
+      console.log('Scanner verify: Ticket marked as used');
       return res.json({
         ok: true,
+        valid: true,
+        already: false,
         message: 'Ticket verified successfully',
-        ticket: {
-          buyer_name: order.buyer_name,
-          event_title: order.event_title,
-          quantity: order.quantity,
-          amount: order.amount
-        }
+        buyer,
+        event,
+        quantity: order.quantity,
+        amount: order.amount,
+        last_checkin_at: now
       });
     } catch (error) {
       console.error('Scanner verify error:', error);
-      return res.status(500).json({ ok: false, error: 'Failed to verify ticket' });
+      return res.status(500).json({ ok: false, valid: false, message: 'Server error while verifying ticket' });
     }
   });
 
