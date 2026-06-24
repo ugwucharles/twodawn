@@ -42,7 +42,7 @@ function Scanner() {
     setStatusMsg('Verifying…', 'scanning');
     try {
       console.log('Sending verification request for:', text);
-      const res = await api.post('/organizer/scanner/verify', { ticket_code: text });
+      const res = await api.post('/organizer/scanner/verify', { code: text });
       const data = res.data;
       console.log('Verification response:', data);
       setDebugInfo(prev => ({ ...prev, apiResponse: data }));
