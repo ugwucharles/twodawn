@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getEvents, getTopSellingEvents } from '../services/events'
 import { getOrder } from '../services/checkout'
+import axios from 'axios'
 
 function Debug() {
   const [logs, setLogs] = useState([])
@@ -18,6 +19,10 @@ function Debug() {
     const testApi = async () => {
       addLog('Starting Debug Page...')
       
+      // Check authentication
+      const token = localStorage.getItem('token')
+      addLog('Authentication check', { hasToken: !!token, tokenLength: token?.length })
+
       // Check URL parameters for payment reference
       const reference = searchParams.get('reference')
       if (reference) {
@@ -51,6 +56,37 @@ function Debug() {
       const paymentState = localStorage.getItem('payment_state')
       if (paymentState) {
         addLog('Payment State (from localStorage)', JSON.parse(paymentState))
+      }
+
+      // Test organizer dashboard
+      addLog('Testing organizer dashboard endpoint...')
+      try {
+        const dashboardResponse = await axios.get('/organizer/dashboard')
+        addLog('Organizer dashboard response received', dashboardResponse.data)
+        addLog(`Dashboard stats: ${JSON.stringify(dashboardResponse.data?.stats)}`)
+        addLog(`Dashboard events count: ${dashboardResponse.data?.events?.length || 0}`)
+      } catch (err) {
+        addLog('Organizer dashboard ERROR', {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status,
+          responseText: err.response?.data ? 'HTML response detected' : 'Unknown'
+        })
+      }
+
+      // Test organizer events
+      addLog('Testing organizer events endpoint...')
+      try {
+        const eventsResponse = await axios.get('/organizer/events')
+        addLog('Organizer events response received', eventsResponse.data)
+        addLog(`Organizer events count: ${eventsResponse.data?.events?.length || 0}`)
+      } catch (err) {
+        addLog('Organizer events ERROR', {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status,
+          responseText: err.response?.data ? 'HTML response detected' : 'Unknown'
+        })
       }
 
       try {
