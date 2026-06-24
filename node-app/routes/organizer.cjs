@@ -330,17 +330,22 @@ function createOrganizerRouter() {
   // POST /organizer/scanner/verify - verify ticket
   router.post('/scanner/verify', async (req, res) => {
     try {
+      console.log('Scanner verify request received');
       if (!req.auth || !req.auth.isAuthenticated) {
+        console.log('Scanner verify: Unauthenticated request');
         return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
       }
 
       const { code } = req.body;
+      console.log('Scanner verify: Code received:', code);
 
       if (!code) {
+        console.log('Scanner verify: No code provided');
         return res.status(400).json({ ok: false, error: 'Ticket code is required' });
       }
 
       // Find order by ticket code
+      console.log('Scanner verify: Querying for order with code:', code);
       const orderRows = await query(`
         SELECT o.*, e.title as event_title, e.user_id as organizer_id
         FROM orders o
@@ -348,8 +353,10 @@ function createOrganizerRouter() {
         WHERE o.reference = ? OR o.ticket_code = ?
         LIMIT 1
       `, [code, code]);
+      console.log('Scanner verify: Query result:', orderRows);
 
       if (!orderRows[0]) {
+        console.log('Scanner verify: Order not found');
         return res.json({
           ok: false,
           message: 'Ticket not found'
@@ -357,14 +364,17 @@ function createOrganizerRouter() {
       }
 
       const order = orderRows[0];
+      console.log('Scanner verify: Order found, organizer_id:', order.organizer_id, 'user_id:', req.auth.user.id);
 
       // Check if user owns the event
       if (order.organizer_id !== req.auth.user.id) {
+        console.log('Scanner verify: Permission denied');
         return res.status(403).json({ ok: false, error: 'You do not have permission to verify this ticket' });
       }
 
       // Check if already used
       if (order.status === 'used') {
+        console.log('Scanner verify: Ticket already used');
         return res.json({
           ok: false,
           message: 'Ticket already used',
