@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { getOrder } from '../services/checkout';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { QRCodeSVG } from 'qrcode.react';
 
 function PaymentSuccess() {
-  const { reference } = useParams();
+  const [searchParams] = useSearchParams();
+  const reference = searchParams.get('reference');
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
