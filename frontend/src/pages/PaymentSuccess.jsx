@@ -129,7 +129,7 @@ function PaymentSuccess() {
             includeMargin={true}
           />
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-2 rounded-lg shadow-md">
-            <div className="text-2xl font-bold text-[#8b5cf6]">2D</div>
+            <img src="/logo.svg" alt="2DAWN" className="w-12 h-12" />
           </div>
         </div>
         <button
