@@ -47,7 +47,7 @@ export default function OrganizerLayout() {
         <header className="h-20 bg-black flex items-center justify-between px-4 lg:px-12 shrink-0">
           <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center">
-              <img src="/logo.svg" alt="2DAWN" className="h-10 w-auto" />
+              <img src="/logo-white2.svg" alt="2DAWN" className="h-10 w-auto" />
             </Link>
           </div>
 

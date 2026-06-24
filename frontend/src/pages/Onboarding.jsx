@@ -56,7 +56,7 @@ function Onboarding() {
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <img src="/logo-auth.svg" alt="2DAWN" className="h-8 w-auto" />
+          <img src="/logo-white2.svg" alt="2DAWN" className="h-8 w-auto" />
         </div>
 
         {/* Card */}

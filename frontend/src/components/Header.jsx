@@ -54,7 +54,7 @@ function Header() {
         {/* Left: Logo */}
         <div className="flex items-center shrink-0">
           <Link to="/" className="flex items-center">
-            <img src="/logo.svg" alt="2DAWN" className="h-10 w-auto" />
+            <img src="/logo-white2.svg" alt="2DAWN" className="h-10 w-auto" />
           </Link>
         </div>
 

@@ -3,6 +3,9 @@ import { Camera, Upload, CheckCircle, AlertTriangle, XCircle, Camera as CameraIc
 import api from '../../services/api';
 import jsQR from 'jsqr';
 
+// Delay before the result popup appears after a scan (ms)
+const POPUP_DELAY_MS = 3000;
+
 function Scanner() {
   const [stream, setStream] = useState(null);
   const [running, setRunning] = useState(false);
@@ -11,17 +14,18 @@ function Scanner() {
   const [modal, setModal] = useState(null);
   const [codeInput, setCodeInput] = useState('');
   const [facingMode, setFacingMode] = useState('environment');
-  const [debugInfo, setDebugInfo] = useState({ qrData: null, apiResponse: null });
+
+  // Countdown state for the 3-second hold
+  const [countdown, setCountdown] = useState(null); // null | number
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
-  // Use a ref for running so the animation-frame loop always reads the latest value
   const runningRef = useRef(false);
   const streamRef = useRef(null);
   const facingModeRef = useRef('environment');
+  const countdownIntervalRef = useRef(null);
 
-  // Keep facingModeRef in sync
   useEffect(() => {
     facingModeRef.current = facingMode;
   }, [facingMode]);
@@ -33,20 +37,42 @@ function Scanner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const setStatusMsg = (msg, kind = 'idle') => {
-    setStatus({ msg, kind });
+  const setStatusMsg = (msg, kind = 'idle') => setStatus({ msg, kind });
+
+  const showInlineResult = (kind, msg) => setInlineResult({ kind, msg });
+
+  const openModal = (kind, opts = {}) => setModal({ kind, ...opts });
+
+  const closeModal = () => setModal(null);
+
+  // Formats a date/time nicely for "scanned at" display
+  const formatScanTime = (ts) => {
+    if (!ts) return '';
+    try {
+      return new Date(ts).toLocaleString('en-GB', {
+        day: 'numeric', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      });
+    } catch {
+      return ts;
+    }
   };
 
-  const showInlineResult = (kind, msg) => {
-    setInlineResult({ kind, msg });
-  };
-
-  const openModal = (kind, opts = {}) => {
-    setModal({ kind, ...opts });
-  };
-
-  const closeModal = () => {
-    setModal(null);
+  // Run a 3-second countdown then call the callback
+  const withCountdown = (callback) => {
+    let remaining = 3;
+    setCountdown(remaining);
+    countdownIntervalRef.current = setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+        setCountdown(null);
+        callback();
+      } else {
+        setCountdown(remaining);
+      }
+    }, 1000);
   };
 
   const verifyText = useCallback(async (text) => {
@@ -61,10 +87,9 @@ function Scanner() {
       const res = await api.post('/organizer/scanner/verify', { code: trimmed });
       const data = res.data;
       console.log('Verification response:', data);
-      setDebugInfo(prev => ({ ...prev, apiResponse: data }));
 
       if (data.valid) {
-        setStatusMsg('Approved', 'ok');
+        setStatusMsg('Approved ✓', 'ok');
         showInlineResult('ok', `${data.buyer?.name || 'Guest'} checked in to "${data.event?.title || 'event'}"`);
         openModal('ok', {
           title: '✓ Check-in Approved!',
@@ -73,28 +98,28 @@ function Scanner() {
           last: data.last_checkin_at,
         });
       } else if (data.already) {
-        setStatusMsg('Already used', 'warn');
-        showInlineResult('warn', `Ticket already used. Buyer: ${data.buyer?.name || 'Unknown'} (${data.buyer?.email || ''})`);
+        const scannedAt = formatScanTime(data.last_checkin_at);
+        setStatusMsg('Already Scanned', 'warn');
+        showInlineResult('warn', `Already scanned${scannedAt ? ' at ' + scannedAt : ''}. Buyer: ${data.buyer?.name || 'Unknown'}`);
         openModal('warn', {
-          title: 'Already Checked In',
+          title: 'Already Scanned',
           sub: data.event?.title || '',
           buyer: data.buyer,
           last: data.last_checkin_at,
         });
       } else {
-        setStatusMsg('Invalid', 'err');
-        const msg = data.message || 'Ticket is not valid.';
+        setStatusMsg('Invalid Ticket', 'err');
+        const msg = data.message || 'This ticket is not valid.';
         console.log('Invalid ticket reason:', msg);
         showInlineResult('err', msg);
-        openModal('err', { title: 'Invalid Ticket', sub: msg });
+        openModal('err', { title: 'Ticket Not Valid', sub: msg });
       }
     } catch (e) {
       console.error('Verification error:', e);
-      console.error('Error response:', e.response?.data);
-      const errMsg = e.response?.data?.message || e.message || 'Network error.';
-      setDebugInfo(prev => ({ ...prev, apiResponse: { error: e.message, response: e.response?.data } }));
+      const errMsg = e.response?.data?.message || e.message || 'Network error. Please try again.';
       setStatusMsg('Error', 'err');
       showInlineResult('err', errMsg);
+      openModal('err', { title: 'Connection Error', sub: errMsg });
     }
   }, []);
 
@@ -104,25 +129,22 @@ function Scanner() {
     try {
       if (videoRef.current && canvasRef.current) {
         const video = videoRef.current;
-        // Only scan when video is actually playing and has dimensions
         if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
           const canvas = canvasRef.current;
           const ctx = canvas.getContext('2d');
-          const W = video.videoWidth;
-          const H = video.videoHeight;
-          canvas.width = W;
-          canvas.height = H;
-          ctx.drawImage(video, 0, 0, W, H);
-          const imageData = ctx.getImageData(0, 0, W, H);
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx.drawImage(video, 0, 0);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const code = jsQR(imageData.data, imageData.width, imageData.height, {
             inversionAttempts: 'dontInvert',
           });
           if (code && code.data) {
             console.log('QR code detected:', code.data);
-            setDebugInfo(prev => ({ ...prev, qrData: code.data }));
-            // Stop camera before verifying so we don't re-scan
             stopCamera();
-            verifyText(code.data);
+            // Wait 3 seconds before showing the popup
+            setStatusMsg('QR detected — verifying…', 'scanning');
+            withCountdown(() => verifyText(code.data));
             return;
           }
         }
@@ -134,7 +156,7 @@ function Scanner() {
 
   const startCamera = async () => {
     try {
-      setStatusMsg('Starting…', 'scanning');
+      setStatusMsg('Starting camera…', 'scanning');
       const s = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: facingModeRef.current },
         audio: false,
@@ -149,7 +171,6 @@ function Scanner() {
       runningRef.current = true;
       setRunning(true);
       setStatusMsg('Scanning…', 'scanning');
-      // Start the loop on the next frame
       rafRef.current = requestAnimationFrame(tick);
     } catch (e) {
       console.error('Camera start error:', e);
@@ -175,6 +196,12 @@ function Scanner() {
       streamRef.current = null;
       setStream(null);
     }
+    // Also cancel any pending countdown
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+      setCountdown(null);
+    }
     setStatusMsg('Ready');
   };
 
@@ -185,14 +212,12 @@ function Scanner() {
     facingModeRef.current = next;
     setFacingMode(next);
     if (wasRunning) {
-      // Wait a tick for state to settle before restarting
       setTimeout(() => startCamera(), 150);
     }
   };
 
   const handleManualVerify = async () => {
     const v = codeInput.trim();
-    console.log('Manual verify input:', v);
     if (v) await verifyText(v);
     else showInlineResult('err', 'Please enter a reference code.');
   };
@@ -200,7 +225,6 @@ function Scanner() {
   const handleFileUpload = async (file) => {
     if (!file) return;
     setStatusMsg('Decoding image…', 'scanning');
-    console.log('File uploaded:', file.name, file.type, file.size);
     try {
       const reader = new FileReader();
       reader.onload = async (e) => {
@@ -217,8 +241,8 @@ function Scanner() {
           });
           if (code && code.data) {
             console.log('QR code detected from image:', code.data);
-            setDebugInfo(prev => ({ ...prev, qrData: code.data }));
-            verifyText(code.data);
+            setStatusMsg('QR found — verifying…', 'scanning');
+            withCountdown(() => verifyText(code.data));
           } else {
             setStatusMsg('Error', 'err');
             showInlineResult('err', 'No QR code found in image. Try a clearer photo.');
@@ -268,14 +292,14 @@ function Scanner() {
           <div className="flex items-center gap-3 mb-4">
             <button
               onClick={startCamera}
-              disabled={running}
+              disabled={running || countdown !== null}
               className="px-5 py-2.5 rounded-xl bg-purple-600 text-black border border-black text-sm font-bold hover:bg-purple-700 transition-colors shadow-md shadow-purple-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Start Camera
             </button>
             <button
               onClick={stopCamera}
-              disabled={!running}
+              disabled={!running && countdown === null}
               className="px-5 py-2.5 rounded-xl bg-white border border-purple-200 text-gray-600 text-sm font-bold hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Stop
@@ -294,14 +318,24 @@ function Scanner() {
             <video ref={videoRef} playsInline autoPlay muted className="w-full h-full object-cover"></video>
             <canvas ref={canvasRef} className="hidden"></canvas>
 
+            {/* Countdown overlay */}
+            {countdown !== null && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm gap-3">
+                <div className="w-24 h-24 rounded-full border-4 border-purple-400 flex items-center justify-center">
+                  <span className="text-5xl font-black text-white countdown-num">{countdown}</span>
+                </div>
+                <p className="text-white text-sm font-bold tracking-wide">Verifying ticket…</p>
+              </div>
+            )}
+
             {/* Scan line */}
-            {running && (
+            {running && countdown === null && (
               <div className="scan-line pointer-events-none absolute left-4 right-4 h-0.5 rounded-full bg-gradient-to-r from-transparent via-purple-400 to-transparent"
                    style={{ animation: 'scanLine 2.4s ease-in-out infinite' }}></div>
             )}
 
             {/* Corner brackets */}
-            {running && (
+            {running && countdown === null && (
               <div className="corner-pulse pointer-events-none absolute inset-0">
                 <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-purple-400 rounded-tl-lg"></div>
                 <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-purple-400 rounded-tr-lg"></div>
@@ -311,7 +345,7 @@ function Scanner() {
             )}
 
             {/* Idle overlay */}
-            {!running && (
+            {!running && countdown === null && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white">
                 <Camera className="w-14 h-14 text-black" />
                 <p className="text-sm font-extrabold tracking-wide text-black">Press &quot;Start Camera&quot; to begin</p>
@@ -336,7 +370,8 @@ function Scanner() {
               />
               <button
                 onClick={handleManualVerify}
-                className="px-5 py-2.5 rounded-xl bg-purple-600 text-black border border-black text-sm font-bold hover:bg-purple-700 transition-colors shadow-md shadow-purple-200"
+                disabled={countdown !== null}
+                className="px-5 py-2.5 rounded-xl bg-purple-600 text-black border border-black text-sm font-bold hover:bg-purple-700 transition-colors shadow-md shadow-purple-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Verify
               </button>
@@ -372,34 +407,9 @@ function Scanner() {
                 inlineResult.kind === 'warn' ? 'bg-amber-100 text-amber-700' :
                 'bg-red-100 text-red-700'
               }`}>
-                {inlineResult.kind === 'ok' ? '✓ Valid' : inlineResult.kind === 'warn' ? '⚠ Already Used' : '✕ Invalid'}
+                {inlineResult.kind === 'ok' ? '✓ Checked In' : inlineResult.kind === 'warn' ? '⚠ Already Scanned' : '✕ Invalid'}
               </span>
               <p className="text-sm text-black font-medium">{inlineResult.msg}</p>
-            </div>
-          )}
-
-          {/* Debug Info */}
-          {(debugInfo.qrData || debugInfo.apiResponse || codeInput) && (
-            <div className="bg-gray-900 border border-gray-700 rounded-3xl p-4 shadow-sm">
-              <p className="text-xs font-bold text-gray-400 mb-2">DEBUG INFO</p>
-              {codeInput && (
-                <div className="mb-3">
-                  <p className="text-xs font-semibold text-yellow-400 mb-1">Manual Input:</p>
-                  <p className="text-xs text-gray-300 break-all font-mono">{codeInput}</p>
-                </div>
-              )}
-              {debugInfo.qrData && (
-                <div className="mb-3">
-                  <p className="text-xs font-semibold text-green-400 mb-1">QR Code Detected:</p>
-                  <p className="text-xs text-gray-300 break-all font-mono">{debugInfo.qrData}</p>
-                </div>
-              )}
-              {debugInfo.apiResponse && (
-                <div>
-                  <p className="text-xs font-semibold text-blue-400 mb-1">API Response:</p>
-                  <pre className="text-xs text-gray-300 break-all font-mono">{JSON.stringify(debugInfo.apiResponse, null, 2)}</pre>
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -440,7 +450,16 @@ function Scanner() {
             )}
 
             <p className="text-zinc-400 text-sm font-medium mb-1">{modal.sub}</p>
-            <p className="text-zinc-600 text-xs mb-6">{modal.last ? 'Last check-in: ' + new Date(modal.last).toLocaleString() : ''}</p>
+            {modal.kind === 'warn' && modal.last && (
+              <p className="text-amber-400/80 text-xs font-semibold mb-6">
+                Previously scanned at {formatScanTime(modal.last)}
+              </p>
+            )}
+            {modal.kind !== 'warn' && (
+              <p className="text-zinc-600 text-xs mb-6">
+                {modal.last && modal.kind === 'ok' ? 'Checked in: ' + formatScanTime(modal.last) : ''}
+              </p>
+            )}
 
             <button
               onClick={closeModal}
@@ -458,9 +477,11 @@ function Scanner() {
         @keyframes scanLine { 0% { top: 8%; opacity: 0.8; } 50% { top: 88%; opacity: 1; } 100% { top: 8%; opacity: 0.8; } }
         @keyframes cornerPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
         @keyframes ringPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,.45); } 50% { box-shadow: 0 0 0 22px rgba(139,92,246,0); } }
+        @keyframes countdownPop { 0% { transform: scale(1.4); opacity: 0; } 20% { transform: scale(1); opacity: 1; } 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.6; } }
         .scan-line { animation: scanLine 2.4s ease-in-out infinite; }
         .corner-pulse { animation: cornerPulse 1.8s ease-in-out infinite; }
         .ring-pulse { animation: ringPulse 1.4s ease-in-out infinite; }
+        .countdown-num { animation: countdownPop 1s ease-in-out forwards; }
       `}</style>
     </div>
   );

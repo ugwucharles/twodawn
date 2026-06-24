@@ -10,7 +10,7 @@ function Footer() {
           
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src="/logo.svg" alt="2DAWN" className="h-8 w-auto opacity-80 hover:opacity-100 transition-opacity" />
+            <img src="/logo-white2.svg" alt="2DAWN" className="h-8 w-auto opacity-80 hover:opacity-100 transition-opacity" />
           </Link>
 
           {/* Navigation Links */}
