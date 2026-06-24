@@ -11,6 +11,7 @@ function Scanner() {
   const [modal, setModal] = useState(null);
   const [codeInput, setCodeInput] = useState('');
   const [facingMode, setFacingMode] = useState('environment'); // 'environment' for back, 'user' for front
+  const [debugInfo, setDebugInfo] = useState({ qrData: null, apiResponse: null });
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
@@ -44,6 +45,7 @@ function Scanner() {
       const res = await api.post('/organizer/scanner/verify', { text });
       const data = res.data;
       console.log('Verification response:', data);
+      setDebugInfo(prev => ({ ...prev, apiResponse: data }));
 
       if (data.valid) {
         setStatusMsg('Approved', 'ok');
@@ -73,6 +75,7 @@ function Scanner() {
     } catch (e) {
       console.error('Verification error:', e);
       console.error('Error response:', e.response?.data);
+      setDebugInfo(prev => ({ ...prev, apiResponse: { error: e.message, response: e.response?.data } }));
       setStatusMsg('Error', 'err');
       showInlineResult('err', 'Network error.');
     }
@@ -146,6 +149,7 @@ function Scanner() {
             console.log('QR code detected:', code.data);
             console.log('QR code data type:', typeof code.data);
             console.log('QR code data length:', code.data.length);
+            setDebugInfo(prev => ({ ...prev, qrData: code.data }));
             verifyText(code.data);
             stopCamera();
             return;
@@ -306,6 +310,25 @@ function Scanner() {
                 {inlineResult.kind === 'ok' ? '✓ Valid' : inlineResult.kind === 'warn' ? '⚠ Already Used' : '✕ Invalid'}
               </span>
               <p className="text-sm text-black font-medium">{inlineResult.msg}</p>
+            </div>
+          )}
+
+          {/* Debug Info */}
+          {(debugInfo.qrData || debugInfo.apiResponse) && (
+            <div className="bg-gray-900 border border-gray-700 rounded-3xl p-4 shadow-sm">
+              <p className="text-xs font-bold text-gray-400 mb-2">DEBUG INFO</p>
+              {debugInfo.qrData && (
+                <div className="mb-3">
+                  <p className="text-xs font-semibold text-green-400 mb-1">QR Code Detected:</p>
+                  <p className="text-xs text-gray-300 break-all font-mono">{debugInfo.qrData}</p>
+                </div>
+              )}
+              {debugInfo.apiResponse && (
+                <div>
+                  <p className="text-xs font-semibold text-blue-400 mb-1">API Response:</p>
+                  <pre className="text-xs text-gray-300 break-all font-mono">{JSON.stringify(debugInfo.apiResponse, null, 2)}</pre>
+                </div>
+              )}
             </div>
           )}
         </div>
