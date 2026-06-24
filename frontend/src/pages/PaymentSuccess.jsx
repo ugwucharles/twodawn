@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getOrder } from '../services/checkout';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 
 function PaymentSuccess() {
   const { reference } = useParams();
@@ -55,14 +55,26 @@ function PaymentSuccess() {
   }, [reference]);
 
   const downloadQR = () => {
-    const canvas = document.getElementById('qrCanvas');
-    const pngUrl = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
-    const downloadLink = document.createElement('a');
-    downloadLink.href = pngUrl;
-    downloadLink.download = `ticket-${reference}.png`;
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
+    const svgElement = document.getElementById('qrCanvas');
+    const svgData = new XMLSerializer().serializeToString(svgElement);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const pngUrl = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+      const downloadLink = document.createElement('a');
+      downloadLink.href = pngUrl;
+      downloadLink.download = `ticket-${reference}.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    };
+    
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
   };
 
   if (loading) {
@@ -121,7 +133,7 @@ function PaymentSuccess() {
 
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Your Ticket is Ready</h1>
         <div className="bg-white p-6 rounded-xl shadow-lg">
-          <QRCode
+          <QRCodeSVG
             id="qrCanvas"
             value={order?.qr_data || reference}
             size={256}
