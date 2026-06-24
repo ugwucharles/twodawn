@@ -19,11 +19,11 @@ function resolvePaystackCallbackUrl(req) {
 }
 
 function resolveFrontendUrl() {
-  return process.env.FRONTEND_URL || 'https://twodawn-frontend-real.vercel.app';
+  return String(process.env.FRONTEND_URL || 'https://twodawn-frontend-real.vercel.app').trim();
 }
 
 function resolveOrderConfirmationUrl(reference) {
-  return `${String(resolveFrontendUrl()).replace(/\/$/, '')}/payment-success?reference=${encodeURIComponent(reference)}`;
+  return `${String(resolveFrontendUrl()).replace(/\/$/, '').trim()}/payment-success?reference=${encodeURIComponent(reference)}`;
 }
 
 function createCheckoutRouter() {
@@ -257,22 +257,29 @@ function createCheckoutRouter() {
   router.get('/paystack/callback', async (req, res) => {
     try {
       const reference = req.query.reference;
+      console.log('🔔 Paystack callback received:', reference);
+      
       if (!reference) {
+        console.log('❌ No reference in callback');
         return res.redirect(`${resolveFrontendUrl()}/events`);
       }
 
       const result = await finalizePayment(reference);
+      console.log('💰 Payment finalization result:', result.success ? 'SUCCESS' : 'FAILED', result.error || '');
       
       if (!result.success) {
         if (isJsonRequest(req)) {
           return res.status(400).json({ ok: false, message: result.error });
         }
+        console.log('🔴 Redirecting to events with payment=failed');
         return res.redirect(`${resolveFrontendUrl()}/events?payment=failed`);
       }
 
-      return res.redirect(resolveOrderConfirmationUrl(reference));
+      const redirectUrl = resolveOrderConfirmationUrl(reference);
+      console.log('✅ Redirecting to:', redirectUrl);
+      return res.redirect(redirectUrl);
     } catch (error) {
-      console.error('Callback error:', error);
+      console.error('❌ Callback error:', error);
       return proxyRequest(req, res);
     }
   });

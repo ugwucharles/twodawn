@@ -1,6 +1,7 @@
 const { findEventById } = require('../models/eventModel.cjs');
 const {
   createOrder,
+  findOrderByReference,
   updateOrderStatusByReference,
   decrementEventCapacity,
   incrementCouponUses,
