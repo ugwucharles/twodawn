@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 import { Calendar, Ticket, Wallet, DollarSign, Plus, ChevronRight } from 'lucide-react';
 
 function OrganizerDashboard() {
@@ -13,7 +13,7 @@ function OrganizerDashboard() {
 
   const fetchDashboard = async () => {
     try {
-      const response = await axios.get('/organizer/dashboard');
+      const response = await api.get('/organizer/dashboard');
       console.log('Dashboard response:', response.data);
       setStats(response.data);
       setLoading(false);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 import { ArrowLeft, ExternalLink, Edit, AlertTriangle } from 'lucide-react';
 
 function EventDetails() {
@@ -17,7 +17,7 @@ function EventDetails() {
 
   const fetchEventDetails = async () => {
     try {
-      const response = await axios.get(`/organizer/events/${id}`);
+      const response = await api.get(`/organizer/events/${id}`);
       console.log('Event details response:', response.data);
       setEvent(response.data.event);
       setStats(response.data.stats);

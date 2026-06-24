@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getEvents, getTopSellingEvents } from '../services/events'
 import { getOrder } from '../services/checkout'
-import axios from 'axios'
+import api from '../services/api'
 
 function Debug() {
   const [logs, setLogs] = useState([])
@@ -61,7 +61,7 @@ function Debug() {
       // Test organizer dashboard
       addLog('Testing organizer dashboard endpoint...')
       try {
-        const dashboardResponse = await axios.get('/organizer/dashboard')
+        const dashboardResponse = await api.get('/organizer/dashboard')
         addLog('Organizer dashboard response received', dashboardResponse.data)
         addLog(`Dashboard stats: ${JSON.stringify(dashboardResponse.data?.stats)}`)
         addLog(`Dashboard events count: ${dashboardResponse.data?.events?.length || 0}`)
@@ -77,7 +77,7 @@ function Debug() {
       // Test organizer events
       addLog('Testing organizer events endpoint...')
       try {
-        const eventsResponse = await axios.get('/organizer/events')
+        const eventsResponse = await api.get('/organizer/events')
         addLog('Organizer events response received', eventsResponse.data)
         addLog(`Organizer events count: ${eventsResponse.data?.events?.length || 0}`)
       } catch (err) {
