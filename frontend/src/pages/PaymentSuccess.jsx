@@ -127,10 +127,13 @@ function PaymentSuccess() {
             size={256}
             level="H"
             includeMargin={true}
+            imageSettings={{
+              src: "/logo.svg",
+              height: 48,
+              width: 48,
+              excavate: true,
+            }}
           />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-2 rounded-lg shadow-md">
-            <img src="/logo.svg" alt="2DAWN" className="w-12 h-12" />
-          </div>
         </div>
         <button
           onClick={downloadQR}
