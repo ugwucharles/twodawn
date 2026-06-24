@@ -16,6 +16,7 @@ function PaymentSuccess() {
   useEffect(() => {
     console.log('PaymentSuccess component mounted');
     console.log('Reference from URL:', reference);
+    console.log('Search params:', Object.fromEntries(searchParams));
     
     const fetch = async () => {
       try {
