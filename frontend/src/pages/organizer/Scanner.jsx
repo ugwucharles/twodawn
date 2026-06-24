@@ -40,8 +40,10 @@ function Scanner() {
   const verifyText = async (text) => {
     setStatusMsg('Verifying…', 'scanning');
     try {
+      console.log('Sending verification request for:', text);
       const res = await api.post('/organizer/scanner/verify', { text });
       const data = res.data;
+      console.log('Verification response:', data);
 
       if (data.valid) {
         setStatusMsg('Approved', 'ok');
@@ -64,11 +66,13 @@ function Scanner() {
       } else {
         setStatusMsg('Invalid', 'err');
         const msg = data.message || 'Ticket is not valid.';
+        console.log('Invalid ticket reason:', msg);
         showInlineResult('err', msg);
         openModal('err', { title: 'Invalid Ticket', sub: msg });
       }
     } catch (e) {
-      console.error(e);
+      console.error('Verification error:', e);
+      console.error('Error response:', e.response?.data);
       setStatusMsg('Error', 'err');
       showInlineResult('err', 'Network error.');
     }
@@ -140,6 +144,8 @@ function Scanner() {
           
           if (code) {
             console.log('QR code detected:', code.data);
+            console.log('QR code data type:', typeof code.data);
+            console.log('QR code data length:', code.data.length);
             verifyText(code.data);
             stopCamera();
             return;
