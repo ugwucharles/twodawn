@@ -10,6 +10,7 @@ const {
   finalizeZeroCostOrder,
 } = require('../services/checkoutService.cjs');
 const { proxyRequest } = require('../services/proxyRequest.cjs');
+const { sendTicketEmail } = require('../services/emailService.cjs');
 const { isJsonRequest } = require('../lib/authHttp.cjs');
 const { ensureOrdersSchema } = require('../db/ensureOrdersSchema.cjs');
 const { resolvePaystackCallbackUrl: resolvePaystackCallbackUrlFromRequest } = require('../lib/filtering.cjs');
@@ -331,6 +332,42 @@ function createCheckoutRouter() {
     // PDF generation requires dompdf and other dependencies
     // For now, proxy to Laravel to maintain functionality
     return proxyRequest(req, res);
+  });
+
+  // POST /test-email - Send test email (for testing email configuration)
+  router.post('/test-email', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ ok: false, message: 'Email address is required' });
+      }
+
+      const testOrder = {
+        buyer_email: email,
+        buyer_name: 'Test User',
+        paystack_reference: 'TEST_' + Date.now(),
+        quantity: 2,
+        amount: 5000,
+      };
+
+      const testEvent = {
+        title: 'Test Event - Email Verification',
+        starts_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        venue: 'Test Venue, Lagos',
+      };
+
+      const result = await sendTicketEmail(testOrder, testEvent);
+      
+      if (result.success) {
+        return res.json({ ok: true, message: 'Test email sent successfully', messageId: result.messageId });
+      } else {
+        return res.status(500).json({ ok: false, message: 'Failed to send test email', error: result.error });
+      }
+    } catch (error) {
+      console.error('Test email error:', error);
+      return res.status(500).json({ ok: false, message: 'Test email failed', error: error.message });
+    }
   });
 
   return router;
