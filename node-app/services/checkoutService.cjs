@@ -8,6 +8,7 @@ const {
   countRecentFreeOrders,
   sumPaidQuantityForEvent,
 } = require('../models/orderModel.cjs');
+const { queueTicketEmail } = require('./emailService.cjs');
 const crypto = require('crypto');
 
 function generateReference() {
@@ -124,32 +125,39 @@ async function finalizePayment(reference) {
   if (!order) {
     return { success: false, error: 'Order not found' };
   }
-  
+
   // Idempotency: if already paid, return success
   if (order.status === 'paid') {
     return { success: true, order };
   }
-  
+
   try {
     const transaction = await verifyPaystackTransaction(reference);
-    
+
     const status = transaction.status;
     const amount = transaction.amount;
     const currency = transaction.currency;
-    
+
     if (status !== 'success' || amount !== order.amount || currency !== 'NGN') {
       await updateOrderStatusByReference(reference, 'failed');
       return { success: false, error: 'Payment verification failed' };
     }
-    
+
     // Safely mark paid and reduce capacity without overselling
     await decrementEventCapacity(order.event_id, order.quantity);
-    
+
     if (order.coupon_code) {
       await incrementCouponUses(order.coupon_code);
     }
-    
+
     const updatedOrder = await updateOrderStatusByReference(reference, 'paid');
+
+    // Send ticket email
+    const event = await findEventById(order.event_id);
+    if (event) {
+      queueTicketEmail(updatedOrder, event);
+    }
+
     return { success: true, order: updatedOrder };
   } catch (error) {
     await updateOrderStatusByReference(reference, 'failed');
@@ -160,12 +168,19 @@ async function finalizePayment(reference) {
 async function finalizeZeroCostOrder(order) {
   try {
     await decrementEventCapacity(order.event_id, order.quantity);
-    
+
     if (order.coupon_code) {
       await incrementCouponUses(order.coupon_code);
     }
-    
+
     const updatedOrder = await updateOrderStatusByReference(order.paystack_reference, 'paid');
+
+    // Send ticket email for free orders
+    const event = await findEventById(order.event_id);
+    if (event) {
+      queueTicketEmail(updatedOrder, event);
+    }
+
     return { success: true, order: updatedOrder };
   } catch (error) {
     await updateOrderStatusByReference(order.paystack_reference, 'failed');
