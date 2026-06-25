@@ -7,17 +7,30 @@ const { ensureUsersSchema } = require('./db/ensureUsersSchema.cjs');
 const { ensureOrdersSchema } = require('./db/ensureOrdersSchema.cjs');
 const { ensureEventsSchema } = require('./db/ensureEventsSchema.cjs');
 
-ensureUsersSchema().catch((error) => {
-  console.error('Failed to ensure users schema:', error.message);
-});
+async function initializeSchemas() {
+  try {
+    await ensureUsersSchema();
+    console.log('✅ Users schema ensured');
+  } catch (error) {
+    console.error('Failed to ensure users schema:', error.message);
+  }
 
-ensureOrdersSchema().catch((error) => {
-  console.error('Failed to ensure orders schema:', error.message);
-});
+  try {
+    await ensureOrdersSchema();
+    console.log('✅ Orders schema ensured');
+  } catch (error) {
+    console.error('Failed to ensure orders schema:', error.message);
+  }
 
-ensureEventsSchema().catch((error) => {
-  console.error('Failed to ensure events schema:', error.message);
-});
+  try {
+    await ensureEventsSchema();
+    console.log('✅ Events schema ensured');
+  } catch (error) {
+    console.error('Failed to ensure events schema:', error.message);
+  }
+}
+
+initializeSchemas();
 
 function createApp() {
   const app = express();
