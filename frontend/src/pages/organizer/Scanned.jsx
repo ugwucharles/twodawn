@@ -17,10 +17,11 @@ function Scanned() {
     try {
       setLoading(true);
       const res = await api.get('/organizer/events');
-      setEvents(res.data.events || []);
+      setEvents(res.data?.events || []);
     } catch (err) {
       setError('Failed to load events');
       console.error('Error fetching events:', err);
+      setEvents([]);
     } finally {
       setLoading(false);
     }
@@ -174,7 +175,7 @@ function Scanned() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-purple-500" />
-                  <span className="text-gray-700">{event.total_tickets || tickets_sold || 0} total</span>
+                  <span className="text-gray-700">{event.total_tickets || 0} total</span>
                 </div>
               </div>
             </div>
