@@ -9,7 +9,8 @@ import {
   Wallet, 
   Settings, 
   LogOut,
-  ChevronDown
+  ChevronDown,
+  CheckCircle
 } from 'lucide-react';
 
 export default function OrganizerLayout() {
