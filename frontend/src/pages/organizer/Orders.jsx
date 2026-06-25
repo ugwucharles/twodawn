@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { ShoppingBag } from 'lucide-react';
 
 function Orders() {
@@ -12,7 +12,7 @@ function Orders() {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get('/organizer/orders');
+      const response = await api.get('/organizer/orders');
       setOrders(response.data.orders || []);
       setLoading(false);
     } catch (err) {

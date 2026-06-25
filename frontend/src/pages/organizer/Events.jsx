@@ -45,11 +45,14 @@ function Events() {
     }
     setDeleting(eventId)
     try {
-      await api.delete(`/organizer/events/${eventId}`)
+      console.log('Deleting event:', eventId)
+      const response = await api.delete(`/organizer/events/${eventId}`)
+      console.log('Delete response:', response.data)
       setEvents(prev => prev.filter(e => e.id !== eventId))
     } catch (err) {
       console.error('Failed to delete event', err)
-      alert('Failed to delete event')
+      console.error('Error response:', err.response?.data)
+      alert(`Failed to delete event: ${err.response?.data?.error || err.message}`)
     } finally {
       setDeleting(null)
     }

@@ -94,8 +94,17 @@ function OrganizerSettings() {
     setErrors([]);
     setSuccessMessage('');
     try {
-      await api.patch('/organizer/settings', formData);
+      const response = await api.patch('/organizer/settings', formData);
       setSuccessMessage('Settings updated successfully!');
+      // Update form data with response
+      const s = response.data.settings || {};
+      setFormData({
+        name: s.name || '',
+        instagram_handle: s.instagram_handle || '',
+        whatsapp_number: s.whatsapp_number || '',
+        twitter_handle: s.twitter_handle || '',
+        profile_picture: s.profile_picture || '',
+      });
       setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err) {
       console.error('Failed to update settings', err);

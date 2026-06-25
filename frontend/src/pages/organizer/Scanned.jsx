@@ -91,14 +91,14 @@ function Scanned() {
               <Users className="w-5 h-5 text-purple-600" />
               <span className="text-sm font-semibold text-gray-700">Total Tickets</span>
             </div>
-            <p className="text-3xl font-bold text-gray-900">{selectedEvent.total_tickets || 0}</p>
+            <p className="text-3xl font-bold text-gray-900">{selectedEvent.orders_count || 0}</p>
           </div>
           <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-2">
               <CheckCircle className="w-5 h-5 text-emerald-600" />
               <span className="text-sm font-semibold text-gray-700">Scanned</span>
             </div>
-            <p className="text-3xl font-bold text-gray-900">{selectedEvent.scanned_count || 0}</p>
+            <p className="text-3xl font-bold text-gray-900">{selectedEvent.scanned_count || selectedEvent.orders_count || 0}</p>
           </div>
           <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-2">
@@ -106,7 +106,7 @@ function Scanned() {
               <span className="text-sm font-semibold text-gray-700">Remaining</span>
             </div>
             <p className="text-3xl font-bold text-gray-900">
-              {(selectedEvent.total_tickets || 0) - (selectedEvent.scanned_count || 0)}
+              {(selectedEvent.orders_count || 0) - (selectedEvent.scanned_count || 0)}
             </p>
           </div>
         </div>
