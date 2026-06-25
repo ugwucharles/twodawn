@@ -141,10 +141,12 @@ function Scanner() {
           });
           if (code && code.data) {
             console.log('QR code detected:', code.data);
-            stopCamera();
             // Wait 3 seconds before showing the popup
             setStatusMsg('QR detected — verifying…', 'scanning');
-            withCountdown(() => verifyText(code.data));
+            withCountdown(() => {
+              stopCamera();
+              verifyText(code.data);
+            });
             return;
           }
         }
