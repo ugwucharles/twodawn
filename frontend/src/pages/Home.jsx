@@ -10,6 +10,7 @@ import { getEventImage } from '../utils/image'
 function Home() {
   const [events, setEvents] = useState([])
   const [topSellingEvents, setTopSellingEvents] = useState([])
+  const [recentEvents, setRecentEvents] = useState([])
   const [topSellingState, setTopSellingState] = useState('')
   const [stateDropdownOpen, setStateDropdownOpen] = useState(false)
   const [priceFilter, setPriceFilter] = useState('')
@@ -86,6 +87,7 @@ function Home() {
 
   useEffect(() => {
     fetchEvents()
+    fetchRecentEvents()
   }, [])
 
   useEffect(() => {
@@ -130,6 +132,22 @@ function Home() {
       setTopSellingEvents(topSellingResponse.events || [])
     } catch (err) {
       console.error('Failed to load top selling', err)
+    }
+  }
+
+  const fetchRecentEvents = async () => {
+    try {
+      const response = await getEvents({})
+      const allEvents = response.events || []
+      const now = new Date()
+      const endedEvents = allEvents.filter(event => {
+        if (!event.ends_at) return false
+        const endDate = new Date(event.ends_at)
+        return endDate < now
+      }).slice(0, 6)
+      setRecentEvents(endedEvents)
+    } catch (err) {
+      console.error('Failed to load recent events', err)
     }
   }
 
@@ -433,6 +451,55 @@ function Home() {
                 ))
               )}
             </div>
+
+            {/* Recent Events */}
+            {recentEvents.length > 0 && (
+              <div className="mt-12">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                    Recent Events
+                  </h2>
+                  <Link to="/events" className="text-sm font-medium text-gray-500 hover:text-[#8b5cf6] transition-colors">
+                    See all
+                  </Link>
+                </div>
+                <div className="flex gap-5 overflow-x-auto no-scrollbar">
+                  {recentEvents.map((event) => (
+                    <Link
+                      key={event.id}
+                      to={`/events/${event.id}`}
+                      className="group shrink-0 w-[16.8rem]"
+                    >
+                      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-100">
+                        {getEventImage(event) ? (
+                          <img
+                            src={getEventImage(event)}
+                            alt={event.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center">
+                            <span className="text-4xl">🎟️</span>
+                          </div>
+                        )}
+                        {/* Dark overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-transparent" />
+                        {/* Text inside card */}
+                        <div className="absolute bottom-0 left-0 right-0 p-5">
+                          <h3 className="text-[1.3rem] font-bold text-white line-clamp-2 mb-1">
+                            {event.title}
+                          </h3>
+                          <p className="text-base text-white/90">{formatPrice(event)}</p>
+                        </div>
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10">
+                          <span className="text-white font-extrabold text-xs uppercase tracking-widest px-2 py-1 rounded bg-gray-700">Ended</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
           </div>
         </section>

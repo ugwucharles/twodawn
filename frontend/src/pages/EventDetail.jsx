@@ -96,6 +96,7 @@ function EventDetail() {
 
   const eventImage = getEventImage(event)
   const isSoldOut = event.capacity !== null && event.capacity <= 0
+  const isEnded = event.ends_at ? new Date(event.ends_at) < new Date() : false
   const hasTicketTypes = event.ticket_types && event.ticket_types.length > 0
 
   return (
@@ -137,7 +138,14 @@ function EventDetail() {
                       <span className="text-[#8b5cf6] font-semibold text-sm">No Image Available</span>
                     </div>
                   )}
-                  {isSoldOut && (
+                  {isEnded && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+                      <span className="text-white font-extrabold text-lg uppercase tracking-widest px-4 py-2 rounded-lg bg-gray-700">
+                        Sales Closed
+                      </span>
+                    </div>
+                  )}
+                  {isSoldOut && !isEnded && (
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
                       <span className="text-white font-extrabold text-lg uppercase tracking-widest px-4 py-2 rounded-lg bg-red-600">
                         Sold Out
@@ -287,7 +295,14 @@ function EventDetail() {
 
               {/* CTA Button */}
               <div>
-                {isSoldOut ? (
+                {isEnded ? (
+                  <button
+                    disabled
+                    className="w-full bg-gray-300 text-gray-500 py-4 rounded-2xl text-lg font-bold cursor-not-allowed"
+                  >
+                    Sales Closed
+                  </button>
+                ) : isSoldOut ? (
                   <button
                     disabled
                     className="w-full bg-gray-300 text-gray-500 py-4 rounded-2xl text-lg font-bold cursor-not-allowed"
