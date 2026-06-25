@@ -10,8 +10,11 @@ export const getEventById = async (id) => {
   return response.data
 }
 
-export const getRecentEvents = async () => {
-  const response = await api.get('/api/v1/events/recent')
+export const getRecentEvents = async (limit = 12) => {
+  const params = new URLSearchParams()
+  if (limit) params.set('limit', String(limit))
+  const query = params.toString()
+  const response = await api.get(`/api/v1/events/recent${query ? `?${query}` : ''}`)
   return response.data
 }
 

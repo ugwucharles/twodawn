@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { getEvents, getTopSellingEvents } from '../services/events'
+import { getEvents, getTopSellingEvents, getRecentEvents } from '../services/events'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { formatPrice } from '../utils/price'
@@ -137,15 +137,8 @@ function Home() {
 
   const fetchRecentEvents = async () => {
     try {
-      const response = await getEvents({})
-      const allEvents = response.events || []
-      const now = new Date()
-      const endedEvents = allEvents.filter(event => {
-        if (!event.ends_at) return false
-        const endDate = new Date(event.ends_at)
-        return endDate < now
-      }).slice(0, 6)
-      setRecentEvents(endedEvents)
+      const response = await getRecentEvents(6)
+      setRecentEvents(response.events || [])
     } catch (err) {
       console.error('Failed to load recent events', err)
     }

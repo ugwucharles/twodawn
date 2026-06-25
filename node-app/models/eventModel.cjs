@@ -147,20 +147,18 @@ async function getRemainingFreeTickets(eventId) {
 
 async function listRecentEvents(page = {}) {
   const { limit, offset } = normalizePage(page);
-  const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const now = new Date().toISOString();
 
   const rows = await query(
     `SELECT e.*, u.username as organizer_username, u.name as organizer_name, u.profile_picture as organizer_avatar
      FROM events e
      LEFT JOIN users u ON e.user_id = u.id
      WHERE e.is_published = 1
-       AND (
-         (e.ends_at IS NOT NULL AND e.ends_at >= ?)
-         OR (e.ends_at IS NULL AND e.starts_at >= ?)
-       )
-     ORDER BY e.starts_at DESC, e.id DESC
+       AND e.ends_at IS NOT NULL
+       AND e.ends_at < ?
+     ORDER BY e.ends_at DESC, e.id DESC
      LIMIT ? OFFSET ?`,
-    [oneMonthAgo.toISOString(), oneMonthAgo.toISOString(), limit, offset]
+    [now, limit, offset]
   );
 
   return rows.map(mapEvent);
