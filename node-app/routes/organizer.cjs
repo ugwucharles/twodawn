@@ -413,10 +413,10 @@ function createOrganizerRouter() {
       // Mark as used
       const now = new Date().toISOString();
       await query(`
-        UPDATE orders 
-        SET status = 'used', updated_at = ?
+        UPDATE orders
+        SET status = 'used', updated_at = ?, last_checkin_at = ?
         WHERE id = ?
-      `, [now, order.id]);
+      `, [now, now, order.id]);
 
       console.log('Scanner verify: Ticket marked as used');
       return res.json({

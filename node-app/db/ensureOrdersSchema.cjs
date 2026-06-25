@@ -16,7 +16,8 @@ const ORDERS_TABLE_SQL = `
     status TEXT DEFAULT 'pending',
     created_ip TEXT,
     created_at TEXT,
-    updated_at TEXT
+    updated_at TEXT,
+    last_checkin_at TEXT
   )
 `;
 
@@ -35,6 +36,7 @@ const COLUMN_MIGRATIONS = [
   { column: 'created_ip', sql: 'ALTER TABLE orders ADD COLUMN created_ip TEXT' },
   { column: 'created_at', sql: 'ALTER TABLE orders ADD COLUMN created_at TEXT' },
   { column: 'updated_at', sql: 'ALTER TABLE orders ADD COLUMN updated_at TEXT' },
+  { column: 'last_checkin_at', sql: 'ALTER TABLE orders ADD COLUMN last_checkin_at TEXT' },
 ];
 
 let schemaReady = null;
