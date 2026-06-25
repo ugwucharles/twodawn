@@ -134,7 +134,7 @@ function Scanned() {
                       <td className="py-3 px-4 text-sm text-gray-600">{attendee.buyer_email}</td>
                       <td className="py-3 px-4 text-sm text-gray-900">{attendee.quantity}</td>
                       <td className="py-3 px-4 text-sm text-gray-600">
-                        {attendee.last_checkin_at ? new Date(attendee.last_checkin_at).toLocaleString() : 'N/A'}
+                        {attendee.last_checkin_at ? new Date(attendee.last_checkin_at).toLocaleString() : (attendee.updated_at ? new Date(attendee.updated_at).toLocaleString() : 'N/A')}
                       </td>
                     </tr>
                   ))}
