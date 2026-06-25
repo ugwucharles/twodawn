@@ -459,9 +459,16 @@ function createOrganizerRouter() {
         return res.status(404).json({ ok: false, error: 'Event not found' });
       }
 
-      // Soft delete by setting deleted_at
-      await query('UPDATE events SET deleted_at = datetime("now") WHERE id = ?', [eventId]);
-      console.log('Delete event: Event deleted successfully');
+      // Try soft delete by setting deleted_at
+      try {
+        await query('UPDATE events SET deleted_at = datetime("now") WHERE id = ?', [eventId]);
+        console.log('Delete event: Event soft deleted successfully');
+      } catch (softDeleteError) {
+        console.log('Delete event: Soft delete failed, trying hard delete:', softDeleteError.message);
+        // Fallback to hard delete if deleted_at column doesn't exist
+        await query('DELETE FROM events WHERE id = ?', [eventId]);
+        console.log('Delete event: Event hard deleted successfully');
+      }
 
       return res.json({ ok: true, message: 'Event deleted successfully' });
     } catch (error) {
