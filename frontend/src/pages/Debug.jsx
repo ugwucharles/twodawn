@@ -80,12 +80,29 @@ function Debug() {
         const eventsResponse = await api.get('/organizer/events')
         addLog('Organizer events response received', eventsResponse.data)
         addLog(`Organizer events count: ${eventsResponse.data?.events?.length || 0}`)
+        if (eventsResponse.data?.events) {
+          addLog('Sample event data', eventsResponse.data.events[0])
+        }
       } catch (err) {
         addLog('Organizer events ERROR', {
           message: err.message,
           response: err.response?.data,
           status: err.response?.status,
           responseText: err.response?.data ? 'HTML response detected' : 'Unknown'
+        })
+      }
+
+      // Test scanned page data
+      addLog('Testing scanned page data (same as events)...')
+      try {
+        const scannedResponse = await api.get('/organizer/events')
+        addLog('Scanned page data response received', scannedResponse.data)
+        addLog(`Scanned page events count: ${scannedResponse.data?.events?.length || 0}`)
+      } catch (err) {
+        addLog('Scanned page data ERROR', {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status
         })
       }
 
