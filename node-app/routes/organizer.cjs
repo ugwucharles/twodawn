@@ -439,23 +439,29 @@ function createOrganizerRouter() {
   // DELETE /organizer/events/:id - soft delete event
   router.delete('/events/:id', async (req, res) => {
     try {
+      console.log('Delete event: Request received');
       if (!req.auth || !req.auth.isAuthenticated) {
+        console.log('Delete event: Unauthenticated request');
         return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
       }
 
       const eventId = parseInt(req.params.id);
+      console.log('Delete event: Event ID:', eventId, 'User ID:', req.auth.user.id);
       if (!eventId) {
         return res.status(400).json({ ok: false, error: 'Invalid event ID' });
       }
 
       // Check if event belongs to user
       const event = await query('SELECT * FROM events WHERE id = ? AND user_id = ?', [eventId, req.auth.user.id]);
+      console.log('Delete event: Event query result:', event);
       if (!event[0]) {
+        console.log('Delete event: Event not found for user');
         return res.status(404).json({ ok: false, error: 'Event not found' });
       }
 
       // Soft delete by setting deleted_at
       await query('UPDATE events SET deleted_at = datetime("now") WHERE id = ?', [eventId]);
+      console.log('Delete event: Event deleted successfully');
 
       return res.json({ ok: true, message: 'Event deleted successfully' });
     } catch (error) {
