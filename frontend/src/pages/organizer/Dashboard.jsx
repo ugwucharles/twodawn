@@ -228,10 +228,10 @@ function OrganizerDashboard() {
                       <td className="px-8 py-6">
                         <div className="flex flex-col">
                           <span className="text-sm font-bold text-gray-900 leading-tight">
-                            {order.event?.title || 'Deleted Event'}
+                            {order.event_title || order.event?.title || 'Deleted Event'}
                           </span>
                           <span className="text-xs font-medium text-gray-400 mt-1 uppercase tracking-wider">
-                            {order.reference || `TXN-${order.id}`}
+                            {order.paystack_reference || order.reference || `TXN-${order.id}`}
                           </span>
                         </div>
                       </td>

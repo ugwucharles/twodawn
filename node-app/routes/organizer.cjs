@@ -296,6 +296,34 @@ function createOrganizerRouter() {
     }
   });
 
+  // DELETE /organizer/events/:id - soft delete event
+  router.delete('/events/:id', async (req, res) => {
+    try {
+      if (!req.auth || !req.auth.isAuthenticated) {
+        return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
+      }
+
+      const eventId = parseInt(req.params.id);
+      if (!eventId) {
+        return res.status(400).json({ ok: false, error: 'Invalid event ID' });
+      }
+
+      // Check if event belongs to user
+      const event = await query('SELECT * FROM events WHERE id = ? AND user_id = ?', [eventId, req.auth.user.id]);
+      if (!event[0]) {
+        return res.status(404).json({ ok: false, error: 'Event not found' });
+      }
+
+      // Soft delete by setting deleted_at
+      await query('UPDATE events SET deleted_at = datetime("now") WHERE id = ?', [eventId]);
+
+      return res.json({ ok: true, message: 'Event deleted successfully' });
+    } catch (error) {
+      console.error('Delete event error:', error);
+      return res.status(500).json({ ok: false, error: 'Failed to delete event' });
+    }
+  });
+
   // POST /organizer/settings/profile-picture - upload profile picture
   router.post('/settings/profile-picture', profilePicUpload.single('profile_picture'), async (req, res) => {
     try {

@@ -12,8 +12,8 @@ async function getOrganizerStats(userId) {
 
   const rows = await query(`
     SELECT 
-      (SELECT COUNT(*) FROM events WHERE user_id = ?) as total_events,
-      (SELECT COUNT(*) FROM events WHERE user_id = ? AND starts_at > datetime('now')) as upcoming_events
+      (SELECT COUNT(*) FROM events WHERE user_id = ? AND deleted_at IS NULL) as total_events,
+      (SELECT COUNT(*) FROM events WHERE user_id = ? AND starts_at > datetime('now') AND deleted_at IS NULL) as upcoming_events
   `, [id, id]);
 
   const totalEvents = Number(rows[0]?.total_events || 0);
@@ -28,7 +28,7 @@ async function getOrganizerStats(userId) {
         COALESCE(SUM(quantity), 0) as tickets_sold,
         COALESCE(SUM(amount), 0) as revenue
       FROM orders 
-      WHERE event_id IN (SELECT id FROM events WHERE user_id = ?) AND status = 'paid'
+      WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND deleted_at IS NULL) AND status = 'paid'
     `, [id]);
 
     totalTicketsSold = Number(orderRows[0]?.tickets_sold || 0);
@@ -41,7 +41,7 @@ async function getOrganizerStats(userId) {
   if (totalEvents > 0) {
     const orderRows = await query(`
       SELECT amount FROM orders 
-      WHERE event_id IN (SELECT id FROM events WHERE user_id = ?) AND status = 'paid'
+      WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND deleted_at IS NULL) AND status = 'paid'
     `, [id]);
 
     for (const row of orderRows) {
@@ -61,7 +61,7 @@ async function getOrganizerStats(userId) {
       const monthRows = await query(`
         SELECT COALESCE(SUM(amount), 0) as revenue
         FROM orders 
-        WHERE event_id IN (SELECT id FROM events WHERE user_id = ?) 
+        WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND deleted_at IS NULL) 
           AND status = 'paid'
           AND strftime('%Y', created_at) = strftime('%Y', 'now')
           AND strftime('%m', created_at) = ?
@@ -107,7 +107,7 @@ async function getOrganizerEvents(userId) {
       WHERE status = 'paid'
       GROUP BY event_id
     ) o ON o.event_id = e.id
-    WHERE e.user_id = ?
+    WHERE e.user_id = ? AND e.deleted_at IS NULL
     ORDER BY e.starts_at DESC
   `, [id]);
 

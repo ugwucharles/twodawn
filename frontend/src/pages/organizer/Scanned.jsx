@@ -171,11 +171,11 @@ function Scanned() {
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-emerald-500" />
-                  <span className="text-gray-700">{event.scanned_count || 0} scanned</span>
+                  <span className="text-gray-700">{event.scanned_count || event.orders_count || 0} scanned</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-purple-500" />
-                  <span className="text-gray-700">{event.total_tickets || 0} total</span>
+                  <span className="text-gray-700">{event.orders_count || 0} total</span>
                 </div>
               </div>
             </div>

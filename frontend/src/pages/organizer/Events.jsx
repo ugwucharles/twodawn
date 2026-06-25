@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Calendar, Eye, EyeOff } from 'lucide-react'
+import { Plus, Calendar, Eye, EyeOff, Trash2 } from 'lucide-react'
 import api from '../../services/api'
 import { getEventImage } from '../../utils/image'
 
@@ -8,6 +8,7 @@ function Events() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [toggling, setToggling] = useState(null)
+  const [deleting, setDeleting] = useState(null)
 
   useEffect(() => {
     fetchEvents()
@@ -35,6 +36,22 @@ function Events() {
       console.error('Failed to toggle publish', err)
     } finally {
       setToggling(null)
+    }
+  }
+
+  const deleteEvent = async (eventId) => {
+    if (!window.confirm('Are you sure you want to delete this event? This action can be undone by restoring from backup.')) {
+      return
+    }
+    setDeleting(eventId)
+    try {
+      await api.delete(`/organizer/events/${eventId}`)
+      setEvents(prev => prev.filter(e => e.id !== eventId))
+    } catch (err) {
+      console.error('Failed to delete event', err)
+      alert('Failed to delete event')
+    } finally {
+      setDeleting(null)
     }
   }
 
@@ -154,6 +171,19 @@ function Events() {
                       >
                         Edit
                       </Link>
+                      <button
+                        onClick={() => deleteEvent(event.id)}
+                        disabled={deleting === event.id}
+                        title="Delete event"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-xl text-xs font-bold transition-all disabled:opacity-50 whitespace-nowrap"
+                      >
+                        {deleting === event.id ? (
+                          <span className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
+                        Delete
+                      </button>
                     </div>
                   </div>
                 </div>

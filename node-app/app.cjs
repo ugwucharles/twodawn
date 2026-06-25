@@ -5,6 +5,7 @@ const { registerRoutes } = require('./routes/index.cjs');
 const { createUpstreamProxy } = require('./services/upstreamProxy.cjs');
 const { ensureUsersSchema } = require('./db/ensureUsersSchema.cjs');
 const { ensureOrdersSchema } = require('./db/ensureOrdersSchema.cjs');
+const { ensureEventsSchema } = require('./db/ensureEventsSchema.cjs');
 
 ensureUsersSchema().catch((error) => {
   console.error('Failed to ensure users schema:', error.message);
@@ -12,6 +13,10 @@ ensureUsersSchema().catch((error) => {
 
 ensureOrdersSchema().catch((error) => {
   console.error('Failed to ensure orders schema:', error.message);
+});
+
+ensureEventsSchema().catch((error) => {
+  console.error('Failed to ensure events schema:', error.message);
 });
 
 function createApp() {
