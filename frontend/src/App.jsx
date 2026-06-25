@@ -14,6 +14,7 @@ import OrganizerLayout from './pages/organizer/OrganizerLayout'
 import OrganizerEvents from './pages/organizer/Events'
 import OrganizerOrders from './pages/organizer/Orders'
 import OrganizerScanner from './pages/organizer/Scanner'
+import OrganizerScanned from './pages/organizer/Scanned'
 import OrganizerWallet from './pages/organizer/Wallet'
 import OrganizerSettings from './pages/organizer/Settings'
 import CreateEvent from './pages/organizer/CreateEvent'
@@ -70,6 +71,7 @@ function App() {
           <Route path="events" element={<OrganizerEvents />} />
           <Route path="orders" element={<OrganizerOrders />} />
           <Route path="scanner" element={<OrganizerScanner />} />
+          <Route path="scanned" element={<OrganizerScanned />} />
           <Route path="wallet" element={<OrganizerWallet />} />
           <Route path="settings" element={<OrganizerSettings />} />
         </Route>

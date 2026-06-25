@@ -27,6 +27,7 @@ export default function OrganizerLayout() {
     { path: '/organizer/events', label: 'Events', icon: Calendar },
     { path: '/organizer/orders', label: 'Orders', icon: ShoppingBag },
     { path: '/organizer/scanner', label: 'Scanner', icon: Scan },
+    { path: '/organizer/scanned', label: 'Scanned', icon: CheckCircle },
   ];
 
   const otherItems = [

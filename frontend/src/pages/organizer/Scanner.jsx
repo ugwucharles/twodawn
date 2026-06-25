@@ -100,9 +100,9 @@ function Scanner() {
       } else if (data.already) {
         const scannedAt = formatScanTime(data.last_checkin_at);
         setStatusMsg('Already Scanned', 'warn');
-        showInlineResult('warn', `Already scanned${scannedAt ? ' at ' + scannedAt : ''}. Buyer: ${data.buyer?.name || 'Unknown'}`);
+        showInlineResult('warn', `Ticket scanned already${scannedAt ? ' at ' + scannedAt : ''}. Buyer: ${data.buyer?.name || 'Unknown'}`);
         openModal('warn', {
-          title: 'Already Scanned',
+          title: 'Ticket Scanned Already',
           sub: data.event?.title || '',
           buyer: data.buyer,
           last: data.last_checkin_at,
