@@ -30,7 +30,10 @@ function Scanned() {
   const fetchEventDetails = async (eventId) => {
     try {
       const res = await api.get(`/organizer/events/${eventId}`);
-      setSelectedEvent(res.data.event);
+      setSelectedEvent({
+        ...res.data.event,
+        orders: res.data.orders
+      });
     } catch (err) {
       console.error('Error fetching event details:', err);
     }
