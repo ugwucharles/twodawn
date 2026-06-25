@@ -6,6 +6,7 @@ import { Calendar, Ticket, Wallet, DollarSign, Plus, ChevronRight } from 'lucide
 function OrganizerDashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchDashboard();
@@ -20,12 +21,21 @@ function OrganizerDashboard() {
     } catch (err) {
       console.error('Failed to load dashboard', err);
       console.error('Error response:', err.response?.data);
+      setError('Failed to load dashboard');
       setLoading(false);
     }
   };
 
   if (loading) {
     return <div className="text-center py-12">Loading dashboard...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-12 text-red-500">{error}</div>;
+  }
+
+  if (!stats) {
+    return <div className="text-center py-12">No data available</div>;
   }
 
   const totalEvents = stats?.stats?.total_events || 0;
