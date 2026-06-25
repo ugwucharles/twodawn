@@ -294,9 +294,15 @@ function Home() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-4 py-8 text-center text-sm text-gray-500">
-                  No top-selling events found for this state yet.
-                </div>
+                <Link
+                  to="/organizer/login"
+                  className="flex items-center rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-black hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 overflow-hidden group h-32"
+                >
+                  <div className="flex-1 p-6 flex flex-col justify-center items-center text-center">
+                    <h3 className="text-lg font-bold text-white mb-1">Create Your Event Now</h3>
+                    <p className="text-xs text-white/80">Start selling tickets for your unforgettable experiences</p>
+                  </div>
+                </Link>
               )}
             </div>
 
@@ -378,9 +384,20 @@ function Home() {
                   Loading events...
                 </div>
               ) : filteredEvents.length === 0 ? (
-                <div className="py-20 text-center text-gray-400 col-span-full">
-                  No matching events found.
-                </div>
+                <Link
+                  to="/organizer/login"
+                  className="flex items-center rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-black hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 overflow-hidden group h-52 col-span-full"
+                >
+                  <div className="flex-1 p-8 flex flex-col justify-center items-center text-center">
+                    <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Create Your Event Now</h3>
+                    <p className="text-sm text-white/80">Start selling tickets for your unforgettable experiences</p>
+                  </div>
+                </Link>
               ) : (
                 filteredEvents.map((event) => (
                   <Link
@@ -446,16 +463,16 @@ function Home() {
             </div>
 
             {/* Recent Events */}
-            {recentEvents.length > 0 && (
-              <div className="mt-12">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    Recent Events
-                  </h2>
-                  <Link to="/events" className="text-sm font-medium text-gray-500 hover:text-[#8b5cf6] transition-colors">
-                    See all
-                  </Link>
-                </div>
+            <div className="mt-12">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  Recent Events
+                </h2>
+                <Link to="/events" className="text-sm font-medium text-gray-500 hover:text-[#8b5cf6] transition-colors">
+                  See all
+                </Link>
+              </div>
+              {recentEvents.length > 0 ? (
                 <div className="flex gap-5 overflow-x-auto no-scrollbar">
                   {recentEvents.map((event) => (
                     <Link
@@ -491,8 +508,18 @@ function Home() {
                     </Link>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <Link
+                  to="/organizer/login"
+                  className="flex items-center rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-black hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 overflow-hidden group h-32"
+                >
+                  <div className="flex-1 p-6 flex flex-col justify-center items-center text-center">
+                    <h3 className="text-lg font-bold text-white mb-1">Create Your Event Now</h3>
+                    <p className="text-xs text-white/80">Start selling tickets for your unforgettable experiences</p>
+                  </div>
+                </Link>
+              )}
+            </div>
 
           </div>
         </section>

@@ -23,7 +23,7 @@ function Footer() {
               <img src="/logo-white2.svg" alt="2DAWN" className="h-8 w-auto opacity-80 hover:opacity-100 transition-opacity" />
             </Link>
             <p className="text-sm text-zinc-400 leading-relaxed max-w-xs">
-              Tix is an event ticketing platform for memorable experiences in Africa.
+              2DAWN is your go-to platform for discovering and booking unforgettable events across Nigeria.
             </p>
           </div>
 
