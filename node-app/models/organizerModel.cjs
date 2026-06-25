@@ -97,21 +97,45 @@ async function getOrganizerEvents(userId) {
   const id = asPositiveInt(userId);
   if (!id) return [];
 
-  const rows = await query(`
-    SELECT e.*,
-           COALESCE(o.orders_count, 0) as orders_count
-    FROM events e
-    LEFT JOIN (
-      SELECT event_id, COUNT(*) as orders_count
-      FROM orders
-      WHERE status = 'paid'
-      GROUP BY event_id
-    ) o ON o.event_id = e.id
-    WHERE e.user_id = ? AND e.deleted_at IS NULL
-    ORDER BY e.starts_at DESC
-  `, [id]);
+  try {
+    const rows = await query(`
+      SELECT e.*,
+             COALESCE(o.orders_count, 0) as orders_count
+      FROM events e
+      LEFT JOIN (
+        SELECT event_id, COUNT(*) as orders_count
+        FROM orders
+        WHERE status = 'paid'
+        GROUP BY event_id
+      ) o ON o.event_id = e.id
+      WHERE e.user_id = ? AND (e.deleted_at IS NULL OR e.deleted_at = '')
+      ORDER BY e.starts_at DESC
+    `, [id]);
 
-  return rows;
+    return rows;
+  } catch (error) {
+    console.error('Error in getOrganizerEvents:', error);
+    // Fallback query without deleted_at column
+    try {
+      const rows = await query(`
+        SELECT e.*,
+               COALESCE(o.orders_count, 0) as orders_count
+        FROM events e
+        LEFT JOIN (
+          SELECT event_id, COUNT(*) as orders_count
+          FROM orders
+          WHERE status = 'paid'
+          GROUP BY event_id
+        ) o ON o.event_id = e.id
+        WHERE e.user_id = ?
+        ORDER BY e.starts_at DESC
+      `, [id]);
+      return rows;
+    } catch (fallbackError) {
+      console.error('Fallback query also failed:', fallbackError);
+      return [];
+    }
+  }
 }
 
 async function getOrganizerOrders(userId, page = {}) {
