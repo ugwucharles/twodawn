@@ -9,13 +9,21 @@ function OrganizerDashboard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('Dashboard component mounted');
     fetchDashboard();
   }, []);
 
   const fetchDashboard = async () => {
     try {
+      console.log('Fetching dashboard data...');
       const response = await api.get('/organizer/dashboard');
       console.log('Dashboard response:', response.data);
+      console.log('Response structure:', {
+        hasData: !!response.data,
+        hasStats: !!response.data?.stats,
+        hasEvents: !!response.data?.events,
+        hasRecentOrders: !!response.data?.recent_orders
+      });
       setStats(response.data);
       setLoading(false);
     } catch (err) {
@@ -26,15 +34,20 @@ function OrganizerDashboard() {
     }
   };
 
+  console.log('Dashboard render state:', { loading, error, hasStats: !!stats });
+
   if (loading) {
+    console.log('Dashboard: showing loading state');
     return <div className="text-center py-12">Loading dashboard...</div>;
   }
 
   if (error) {
+    console.log('Dashboard: showing error state', error);
     return <div className="text-center py-12 text-red-500">{error}</div>;
   }
 
   if (!stats) {
+    console.log('Dashboard: no stats data');
     return <div className="text-center py-12">No data available</div>;
   }
 
@@ -45,6 +58,8 @@ function OrganizerDashboard() {
   const totalRevenue = stats?.stats?.total_revenue || 0;
   const events = stats?.events || [];
   const recentOrders = stats?.recent_orders || [];
+
+  console.log('Dashboard: rendering with data', { totalEvents, eventsCount: events.length, recentOrdersCount: recentOrders.length });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
