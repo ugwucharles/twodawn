@@ -53,7 +53,7 @@ function Orders() {
                 {orders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-8 py-6 text-sm font-semibold text-gray-500">{order.reference || order.paystack_reference}</td>
-                    <td className="px-8 py-6 text-sm font-black text-gray-900">{order.event?.title || 'Deleted Event'}</td>
+                    <td className="px-8 py-6 text-sm font-black text-gray-900">{order.event_title || order.event?.title || 'Deleted Event'}</td>
                     <td className="px-8 py-6 text-sm font-semibold text-gray-500">
                       <div className="font-bold text-gray-900">{order.buyer_name || 'Unknown'}</div>
                       <div className="text-xs text-gray-400 font-medium">{order.buyer_email || ''}</div>

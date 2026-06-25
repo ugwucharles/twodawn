@@ -76,11 +76,11 @@ function Scanned() {
           <div className="flex items-center gap-4 text-sm text-gray-600">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              {new Date(selectedEvent.starts_at).toLocaleDateString()}
+              {selectedEvent.starts_at ? new Date(selectedEvent.starts_at).toLocaleDateString() : 'TBD'}
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
-              {selectedEvent.location}
+              {selectedEvent.venue || selectedEvent.location || 'TBD'}
             </div>
           </div>
         </div>
