@@ -502,11 +502,11 @@ function createOrganizerRouter() {
         return res.status(403).json({ ok: false, error: 'You do not have permission to view this event' });
       }
 
-      // Get orders for this event
+      // Get orders for this event (both paid and used)
       const orderRows = await query(`
         SELECT o.*
         FROM orders o
-        WHERE o.event_id = ? AND o.status = 'paid'
+        WHERE o.event_id = ? AND (o.status = 'paid' OR o.status = 'used')
         ORDER BY o.created_at DESC
       `, [eventId]);
 

@@ -113,7 +113,7 @@ function Scanned() {
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Scanned Attendees</h2>
-          {selectedEvent.scanned_attendees && selectedEvent.scanned_attendees.length > 0 ? (
+          {selectedEvent.orders && selectedEvent.orders.filter(o => o.status === 'used').length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -125,13 +125,13 @@ function Scanned() {
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedEvent.scanned_attendees.map((attendee, idx) => (
+                  {selectedEvent.orders.filter(o => o.status === 'used').map((attendee, idx) => (
                     <tr key={idx} className="border-b border-gray-100">
                       <td className="py-3 px-4 text-sm text-gray-900">{attendee.buyer_name}</td>
                       <td className="py-3 px-4 text-sm text-gray-600">{attendee.buyer_email}</td>
                       <td className="py-3 px-4 text-sm text-gray-900">{attendee.quantity}</td>
                       <td className="py-3 px-4 text-sm text-gray-600">
-                        {attendee.scanned_at ? new Date(attendee.scanned_at).toLocaleString() : 'N/A'}
+                        {attendee.last_checkin_at ? new Date(attendee.last_checkin_at).toLocaleString() : 'N/A'}
                       </td>
                     </tr>
                   ))}
