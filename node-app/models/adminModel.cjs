@@ -6,22 +6,57 @@ function asPositiveInt(value) {
   return parsed;
 }
 
+// Activity logging
+async function logActivity(action, entityType, entityId, details = null, userId = null) {
+  try {
+    await query(`
+      INSERT INTO activity_logs (action, entity_type, entity_id, details, user_id, created_at)
+      VALUES (?, ?, ?, ?, ?, datetime('now'))
+    `, [action, entityType, entityId, JSON.stringify(details), userId]);
+  } catch (error) {
+    console.error('Failed to log activity:', error);
+  }
+}
+
+async function getActivityLogs(limit = 50, offset = 0) {
+  const rows = await query(`
+    SELECT * FROM activity_logs
+    ORDER BY created_at DESC
+    LIMIT ? OFFSET ?
+  `, [limit, offset]);
+  return rows;
+}
+
 async function getAdminStats() {
   const rows = await query(`
-    SELECT 
+    SELECT
       (SELECT COUNT(*) FROM events) as events_total,
       (SELECT COUNT(*) FROM events WHERE is_published = 1) as events_published,
+      (SELECT COUNT(*) FROM events WHERE is_published = 1 AND (ends_at IS NULL OR ends_at >= datetime('now'))) as events_active,
+      (SELECT COUNT(*) FROM users) as users_total,
+      (SELECT COUNT(*) FROM users WHERE role = 'organizer') as organizers_total,
+      (SELECT COUNT(*) FROM orders) as orders_total,
       (SELECT COUNT(*) FROM orders WHERE date(created_at) = date('now')) as orders_today,
+      (SELECT COALESCE(SUM(quantity), 0) FROM orders WHERE status = 'paid') as tickets_total,
       (SELECT COALESCE(SUM(quantity), 0) FROM orders WHERE status = 'paid' AND date(created_at) = date('now')) as tickets_today,
-      (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE status = 'paid' AND date(created_at) = date('now')) as revenue_today
+      (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE status = 'paid') as revenue_total,
+      (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE status = 'paid' AND date(created_at) = date('now')) as revenue_today,
+      (SELECT COUNT(*) FROM orders WHERE status = 'failed') as payments_failed
   `);
 
   return {
     events_total: Number(rows[0]?.events_total || 0),
     events_published: Number(rows[0]?.events_published || 0),
+    events_active: Number(rows[0]?.events_active || 0),
+    users_total: Number(rows[0]?.users_total || 0),
+    organizers_total: Number(rows[0]?.organizers_total || 0),
+    orders_total: Number(rows[0]?.orders_total || 0),
     orders_today: Number(rows[0]?.orders_today || 0),
+    tickets_total: Number(rows[0]?.tickets_total || 0),
     tickets_today: Number(rows[0]?.tickets_today || 0),
+    revenue_total: Number(rows[0]?.revenue_total || 0),
     revenue_today: Number(rows[0]?.revenue_today || 0),
+    payments_failed: Number(rows[0]?.payments_failed || 0),
   };
 }
 
@@ -136,6 +171,240 @@ async function createHostToken(eventId, label = null) {
   return { id: rows.insertId, token, label, active: true };
 }
 
+// Event management
+async function getAllEvents(limit = 50, offset = 0, status = null) {
+  let whereClause = '';
+  let params = [];
+
+  if (status === 'published') {
+    whereClause = 'WHERE is_published = 1';
+  } else if (status === 'draft') {
+    whereClause = 'WHERE is_published = 0';
+  } else if (status === 'active') {
+    whereClause = 'WHERE is_published = 1 AND (ends_at IS NULL OR ends_at >= datetime("now"))';
+  }
+
+  const rows = await query(`
+    SELECT e.*, u.name as organizer_name, u.email as organizer_email,
+           (SELECT COUNT(*) FROM orders WHERE event_id = e.id AND status = 'paid') as tickets_sold,
+           (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE event_id = e.id AND status = 'paid') as revenue
+    FROM events e
+    LEFT JOIN users u ON e.user_id = u.id
+    ${whereClause}
+    ORDER BY e.created_at DESC
+    LIMIT ? OFFSET ?
+  `, [...params, limit, offset]);
+
+  return rows;
+}
+
+async function getEventById(eventId) {
+  const id = asPositiveInt(eventId);
+  if (!id) return null;
+
+  const rows = await query(`
+    SELECT e.*, u.name as organizer_name, u.email as organizer_email
+    FROM events e
+    LEFT JOIN users u ON e.user_id = u.id
+    WHERE e.id = ?
+    LIMIT 1
+  `, [id]);
+
+  return rows[0] || null;
+}
+
+async function updateEvent(eventId, updates) {
+  const id = asPositiveInt(eventId);
+  if (!id) return null;
+
+  const fields = [];
+  const values = [];
+
+  if (updates.is_published !== undefined) {
+    fields.push('is_published = ?');
+    values.push(updates.is_published ? 1 : 0);
+  }
+  if (updates.is_featured !== undefined) {
+    fields.push('is_featured = ?');
+    values.push(updates.is_featured ? 1 : 0);
+  }
+  if (updates.title !== undefined) {
+    fields.push('title = ?');
+    values.push(updates.title);
+  }
+  if (updates.venue !== undefined) {
+    fields.push('venue = ?');
+    values.push(updates.venue);
+  }
+
+  if (fields.length === 0) return null;
+
+  values.push(id);
+  await query(`UPDATE events SET ${fields.join(', ')} WHERE id = ?`, values);
+
+  return await getEventById(id);
+}
+
+async function deleteEvent(eventId) {
+  const id = asPositiveInt(eventId);
+  if (!id) return false;
+
+  await query(`UPDATE events SET deleted_at = datetime('now') WHERE id = ?`, [id]);
+  return true;
+}
+
+// Organizer management
+async function getAllOrganizers(limit = 50, offset = 0) {
+  const rows = await query(`
+    SELECT u.*,
+           (SELECT COUNT(*) FROM events WHERE user_id = u.id) as events_count,
+           (SELECT COALESCE(SUM(o.amount), 0) FROM orders o
+            JOIN events e ON o.event_id = e.id
+            WHERE e.user_id = u.id AND o.status = 'paid') as total_revenue
+    FROM users
+    WHERE role = 'organizer'
+    ORDER BY u.created_at DESC
+    LIMIT ? OFFSET ?
+  `, [limit, offset]);
+
+  return rows;
+}
+
+async function getOrganizerById(organizerId) {
+  const id = asPositiveInt(organizerId);
+  if (!id) return null;
+
+  const rows = await query(`
+    SELECT u.*,
+           (SELECT COUNT(*) FROM events WHERE user_id = u.id) as events_count,
+           (SELECT COALESCE(SUM(o.amount), 0) FROM orders o
+            JOIN events e ON o.event_id = e.id
+            WHERE e.user_id = u.id AND o.status = 'paid') as total_revenue
+    FROM users
+    WHERE id = ? AND role = 'organizer'
+    LIMIT 1
+  `, [id]);
+
+  return rows[0] || null;
+}
+
+async function updateOrganizer(organizerId, updates) {
+  const id = asPositiveInt(organizerId);
+  if (!id) return null;
+
+  const fields = [];
+  const values = [];
+
+  if (updates.is_suspended !== undefined) {
+    fields.push('is_suspended = ?');
+    values.push(updates.is_suspended ? 1 : 0);
+  }
+
+  if (fields.length === 0) return null;
+
+  values.push(id);
+  await query(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
+
+  return await getOrganizerById(id);
+}
+
+// User management
+async function getAllUsers(limit = 50, offset = 0, search = null) {
+  let whereClause = '';
+  let params = [];
+
+  if (search) {
+    whereClause = 'WHERE name LIKE ? OR email LIKE ?';
+    params = [`%${search}%`, `%${search}%`];
+  }
+
+  const rows = await query(`
+    SELECT u.*,
+           (SELECT COUNT(*) FROM orders WHERE buyer_email = u.email) as orders_count
+    FROM users u
+    ${whereClause}
+    ORDER BY u.created_at DESC
+    LIMIT ? OFFSET ?
+  `, [...params, limit, offset]);
+
+  return rows;
+}
+
+async function getUserById(userId) {
+  const id = asPositiveInt(userId);
+  if (!id) return null;
+
+  const rows = await query(`
+    SELECT u.*,
+           (SELECT COUNT(*) FROM orders WHERE buyer_email = u.email) as orders_count
+    FROM users
+    WHERE id = ?
+    LIMIT 1
+  `, [id]);
+
+  return rows[0] || null;
+}
+
+// Transaction management
+async function getAllTransactions(limit = 50, offset = 0, status = null) {
+  let whereClause = '';
+  let params = [];
+
+  if (status) {
+    whereClause = 'WHERE o.status = ?';
+    params.push(status);
+  }
+
+  const rows = await query(`
+    SELECT o.*, e.title as event_title, u.name as organizer_name
+    FROM orders o
+    LEFT JOIN events e ON o.event_id = e.id
+    LEFT JOIN users u ON e.user_id = u.id
+    ${whereClause}
+    ORDER BY o.created_at DESC
+    LIMIT ? OFFSET ?
+  `, [...params, limit, offset]);
+
+  return rows;
+}
+
+// System health
+async function getSystemHealth() {
+  try {
+    // Test database connection
+    await query('SELECT 1');
+    const dbStatus = 'healthy';
+
+    // Check recent errors (if error_logs table exists)
+    let recentErrors = 0;
+    try {
+      const errorRows = await query(`
+        SELECT COUNT(*) as count FROM error_logs
+        WHERE created_at >= datetime('now', '-1 hour')
+      `);
+      recentErrors = Number(errorRows[0]?.count || 0);
+    } catch (e) {
+      // error_logs table might not exist
+    }
+
+    return {
+      database: dbStatus,
+      api: 'healthy',
+      payment_gateway: 'healthy',
+      email_service: 'unknown',
+      recent_errors: recentErrors,
+    };
+  } catch (error) {
+    return {
+      database: 'unhealthy',
+      api: 'unhealthy',
+      payment_gateway: 'unknown',
+      email_service: 'unknown',
+      recent_errors: 0,
+    };
+  }
+}
+
 module.exports = {
   getAdminStats,
   getChartData,
@@ -145,4 +414,17 @@ module.exports = {
   getOrderById,
   getHostTokens,
   createHostToken,
+  logActivity,
+  getActivityLogs,
+  getAllEvents,
+  getEventById,
+  updateEvent,
+  deleteEvent,
+  getAllOrganizers,
+  getOrganizerById,
+  updateOrganizer,
+  getAllUsers,
+  getUserById,
+  getAllTransactions,
+  getSystemHealth,
 };

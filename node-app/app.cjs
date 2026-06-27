@@ -6,6 +6,7 @@ const { createUpstreamProxy } = require('./services/upstreamProxy.cjs');
 const { ensureUsersSchema } = require('./db/ensureUsersSchema.cjs');
 const { ensureOrdersSchema } = require('./db/ensureOrdersSchema.cjs');
 const { ensureEventsSchema } = require('./db/ensureEventsSchema.cjs');
+const { ensureActivityLogsSchema } = require('./db/ensureActivityLogsSchema.cjs');
 
 async function initializeSchemas() {
   try {
@@ -27,6 +28,13 @@ async function initializeSchemas() {
     console.log('✅ Events schema ensured');
   } catch (error) {
     console.error('Failed to ensure events schema:', error.message);
+  }
+
+  try {
+    await ensureActivityLogsSchema();
+    console.log('✅ Activity logs schema ensured');
+  } catch (error) {
+    console.error('Failed to ensure activity logs schema:', error.message);
   }
 }
 
