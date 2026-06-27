@@ -3,17 +3,16 @@ const { createClient } = require('@libsql/client/web');
 let tursoClient = null;
 
 function getDatabase() {
-  // Always require Turso - no SQLite fallback anywhere
   if (!process.env.TURSO_DATABASE_URL || !process.env.TURSO_AUTH_TOKEN) {
-    throw new Error('Turso is required. Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN environment variables.');
+    throw new Error('❌ Database Error: TURSO_DATABASE_URL and TURSO_AUTH_TOKEN must be set in environment variables.');
   }
 
   if (tursoClient) return tursoClient;
-  
+
   console.log('🔌 Using Turso database');
   console.log('TURSO_DATABASE_URL:', process.env.TURSO_DATABASE_URL ? 'SET' : 'NOT SET');
   console.log('TURSO_AUTH_TOKEN:', process.env.TURSO_AUTH_TOKEN ? 'SET' : 'NOT SET');
-  
+
   tursoClient = createClient({
     url: process.env.TURSO_DATABASE_URL,
     authToken: process.env.TURSO_AUTH_TOKEN,
@@ -24,6 +23,7 @@ function getDatabase() {
 async function query(sql, params = []) {
   const database = getDatabase();
   console.log('🔍 Query type: Turso, SQL:', sql.substring(0, 50));
+
   try {
     const result = await database.execute({ sql, args: params });
     const sqlUpper = sql.trim().toUpperCase();
@@ -68,3 +68,4 @@ async function pingDatabase() {
 }
 
 module.exports = { getDatabase, query, pingDatabase };
+

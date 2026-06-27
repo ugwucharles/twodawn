@@ -28,18 +28,11 @@ function createAdminRouter() {
   // GET /admin/dashboard - admin dashboard
   router.get('/dashboard', async (req, res) => {
     try {
-      if (isJsonRequest(req)) {
-        const data = await getDashboardData();
-        return res.json({ ok: true, ...data });
-      }
-      // Proxy to Laravel for HTML
-      return proxyRequest(req, res);
+      const data = await getDashboardData();
+      return res.json({ ok: true, ...data });
     } catch (error) {
       console.error('Admin dashboard error:', error);
-      if (isJsonRequest(req)) {
-        return res.status(500).json({ ok: false, error: 'Failed to fetch dashboard data' });
-      }
-      return proxyRequest(req, res);
+      return res.status(500).json({ ok: false, error: 'Failed to fetch dashboard data' });
     }
   });
 
@@ -246,6 +239,103 @@ function createAdminRouter() {
     }
   });
 
+  // POST /admin/organizers - create organizer
+  router.post('/organizers', async (req, res) => {
+    try {
+      const { name, email, username, password } = req.body;
+      if (!name || !email || !username || !password) {
+        return res.status(400).json({ ok: false, error: 'All fields are required' });
+      }
+
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const { query } = require('../db/client.cjs');
+      const result = await query(`
+        INSERT INTO users (name, email, username, password, is_organizer, created_at, updated_at)
+        VALUES (?, ?, ?, ?, 1, datetime('now'), datetime('now'))
+      `, [name, email, username, hashedPassword]);
+
+      const newId = Number(result.lastInsertRowid);
+      await logActivity('create_organizer', 'user', newId);
+
+      return res.json({
+        ok: true,
+        organizer: {
+          id: newId,
+          name,
+          email,
+          username,
+          is_organizer: 1,
+          events_count: 0,
+          total_revenue: 0
+        }
+      });
+    } catch (error) {
+      console.error('Create organizer error:', error);
+      return res.status(500).json({ ok: false, error: 'Failed to create organizer' });
+    }
+  });
+
+  // DELETE /admin/organizers/:id - delete organizer
+  router.delete('/organizers/:id', async (req, res) => {
+    try {
+      const organizerId = parseInt(req.params.id, 10);
+      const { deleteAuthUserById } = require('../models/authUserModel.cjs');
+      const success = await deleteAuthUserById(organizerId);
+      if (!success) {
+        return res.status(404).json({ ok: false, error: 'Organizer not found' });
+      }
+      await logActivity('delete_organizer', 'user', organizerId);
+      return res.json({ ok: true, message: 'Organizer deleted successfully' });
+    } catch (error) {
+      console.error('Delete organizer error:', error);
+      return res.status(500).json({ ok: false, error: 'Failed to delete organizer' });
+    }
+  });
+
+  // POST /admin/events - create event (as admin)
+  router.post('/events', async (req, res) => {
+    try {
+      const { title, slug, venue, starts_at, price, capacity, is_published } = req.body;
+      if (!title || !starts_at || !venue) {
+        return res.status(400).json({ ok: false, error: 'Title, date and venue are required' });
+      }
+      const { query } = require('../db/client.cjs');
+
+      // Default user_id to 1 (Charles/Admin)
+      const user_id = req.body.user_id || 1;
+
+      const eventSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+      const result = await query(`
+        INSERT INTO events (user_id, title, slug, venue, starts_at, price, capacity, is_published, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      `, [user_id, title, eventSlug, venue, starts_at, price || 0, capacity || 100, is_published ? 1 : 0]);
+
+      const newId = Number(result.lastInsertRowid);
+      await logActivity('create_event', 'event', newId);
+
+      return res.json({
+        ok: true,
+        event: {
+          id: newId,
+          user_id,
+          title,
+          slug: eventSlug,
+          venue,
+          starts_at,
+          price: price || 0,
+          capacity: capacity || 100,
+          is_published: is_published ? 1 : 0
+        }
+      });
+    } catch (error) {
+      console.error('Create event error:', error);
+      return res.status(500).json({ ok: false, error: 'Failed to create event' });
+    }
+  });
+
   // GET /admin/users - list users
   router.get('/users', async (req, res) => {
     try {
@@ -311,11 +401,6 @@ function createAdminRouter() {
       console.error('Get health error:', error);
       return res.status(500).json({ ok: false, error: 'Failed to fetch health status' });
     }
-  });
-
-  // All other admin routes proxy to Laravel for now
-  router.all('*', (req, res) => {
-    return proxyRequest(req, res);
   });
 
   return router;

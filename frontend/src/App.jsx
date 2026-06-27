@@ -12,11 +12,9 @@ import AdminDashboard from './pages/admin/Dashboard'
 import AdminActivity from './pages/admin/Activity'
 import AdminEvents from './pages/admin/Events'
 import AdminOrganizers from './pages/admin/Organizers'
-import AdminUsers from './pages/admin/Users'
 import AdminTransactions from './pages/admin/Transactions'
 import AdminAnalytics from './pages/admin/Analytics'
 import AdminHealth from './pages/admin/Health'
-import AdminSettings from './pages/admin/Settings'
 import AdminLayout from './components/admin/AdminLayout'
 import OrganizerDashboard from './pages/organizer/Dashboard'
 import OrganizerLayout from './pages/organizer/OrganizerLayout'
@@ -71,17 +69,14 @@ function App() {
         <Route path="/organizer/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/ucc" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="activity" element={<AdminActivity />} />
           <Route path="events" element={<AdminEvents />} />
           <Route path="organizers" element={<AdminOrganizers />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="orders" element={<AdminTransactions />} />
           <Route path="transactions" element={<AdminTransactions />} />
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="health" element={<AdminHealth />} />
-          <Route path="settings" element={<AdminSettings />} />
         </Route>
         <Route path="/organizer" element={<OrganizerLayout />}>
           <Route path="dashboard" element={<OrganizerDashboard />} />

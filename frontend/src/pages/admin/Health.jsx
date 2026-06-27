@@ -12,7 +12,7 @@ function AdminHealth() {
 
   const fetchHealth = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/admin/health`);
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/ucc/health`);
       setHealth(response.data.health);
       setLoading(false);
     } catch (err) {

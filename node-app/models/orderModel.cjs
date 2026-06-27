@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { query } = require('../db/client.cjs');
 const { ensureOrdersSchema } = require('../db/ensureOrdersSchema.cjs');
 
@@ -12,10 +13,12 @@ const ORDER_SELECT = `
   quantity,
   amount,
   paystack_reference,
+  ticket_code,
   status,
   created_ip,
   created_at,
-  updated_at
+  updated_at,
+  last_checkin_at
 `;
 
 function mapOrder(row) {
@@ -112,12 +115,14 @@ async function createOrder(orderData) {
     created_ip,
   } = orderData;
 
+  const ticket_code = orderData.ticket_code || ('TC-' + crypto.randomBytes(3).toString('hex').toUpperCase());
+
   const rows = await query(
     `INSERT INTO orders (
       event_id, ticket_type, buyer_name, buyer_email, buyer_phone,
-      coupon_code, quantity, amount, paystack_reference, status, created_ip,
+      coupon_code, quantity, amount, paystack_reference, ticket_code, status, created_ip,
       created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, datetime('now'), datetime('now'))`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, datetime('now'), datetime('now'))`,
     [
       event_id,
       ticket_type || null,
@@ -128,6 +133,7 @@ async function createOrder(orderData) {
       quantity,
       amount,
       paystack_reference,
+      ticket_code,
       created_ip || null,
     ]
   );

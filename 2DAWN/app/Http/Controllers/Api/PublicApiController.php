@@ -25,8 +25,9 @@ class PublicApiController extends Controller
             ->orderBy('starts_at')
             ->limit(min(100, (int) $request->query('limit', 50)));
 
-        $items = $q->with('user:id,name,username')->get(['id','title','venue','starts_at','ends_at','price','slug','use_custom_slug','user_id','description','capacity','ticket_types','image_path','state'])
-            ->map(function($e){
+        $items = $q->with('user:id,name,username')->get(['id','title','venue','starts_at','ends_at','price','slug','use_custom_slug','user_id','description','capacity','ticket_types','image_path','state']);
+
+        $mapped = $items->map(function($e){
                 return [
                     'id' => $e->id,
                     'title' => $e->title,
@@ -45,7 +46,7 @@ class PublicApiController extends Controller
                 ];
             });
 
-        return response()->json(['ok' => true, 'events' => $items]);
+        return response()->json(['ok' => true, 'events' => $mapped]);
     }
 
     // GET /api/v1/events/{id}

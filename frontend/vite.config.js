@@ -19,6 +19,7 @@ export default defineConfig({
       '/api': { target: proxyTarget, changeOrigin: true },
       '/organizer': { target: proxyTarget, changeOrigin: true, bypass: htmlBypass },
       '/admin': { target: proxyTarget, changeOrigin: true, bypass: htmlBypass },
+      '/ucc': { target: proxyTarget, changeOrigin: true, bypass: htmlBypass },
       '/events': { target: proxyTarget, changeOrigin: true, bypass: htmlBypass },
       '/event': { target: proxyTarget, changeOrigin: true, bypass: htmlBypass },
       '/orders': { target: proxyTarget, changeOrigin: true, bypass: htmlBypass },

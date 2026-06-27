@@ -12,7 +12,7 @@ function AdminTransactions() {
 
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/admin/transactions`);
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/ucc/transactions`);
       setTransactions(response.data.transactions || []);
       setLoading(false);
     } catch (err) {

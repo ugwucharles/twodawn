@@ -1,135 +1,42 @@
-# Deploying to Render (Docker)
+# Deploying to Render
 
-This document captures the setup we added today to deploy your Laravel app on Render, plus storage changes so uploads and QR codes persist without Render Disks.
+This project now runs as a Node.js application. The deployment flow below covers the current stack: React frontend, Express backend, and Turso or SQLite storage.
 
-Overview
-- Containerized the app with Nginx + PHP-FPM using a multi‑stage Dockerfile (Composer deps + Vite build).
-- Enabled PostgreSQL (pdo_pgsql) for Render Postgres.
-- Switched uploads/QR codes from local disk to S3‑compatible storage (since Render Free has no Disks).
-- Provided a step‑by‑step checklist and environment variables.
+## Overview
 
-Files added/changed
-- Dockerfile (root): multi‑stage build, Nginx + PHP‑FPM, pdo_mysql + pdo_pgsql.
-- docker/nginx/default.conf.template: Nginx vhost bound to $PORT.
-- docker/start.sh: renders Nginx config, caches config/routes/views, runs storage:link, migrations, then starts PHP‑FPM + Nginx.
-- .dockerignore: smaller build context.
-- config/filesystems.php:
-  - default disk now ‘public’ (overridable via FILESYSTEM_DISK)
-  - s3 disk visibility set to ‘public’ for public URLs
-- composer.json: added league/flysystem-aws-s3-v3
-- Controllers + Views:
-  - Event flyers upload via storePublicly('events') on default disk
-  - QR codes written with Storage::put(..., 'public')
-  - Reading files uses Storage::exists/get/mimeType
-  - Displaying images uses Storage::url(...)
+- Frontend is built with Vite and served from the React app.
+- Backend runs through the Node server in the node-app directory.
+- Database configuration uses Turso in production or SQLite locally.
+- Paystack is used for ticket checkout callbacks.
 
-Render setup (high level)
-1) Create PostgreSQL in Render
-   - New → PostgreSQL → pick region → wait for “Available”
-   - Keep Internal Connection details (host, port 5432, db, user, password)
+## Render Setup
 
-2) Create Web Service (Docker)
-   - New → Web Service → select GitHub repo (branch: main)
-   - Environment: Docker, Root Directory: /
-   - Region: same as PostgreSQL
-   - Add environment variables (below)
+1. Create a new Web Service on Render.
+2. Connect the repository and choose the root directory.
+3. Set the build and start commands:
+   - Build: npm install && npm run build
+   - Start: npm run node:dev
+4. Add the required environment variables in Render.
 
-Environment variables
-Core
-- APP_NAME=2DAWN
-- APP_ENV=production
-- APP_DEBUG=false
-- APP_URL=https://YOUR-SERVICE.onrender.com
-- LOG_CHANNEL=errorlog
+## Required Environment Variables
 
-Laravel runtime
-- FILESYSTEM_DISK=s3  (for object storage; set to ‘public’ if testing locally)
-- SESSION_DRIVER=file
-- QUEUE_CONNECTION=sync
+- TURSO_DATABASE_URL
+- TURSO_AUTH_TOKEN
+- PAYSTACK_PUBLIC_KEY
+- PAYSTACK_SECRET_KEY
+- PAYSTACK_CALLBACK_URL
+- NODE_ENV=production
+- PORT=3001
 
-Database (PostgreSQL)
-- DB_CONNECTION=pgsql
-- DB_HOST=your_render_pg_internal_host
-- DB_PORT=5432
-- DB_DATABASE=your_db_name
-- DB_USERNAME=your_db_user
-- DB_PASSWORD=your_db_password
+## Notes
 
-Paystack
-- PAYSTACK_PUBLIC_KEY=your_pub_key
-- PAYSTACK_SECRET_KEY=your_secret_key
+- If you are using local SQLite instead of Turso, make sure the database file is available in the deployed environment.
+- For production, set PAYSTACK_CALLBACK_URL to your live domain.
+- If you need the frontend served separately, configure the hosting service accordingly.
 
-App key
-- APP_KEY=base64:XXXXXXXXXXXXXXXX
-  - Generate locally:  & 'C:\\xampp\\php\\php.exe' artisan key:generate --show
+## Verification Checklist
 
-Object storage options (S3 compatible)
-Pick ONE provider and set the variables accordingly.
-
-A) AWS S3
-- FILESYSTEM_DISK=s3
-- AWS_ACCESS_KEY_ID=...
-- AWS_SECRET_ACCESS_KEY=...
-- AWS_DEFAULT_REGION=us-east-1 (your region)
-- AWS_BUCKET=your-bucket
-- AWS_URL=https://your-bucket.s3.amazonaws.com   (or your CDN URL)
-- AWS_ENDPOINT=  (leave empty)
-- AWS_USE_PATH_STYLE_ENDPOINT=false
-Bucket policy (public reads): allow s3:GetObject on arn:aws:s3:::your-bucket/*
-
-B) Cloudflare R2
-- FILESYSTEM_DISK=s3
-- AWS_ACCESS_KEY_ID=...
-- AWS_SECRET_ACCESS_KEY=...
-- AWS_DEFAULT_REGION=auto
-- AWS_BUCKET=your-bucket
-- AWS_ENDPOINT=https://<account_id>.r2.cloudflarestorage.com
-- AWS_URL=https://your-public-bucket-domain  (if configured)
-- AWS_USE_PATH_STYLE_ENDPOINT=true
-
-C) DigitalOcean Spaces
-- FILESYSTEM_DISK=s3
-- AWS_ACCESS_KEY_ID=...
-- AWS_SECRET_ACCESS_KEY=...
-- AWS_DEFAULT_REGION=nyc3 (or your region)
-- AWS_BUCKET=your-bucket
-- AWS_ENDPOINT=https://nyc3.digitaloceanspaces.com
-- AWS_URL=https://your-bucket.nyc3.digitaloceanspaces.com
-- AWS_USE_PATH_STYLE_ENDPOINT=false
-
-Why S3 now?
-- Render Free plan doesn’t include Disks. Using S3/R2/Spaces ensures flyers and QR codes persist across deploys and restarts.
-- We changed code to use Storage::url() for image links and default disk APIs for reads/writes.
-
-Paystack callback
-- Set in your Paystack dashboard to:
-  https://YOUR-SERVICE.onrender.com/paystack/callback
-- Use test keys while verifying. The flow creates tickets, reduces capacity, and shows success page with tickets.
-
-Admin
-- Admin login route: /admin/login
-- If you need a fresh admin in production, we can create a quick one-time route/command or seed safely.
-
-Deploy flow summary
-- Push to GitHub → Render builds Docker image → start.sh runs migrations → app serves on $PORT via Nginx
-- With S3 configured, uploads and QR codes persist outside the container.
-
-Troubleshooting
-- 500 APP_KEY missing: set APP_KEY in Render env and redeploy
-- 502/Bad Gateway: ensure Nginx listens on $PORT (template handles this) and app booted; check logs
-- DB connection errors: verify DB_* from Render Postgres Internal Connection
-- Missing CSS/JS: Docker builds Vite assets → verify public/build exists and APP_URL is correct
-- Images not loading: check S3 env vars, bucket policy (public read), and that Storage::url(...) resolves to a public URL
-
-Checklist for tomorrow
-- [ ] Confirm Web Service env includes DB_* and APP_KEY
-- [ ] Choose an object store (S3/R2/Spaces) and set FILESYSTEM_DISK=s3 + provider envs
-- [ ] Upload a flyer on an event → confirm it loads
-- [ ] Do a test checkout with Paystack test card → confirm tickets + QR
-- [ ] Set APP_URL to your final domain (Render or custom)
-- [ ] Update Paystack callback to your final domain
-- [ ] (Optional) Add custom domain on Render; queues/cron if needed
-
-Notes
-- start.sh still runs storage:link; harmless with S3 and helpful if you run local/public disk elsewhere.
-- You can switch back to local/public disk for local dev by setting FILESYSTEM_DISK=public and keeping APP_URL=http://localhost.
+- [ ] Build completes successfully
+- [ ] Backend starts on the expected port
+- [ ] Database connection is working
+- [ ] Paystack callback URL is configured correctly

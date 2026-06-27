@@ -27,6 +27,8 @@ async function createUsersTable() {
         instagram_handle TEXT,
         whatsapp_number TEXT,
         twitter_handle TEXT,
+        avatar_url TEXT,
+        profile_picture TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       )

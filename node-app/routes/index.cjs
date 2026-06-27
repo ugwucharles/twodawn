@@ -15,7 +15,7 @@ function registerRoutes(app) {
   app.use(createSitemapRouter());
   app.use('/api/v1', createApiRouter());
   app.use(createCheckoutRouter());
-  app.use('/admin', createAdminRouter());
+  app.use('/ucc', createAdminRouter());
   app.use(createPublicAuthRouter());
   app.use('/organizer', createOrganizerRouter());
   app.use('/h', createHostPanelRouter());

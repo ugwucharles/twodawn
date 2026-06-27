@@ -34,7 +34,7 @@ async function getAdminStats() {
       (SELECT COUNT(*) FROM events WHERE is_published = 1) as events_published,
       (SELECT COUNT(*) FROM events WHERE is_published = 1 AND (ends_at IS NULL OR ends_at >= datetime('now'))) as events_active,
       (SELECT COUNT(*) FROM users) as users_total,
-      (SELECT COUNT(*) FROM users WHERE role = 'organizer') as organizers_total,
+      (SELECT COUNT(*) FROM users WHERE is_organizer = 1) as organizers_total,
       (SELECT COUNT(*) FROM orders) as orders_total,
       (SELECT COUNT(*) FROM orders WHERE date(created_at) = date('now')) as orders_today,
       (SELECT COALESCE(SUM(quantity), 0) FROM orders WHERE status = 'paid') as tickets_total,
@@ -64,24 +64,41 @@ async function getChartData(days = 14) {
   const labels = [];
   const ticketsSeries = [];
   const revenueSeries = [];
+  const dateStrings = [];
 
   for (let i = days - 1; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
     const dateStr = date.toISOString().split('T')[0];
+    dateStrings.push(dateStr);
     labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-
-    const rows = await query(`
-      SELECT 
-        COALESCE(SUM(quantity), 0) as tickets,
-        COALESCE(SUM(amount), 0) as revenue
-      FROM orders 
-      WHERE status = 'paid' AND DATE(created_at) = ?
-    `, [dateStr]);
-
-    ticketsSeries.push(Number(rows[0]?.tickets || 0));
-    revenueSeries.push(Number(rows[0]?.revenue || 0));
   }
+
+  // Fetch all daily summaries in a single query
+  const rows = await query(`
+    SELECT 
+      DATE(created_at) as date_str,
+      COALESCE(SUM(quantity), 0) as tickets,
+      COALESCE(SUM(amount), 0) as revenue
+    FROM orders 
+    WHERE status = 'paid' AND DATE(created_at) >= DATE('now', '-' || ? || ' day')
+    GROUP BY DATE(created_at)
+  `, [String(days)]);
+
+  const dataMap = new Map();
+  rows.forEach(row => {
+    const dStr = String(row.date_str || '').trim();
+    dataMap.set(dStr, {
+      tickets: Number(row.tickets || 0),
+      revenue: Number(row.revenue || 0)
+    });
+  });
+
+  dateStrings.forEach(dateStr => {
+    const data = dataMap.get(dateStr) || { tickets: 0, revenue: 0 };
+    ticketsSeries.push(data.tickets);
+    revenueSeries.push(data.revenue);
+  });
 
   return { labels, tickets: ticketsSeries, revenue: revenueSeries };
 }
@@ -261,8 +278,8 @@ async function getAllOrganizers(limit = 50, offset = 0) {
            (SELECT COALESCE(SUM(o.amount), 0) FROM orders o
             JOIN events e ON o.event_id = e.id
             WHERE e.user_id = u.id AND o.status = 'paid') as total_revenue
-    FROM users
-    WHERE role = 'organizer'
+    FROM users u
+    WHERE is_organizer = 1
     ORDER BY u.created_at DESC
     LIMIT ? OFFSET ?
   `, [limit, offset]);
@@ -280,8 +297,8 @@ async function getOrganizerById(organizerId) {
            (SELECT COALESCE(SUM(o.amount), 0) FROM orders o
             JOIN events e ON o.event_id = e.id
             WHERE e.user_id = u.id AND o.status = 'paid') as total_revenue
-    FROM users
-    WHERE id = ? AND role = 'organizer'
+    FROM users u
+    WHERE id = ? AND is_organizer = 1
     LIMIT 1
   `, [id]);
 
@@ -387,11 +404,16 @@ async function getSystemHealth() {
       // error_logs table might not exist
     }
 
+    let emailStatus = 'healthy';
+    if (process.env.MAIL_MAILER === 'smtp' && (!process.env.MAIL_HOST || !process.env.MAIL_USERNAME)) {
+      emailStatus = 'unhealthy';
+    }
+
     return {
       database: dbStatus,
       api: 'healthy',
       payment_gateway: 'healthy',
-      email_service: 'unknown',
+      email_service: emailStatus,
       recent_errors: recentErrors,
     };
   } catch (error) {

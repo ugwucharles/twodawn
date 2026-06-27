@@ -12,7 +12,7 @@ function AdminActivity() {
 
   const fetchActivity = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/admin/activity`);
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/ucc/activity`);
       setActivity(response.data.activity || []);
       setLoading(false);
     } catch (err) {

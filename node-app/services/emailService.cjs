@@ -1,4 +1,6 @@
 const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
 
 let transporter = null;
 
@@ -17,8 +19,102 @@ function getTransporter() {
   return transporter;
 }
 
-async function sendTicketEmail(order, event) {
+function logEmailToFile({ to, subject, html }) {
+  const logDir = path.join(__dirname, '../../storage/logs');
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+  const logPath = path.join(logDir, 'mail.log');
+  const logEntry = `
+======================================================================
+[${new Date().toISOString()}] EMAIL SENT
+To: ${to}
+Subject: ${subject}
+----------------------------------------------------------------------
+HTML Body:
+${html}
+======================================================================
+\n`;
+  fs.appendFileSync(logPath, logEntry, 'utf8');
+  console.log(`✉️ [Mail Log] Email written to storage/logs/mail.log (To: ${to})`);
+  return { success: true, messageId: `log_${Date.now()}` };
+}
+
+async function sendMailViaDriver({ to, subject, html }) {
+  const driver = (process.env.MAIL_MAILER || 'smtp').toLowerCase();
+  const fromAddress = process.env.MAIL_FROM_ADDRESS || 'noreply@twodawn.com.ng';
+  const fromName = process.env.MAIL_FROM_NAME || '2DAWN';
+  const formattedFrom = `"${fromName}" <${fromAddress}>`;
+
+  if (driver === 'log') {
+    return logEmailToFile({ to, subject, html });
+  }
+
+  if (driver === 'resend') {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      throw new Error('RESEND_API_KEY is not set in environment variables');
+    }
+    console.log('✉️ Sending email via Resend API to:', to);
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: formattedFrom,
+        to: [to],
+        subject,
+        html,
+      }),
+    });
+    const data = await response.json();
+    if (!response.ok || data.error) {
+      throw new Error(data.error?.message || response.statusText || 'Failed to send via Resend API');
+    }
+    return { success: true, messageId: data.id || `resend_${Date.now()}` };
+  }
+
+  if (driver === 'sendgrid') {
+    const apiKey = process.env.SENDGRID_API_KEY;
+    if (!apiKey) {
+      throw new Error('SENDGRID_API_KEY is not set in environment variables');
+    }
+    console.log('✉️ Sending email via SendGrid API to:', to);
+    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        personalizations: [{ to: [{ email: to }] }],
+        from: { email: fromAddress, name: fromName },
+        subject,
+        content: [{ type: 'text/html', value: html }],
+      }),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`SendGrid API Error (status ${response.status}): ${errorText || response.statusText}`);
+    }
+    return { success: true, messageId: response.headers.get('x-message-id') || `sendgrid_${Date.now()}` };
+  }
+
+  // Default to SMTP
+  console.log('✉️ Sending email via SMTP to:', to);
   const transporter = getTransporter();
+  const info = await transporter.sendMail({
+    from: formattedFrom,
+    to,
+    subject,
+    html,
+  });
+  return { success: true, messageId: info.messageId };
+}
+
+async function sendTicketEmail(order, event) {
 
   const qrRemote = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(order.paystack_reference)}`;
   const publicUrl = `${process.env.FRONTEND_URL || 'https://twodawn.com.ng'}/find-tickets?ref=${order.paystack_reference}`;
@@ -89,11 +185,28 @@ async function sendTicketEmail(order, event) {
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Ticket email sent:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    return await sendMailViaDriver({
+      to: order.buyer_email,
+      subject: mailOptions.subject,
+      html: mailOptions.html,
+    });
   } catch (error) {
-    console.error('Failed to send ticket email:', error);
+    console.error(`Failed to send email via ${process.env.MAIL_MAILER || 'smtp'} driver:`, error.message);
+    
+    // In local development / non-production, fall back to log so flow doesn't break
+    if (process.env.APP_ENV !== 'production' && process.env.NODE_ENV !== 'production') {
+      console.log('⚠️ Non-production environment detected. Falling back to log driver to prevent flow block.');
+      try {
+        return logEmailToFile({
+          to: order.buyer_email,
+          subject: mailOptions.subject,
+          html: mailOptions.html,
+        });
+      } catch (logError) {
+        console.error('Failed to write fallback log email:', logError.message);
+      }
+    }
+    
     return { success: false, error: error.message };
   }
 }

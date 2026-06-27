@@ -1,4 +1,4 @@
-const { query } = require('../client.cjs');
+const { query } = require('./client.cjs');
 
 async function ensureActivityLogsSchema() {
   try {

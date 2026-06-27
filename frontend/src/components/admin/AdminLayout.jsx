@@ -3,16 +3,13 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, Bell, Settings, LogOut, Menu, X, Activity, Users, Calendar, DollarSign, BarChart3, Shield, Database, Globe } from 'lucide-react';
 
 const sidebarItems = [
-  { name: 'Dashboard', path: '/admin/dashboard', icon: BarChart3 },
-  { name: 'Live Activity', path: '/admin/activity', icon: Activity },
-  { name: 'Events', path: '/admin/events', icon: Calendar },
-  { name: 'Organizers', path: '/admin/organizers', icon: Users },
-  { name: 'Users', path: '/admin/users', icon: Users },
-  { name: 'Orders', path: '/admin/orders', icon: DollarSign },
-  { name: 'Transactions', path: '/admin/transactions', icon: DollarSign },
-  { name: 'Analytics', path: '/admin/analytics', icon: BarChart3 },
-  { name: 'System Health', path: '/admin/health', icon: Database },
-  { name: 'Settings', path: '/admin/settings', icon: Settings },
+  { name: 'Dashboard', path: '/ucc/dashboard', icon: BarChart3 },
+  { name: 'Live Activity', path: '/ucc/activity', icon: Activity },
+  { name: 'Events', path: '/ucc/events', icon: Calendar },
+  { name: 'Organizers', path: '/ucc/organizers', icon: Users },
+  { name: 'Transactions', path: '/ucc/transactions', icon: DollarSign },
+  { name: 'Analytics', path: '/ucc/analytics', icon: BarChart3 },
+  { name: 'System Health', path: '/ucc/health', icon: Database },
 ];
 
 function AdminLayout() {
@@ -35,7 +32,7 @@ function AdminLayout() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="p-6 border-b border-gray-800">
-            <Link to="/admin/dashboard" className="flex items-center space-x-3">
+            <Link to="/ucc/dashboard" className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">2D</span>
               </div>

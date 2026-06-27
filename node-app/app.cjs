@@ -38,7 +38,8 @@ async function initializeSchemas() {
   }
 }
 
-initializeSchemas();
+// Delay schema initialization slightly to prevent startup CPU spikes from causing Connect Timeout errors
+setTimeout(initializeSchemas, 2000);
 
 function createApp() {
   const app = express();
