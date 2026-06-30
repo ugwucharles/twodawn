@@ -157,7 +157,7 @@ function resolvePaystackCallbackUrl(req = {}, env = process.env) {
   const forwardedProto = req?.headers?.['x-forwarded-proto'];
   const requestProtocol = req?.protocol || (typeof forwardedProto === 'string' ? forwardedProto : Array.isArray(forwardedProto) ? forwardedProto[0] : null) || 'https';
   const requestCallbackUrl = requestHost ? `${requestProtocol}://${requestHost}/paystack/callback` : null;
-  const defaultBackendUrl = env.BACKEND_URL || env.APP_URL || 'https://twodawn-frontend.vercel.app';
+  const defaultBackendUrl = env.BACKEND_URL || env.APP_URL || 'https://api.twodawn.com.ng';
 
   const usesFrontendHost = configuredCallbackUrl && /twodawn-frontend(?:-real)?\.vercel\.app/i.test(configuredCallbackUrl);
 

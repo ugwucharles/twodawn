@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { BarChart3, TrendingUp, DollarSign, Ticket, ShoppingBag, Eye } from 'lucide-react';
 
 function AdminAnalytics() {
@@ -12,8 +12,8 @@ function AdminAnalytics() {
 
   const fetchAnalytics = async () => {
     try {
-      const dashboardRes = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/ucc/dashboard`);
-      const eventsRes = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/ucc/events/list`);
+      const dashboardRes = await api.get('/ucc/dashboard');
+      const eventsRes = await api.get('/ucc/events/list');
       
       const stats = dashboardRes.data?.stats || {};
       const events = eventsRes.data?.events || [];

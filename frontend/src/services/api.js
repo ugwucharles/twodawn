@@ -1,9 +1,9 @@
 import axios from 'axios'
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://twodawn-frontend.vercel.app'
+import { API_BASE_URL } from './httpConfig'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -28,10 +28,12 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status
+    const isAdminRoute = window.location.pathname.startsWith('/ucc')
+    if (status === 401 || (isAdminRoute && status === 403)) {
       // Clear token and redirect to login
       localStorage.removeItem('token')
-      window.location.href = '/login'
+      window.location.href = isAdminRoute ? '/ucc/login' : '/login'
     }
     return Promise.reject(error)
   }

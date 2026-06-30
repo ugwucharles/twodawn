@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { Activity } from 'lucide-react';
 
 function AdminActivity() {
@@ -12,7 +12,7 @@ function AdminActivity() {
 
   const fetchActivity = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/ucc/activity`);
+      const response = await api.get('/ucc/activity');
       setActivity(response.data.activity || []);
       setLoading(false);
     } catch (err) {

@@ -174,7 +174,7 @@ function Debug() {
 
         <div style={{ marginTop: '32px', padding: '16px', backgroundColor: '#2d2d2d', borderRadius: '8px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '8px' }}>API Configuration</h2>
-          <p>API Base URL: {import.meta.env.VITE_API_URL || 'https://twodawn-frontend.vercel.app'}</p>
+          <p>API Base URL: {import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || 'https://api.twodawn.com.ng'}</p>
           <p>Environment: {import.meta.env.DEV ? 'Development' : 'Production'}</p>
         </div>
       </div>

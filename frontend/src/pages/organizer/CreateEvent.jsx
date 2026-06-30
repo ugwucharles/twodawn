@@ -295,7 +295,7 @@ function CreateEvent() {
                 />
                 <div>
                   <span className="block text-sm font-bold text-gray-700">Pass ticket fee to buyers</span>
-                  <span className="block text-xs text-gray-500 mt-1">If enabled, the 10% platform service fee will be added to the ticket price paid by the customer. Otherwise, the fee will be deducted from your payout.</span>
+                  <span className="block text-xs text-gray-500 mt-1">If enabled, the 10% + ₦100 platform service fee will be added to the ticket price paid by the customer. Otherwise, the fee will be deducted from your payout.</span>
                 </div>
               </label>
             </div>

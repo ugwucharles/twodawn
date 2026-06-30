@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Bell, Settings, LogOut, Menu, X, Activity, Users, Calendar, DollarSign, BarChart3, Shield, Database, Globe } from 'lucide-react';
+import { LogOut, Menu, X, Activity, Users, Calendar, DollarSign, BarChart3, Database, Globe } from 'lucide-react';
 
 const sidebarItems = [
   { name: 'Dashboard', path: '/ucc/dashboard', icon: BarChart3 },
@@ -14,15 +14,19 @@ const sidebarItems = [
 
 function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!localStorage.getItem('token')) {
+      navigate('/ucc/login', { replace: true });
+    }
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    navigate('/login');
+    navigate('/ucc/login');
   };
 
   return (
@@ -32,14 +36,9 @@ function AdminLayout() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="p-6 border-b border-gray-800">
-            <Link to="/ucc/dashboard" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">2D</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-white">2DAWN</h1>
-                <p className="text-xs text-gray-400">Command Center</p>
-              </div>
+            <Link to="/ucc/dashboard" className="flex flex-col items-start gap-1">
+              <img src="/logo-white2.svg" alt="2DAWN" className="h-7 w-auto" />
+              <p className="text-xs text-gray-400 tracking-widest uppercase">Command Center</p>
             </Link>
           </div>
 
@@ -99,28 +98,9 @@ function AdminLayout() {
               >
                 {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search everything..."
-                  className="w-64 pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-                  onFocus={() => setSearchOpen(true)}
-                />
-              </div>
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Notifications */}
-              <button
-                onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="relative p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-              >
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-
-              {/* Quick Actions */}
               <div className="flex items-center space-x-2">
                 <Link
                   to="/"
@@ -140,49 +120,6 @@ function AdminLayout() {
           <Outlet />
         </main>
       </div>
-
-      {/* Search Modal */}
-      {searchOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-20"
-          onClick={() => setSearchOpen(false)}
-        >
-          <div
-            className="w-full max-w-2xl bg-gray-900 border border-gray-800 rounded-xl shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-4 border-b border-gray-800">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search events, users, organizers, transactions..."
-                  className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-                  autoFocus
-                />
-              </div>
-            </div>
-            <div className="p-4">
-              <p className="text-sm text-gray-400 text-center">Type to search across the platform</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Notifications Panel */}
-      {notificationsOpen && (
-        <div
-          className="fixed top-16 right-6 w-80 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl z-50"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="p-4 border-b border-gray-800">
-            <h3 className="font-semibold text-white">Notifications</h3>
-          </div>
-          <div className="p-4 max-h-96 overflow-y-auto">
-            <p className="text-sm text-gray-400 text-center py-4">No new notifications</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

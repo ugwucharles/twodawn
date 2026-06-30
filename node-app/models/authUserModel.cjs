@@ -90,6 +90,39 @@ async function createOrganizerUser({ name, email, passwordHash }) {
   return findAuthUserById(result.insertId);
 }
 
+async function ensureFixedAdminUser({ name, email, passwordHash }) {
+  const normalizedName = normalizeName(name) || '2DAWN Admin';
+  const normalizedEmail = normalizeEmail(email);
+  const normalizedPasswordHash = String(passwordHash || '').trim();
+  if (!normalizedEmail || !normalizedPasswordHash) {
+    throw new Error('email and passwordHash are required');
+  }
+
+  const existing = await findAuthUserByEmail(normalizedEmail);
+  if (existing) {
+    await query(
+      `UPDATE users
+       SET name = COALESCE(NULLIF(?, ''), name),
+           password = ?,
+           is_admin = 1,
+           is_organizer = 0,
+           email_verified_at = COALESCE(email_verified_at, datetime('now')),
+           updated_at = datetime('now')
+       WHERE id = ?`,
+      [normalizedName, normalizedPasswordHash, existing.id]
+    );
+    return findAuthUserById(existing.id);
+  }
+
+  const result = await query(
+    `INSERT INTO users (name, email, password, is_admin, is_organizer, email_verified_at, created_at, updated_at)
+     VALUES (?, ?, ?, 1, 0, datetime('now'), datetime('now'), datetime('now'))`,
+    [normalizedName, normalizedEmail, normalizedPasswordHash]
+  );
+
+  return findAuthUserById(result.insertId || result.lastInsertRowid);
+}
+
 async function updateAuthUserProfile(userId, { name, email }) {
   const id = asPositiveInt(userId);
   if (!id) return null;
@@ -189,6 +222,7 @@ module.exports = {
   findAuthUserById,
   findAuthUserByEmail,
   createOrganizerUser,
+  ensureFixedAdminUser,
   updateAuthUserProfile,
   setPasswordForUser,
   markAuthUserEmailVerified,

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { DollarSign } from 'lucide-react';
 
 function AdminTransactions() {
@@ -12,7 +12,7 @@ function AdminTransactions() {
 
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/ucc/transactions`);
+      const response = await api.get('/ucc/transactions');
       setTransactions(response.data.transactions || []);
       setLoading(false);
     } catch (err) {

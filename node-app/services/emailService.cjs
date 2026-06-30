@@ -2,14 +2,28 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 let transporter = null;
 
 function getTransporter() {
   if (!transporter) {
+    const encryption = String(process.env.MAIL_ENCRYPTION || '').toLowerCase();
     transporter = nodemailer.createTransport({
       host: process.env.MAIL_HOST || 'smtp.mailtrap.io',
       port: parseInt(process.env.MAIL_PORT || '2525', 10),
-      secure: process.env.MAIL_ENCRYPTION === 'ssl',
+      secure: encryption === 'ssl',
+      requireTLS: encryption === 'tls',
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
       auth: {
         user: process.env.MAIL_USERNAME,
         pass: process.env.MAIL_PASSWORD,
@@ -116,12 +130,21 @@ async function sendMailViaDriver({ to, subject, html }) {
 
 async function sendTicketEmail(order, event) {
 
+  const frontendUrl = String(process.env.FRONTEND_URL || 'https://twodawn.com.ng').replace(/\/$/, '');
   const qrRemote = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(order.paystack_reference)}`;
-  const publicUrl = `${process.env.FRONTEND_URL || 'https://twodawn.com.ng'}/find-tickets?ref=${order.paystack_reference}`;
+  const publicUrl = `${frontendUrl}/find-tickets?ref=${order.paystack_reference}`;
+  const logoUrl = `${frontendUrl}/logo.svg`;
 
   const startDate = event.starts_at ? new Date(event.starts_at).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'TBD';
   const startTime = event.starts_at ? new Date(event.starts_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'TBD';
   const venue = event.venue || 'TBD';
+  const buyerName = escapeHtml(order.buyer_name || 'Guest');
+  const buyerEmail = escapeHtml(order.buyer_email || 'Not provided');
+  const buyerPhone = escapeHtml(order.buyer_phone || 'Not provided');
+  const ticketType = escapeHtml(order.ticket_type || 'General Admission');
+  const safeReference = escapeHtml(order.paystack_reference);
+  const safeEventTitle = escapeHtml(event.title || '2DAWN Event');
+  const safeVenue = escapeHtml(venue);
 
   const mailOptions = {
     from: process.env.MAIL_FROM_ADDRESS || 'noreply@twodawn.com.ng',
@@ -131,12 +154,13 @@ async function sendTicketEmail(order, event) {
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb; padding: 20px;">
         <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
           <div style="text-align: center; margin-bottom: 30px;">
+            <img src="${logoUrl}" alt="2DAWN" style="display: block; width: 150px; max-width: 60%; height: auto; margin: 0 auto 18px;" />
             <h1 style="color: #8b5cf6; margin: 0; font-size: 28px;">🎫 Your Ticket</h1>
             <p style="color: #6b7280; margin: 10px 0 0;">Thank you for your purchase!</p>
           </div>
 
           <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 8px; padding: 20px; margin-bottom: 25px;">
-            <h2 style="color: white; margin: 0 0 10px; font-size: 22px;">${event.title}</h2>
+            <h2 style="color: white; margin: 0 0 10px; font-size: 22px;">${safeEventTitle}</h2>
             <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 14px;">${startDate}</p>
           </div>
 
@@ -147,19 +171,26 @@ async function sendTicketEmail(order, event) {
             </div>
             <div style="background: #f3f4f6; padding: 15px; border-radius: 8px;">
               <p style="color: #6b7280; margin: 0 0 5px; font-size: 12px; text-transform: uppercase; font-weight: bold;">Venue</p>
-              <p style="color: #1f2937; margin: 0; font-size: 14px;">${venue}</p>
+              <p style="color: #1f2937; margin: 0; font-size: 14px;">${safeVenue}</p>
             </div>
           </div>
 
           <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+            <p style="color: #6b7280; margin: 0 0 10px; font-size: 12px; text-transform: uppercase; font-weight: bold;">Buyer Details</p>
+            <p style="color: #1f2937; margin: 0 0 6px; font-size: 14px;"><strong>Name:</strong> ${buyerName}</p>
+            <p style="color: #1f2937; margin: 0 0 6px; font-size: 14px;"><strong>Email:</strong> ${buyerEmail}</p>
+            <p style="color: #1f2937; margin: 0; font-size: 14px;"><strong>Phone:</strong> ${buyerPhone}</p>
+          </div>
+
+          <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
             <p style="color: #6b7280; margin: 0 0 5px; font-size: 12px; text-transform: uppercase; font-weight: bold;">Reference</p>
-            <p style="color: #1f2937; margin: 0; font-size: 18px; font-weight: bold; letter-spacing: 1px;">${order.paystack_reference}</p>
+            <p style="color: #1f2937; margin: 0; font-size: 18px; font-weight: bold; letter-spacing: 1px;">${safeReference}</p>
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
             <div style="background: #f3f4f6; padding: 15px; border-radius: 8px;">
-              <p style="color: #6b7280; margin: 0 0 5px; font-size: 12px; text-transform: uppercase; font-weight: bold;">Quantity</p>
-              <p style="color: #1f2937; margin: 0; font-size: 18px; font-weight: bold;">${order.quantity}</p>
+              <p style="color: #6b7280; margin: 0 0 5px; font-size: 12px; text-transform: uppercase; font-weight: bold;">Ticket</p>
+              <p style="color: #1f2937; margin: 0; font-size: 18px; font-weight: bold;">${ticketType} x ${order.quantity}</p>
             </div>
             <div style="background: #f3f4f6; padding: 15px; border-radius: 8px;">
               <p style="color: #6b7280; margin: 0 0 5px; font-size: 12px; text-transform: uppercase; font-weight: bold;">Amount Paid</p>

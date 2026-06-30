@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 import { DollarSign, Ticket, Calendar, Users, Activity, AlertCircle } from 'lucide-react';
 
 function CustomAreaChart({ labels = [], data = [], color = 'purple', type = 'number' }) {
@@ -147,7 +147,7 @@ function AdminDashboard() {
 
   const fetchDashboard = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/ucc/dashboard`);
+      const response = await api.get('/ucc/dashboard');
       setStats(response.data);
       setLoading(false);
     } catch (err) {

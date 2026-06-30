@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { Calendar, Plus, Edit2, Trash2, Globe, EyeOff, Search } from 'lucide-react';
 
 function AdminEvents() {
@@ -27,7 +27,7 @@ function AdminEvents() {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/ucc/events/list`);
+      const response = await api.get('/ucc/events/list');
       setEvents(response.data.events || []);
       setLoading(false);
     } catch (err) {
@@ -38,7 +38,7 @@ function AdminEvents() {
 
   const handleTogglePublish = async (event) => {
     try {
-      const res = await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/ucc/events/${event.id}/toggle-json`);
+      const res = await api.patch(`/ucc/events/${event.id}/toggle-json`);
       if (res.data.ok) {
         setEvents(events.map(e => e.id === event.id ? { ...e, is_published: e.is_published ? 0 : 1 } : e));
       }
@@ -50,7 +50,7 @@ function AdminEvents() {
   const handleDeleteEvent = async (eventId) => {
     if (!window.confirm('Are you sure you want to delete this event?')) return;
     try {
-      const res = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/ucc/events/${eventId}`);
+      const res = await api.delete(`/ucc/events/${eventId}`);
       if (res.data.ok) {
         setEvents(events.filter(e => e.id !== eventId));
       }
@@ -90,14 +90,14 @@ function AdminEvents() {
     try {
       if (editingEvent) {
         // Edit Mode
-        const res = await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/ucc/events/${editingEvent.id}`, formData);
+        const res = await api.patch(`/ucc/events/${editingEvent.id}`, formData);
         if (res.data.ok) {
           fetchEvents();
           setModalOpen(false);
         }
       } else {
         // Create Mode
-        const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/ucc/events`, formData);
+        const res = await api.post('/ucc/events', formData);
         if (res.data.ok) {
           fetchEvents();
           setModalOpen(false);

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Home from './pages/Home'
 import Events from './pages/Events'
 import EventDetail from './pages/EventDetail'
@@ -15,6 +15,7 @@ import AdminOrganizers from './pages/admin/Organizers'
 import AdminTransactions from './pages/admin/Transactions'
 import AdminAnalytics from './pages/admin/Analytics'
 import AdminHealth from './pages/admin/Health'
+import AdminLogin from './pages/admin/Login'
 import AdminLayout from './components/admin/AdminLayout'
 import OrganizerDashboard from './pages/organizer/Dashboard'
 import OrganizerLayout from './pages/organizer/OrganizerLayout'
@@ -69,7 +70,9 @@ function App() {
         <Route path="/organizer/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/ucc/login" element={<AdminLogin />} />
         <Route path="/ucc" element={<AdminLayout />}>
+          <Route index element={<Navigate to="/ucc/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="activity" element={<AdminActivity />} />
           <Route path="events" element={<AdminEvents />} />
@@ -91,7 +94,7 @@ function App() {
           <Route path="settings" element={<OrganizerSettings />} />
         </Route>
         <Route path="/h/:token" element={<HostPanel />} />
-        <Route path="/debug" element={<Debug />} />
+        {import.meta.env.DEV && <Route path="/debug" element={<Debug />} />}
       </Routes>
     </BrowserRouter>
   )

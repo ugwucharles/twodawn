@@ -36,7 +36,7 @@ async function getOrganizerStats(userId) {
   }
 
   // Calculate wallet balance (total revenue minus 2DAWN fee)
-  // Assuming 2DAWN takes a 5% fee + ₦50 per transaction
+  // Assuming 2DAWN takes a 10% fee + NGN 100 per transaction
   let twoDawnFee = 0;
   if (totalEvents > 0) {
     const orderRows = await query(`
@@ -45,7 +45,7 @@ async function getOrganizerStats(userId) {
     `, [id]);
 
     for (const row of orderRows) {
-      const fee = (Number(row.amount) * 0.05) + 5000; // 5% + ₦50 (in kobo)
+      const fee = (Number(row.amount) * 0.10) + 10000; // 10% + NGN 100 (in kobo)
       twoDawnFee += fee;
     }
   }

@@ -21,9 +21,13 @@ const {
 } = require('../services/adminService.cjs');
 const { proxyRequest } = require('../services/proxyRequest.cjs');
 const { isJsonRequest } = require('../lib/authHttp.cjs');
+const { attachSessionUser, requireAdmin } = require('../services/sessionAuth.cjs');
 
 function createAdminRouter() {
   const router = express.Router();
+
+  router.use(attachSessionUser);
+  router.use(requireAdmin);
 
   // GET /admin/dashboard - admin dashboard
   router.get('/dashboard', async (req, res) => {

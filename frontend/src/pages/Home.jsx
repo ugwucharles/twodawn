@@ -114,14 +114,18 @@ function Home() {
   }, [topSellingState])
 
   const fetchEvents = async () => {
+    setLoading(true)
+    setError(null)
+
     try {
-      setLoading(true)
-      const response = await getEvents({});
-      setEvents(response.events || []);
-      setLoading(false);
+      const response = await getEvents({})
+      setEvents(response.events || [])
     } catch (err) {
-      setError('Failed to load events');
-      setLoading(false);
+      console.error('Failed to load events', err)
+      setEvents([])
+      setError('Failed to load events')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -382,6 +386,10 @@ function Home() {
               {loading ? (
                 <div className="py-20 text-center text-gray-400 col-span-full">
                   Loading events...
+                </div>
+              ) : error ? (
+                <div className="py-20 text-center text-gray-500 col-span-full">
+                  {error}
                 </div>
               ) : filteredEvents.length === 0 ? (
                 <Link

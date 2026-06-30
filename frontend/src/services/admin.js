@@ -1,12 +1,12 @@
 import api from './api'
 
 export const getAdminDashboard = async () => {
-  const response = await api.get('/admin/dashboard')
+  const response = await api.get('/ucc/dashboard')
   return response.data
 }
 
 export const toggleEventPublish = async (eventId) => {
-  const response = await api.patch(`/admin/events/${eventId}/toggle`)
+  const response = await api.patch(`/ucc/events/${eventId}/toggle`)
   return response.data
 }
 
@@ -15,11 +15,11 @@ export const getAdminOrders = async (filters = {}) => {
   if (filters.limit) params.append('limit', filters.limit)
   if (filters.page) params.append('page', filters.page)
 
-  const response = await api.get(`/admin/orders?${params}`)
+  const response = await api.get(`/ucc/orders?${params}`)
   return response.data
 }
 
 export const createHostToken = async (eventId, label) => {
-  const response = await api.post(`/admin/events/${eventId}/host-tokens`, { label })
+  const response = await api.post(`/ucc/events/${eventId}/host-tokens`, { label })
   return response.data
 }

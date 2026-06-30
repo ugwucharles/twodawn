@@ -74,7 +74,7 @@ async function testPayment() {
 
     // Step 4: Initialize Paystack payment
     console.log('💳 Step 4: Initializing Paystack payment...');
-    const callbackUrl = 'https://twodawn-frontend.vercel.app/paystack/callback';
+    const callbackUrl = 'https://api.twodawn.com.ng/paystack/callback';
     const authUrl = await initializePaystackPayment(order, callbackUrl);
     console.log(`✅ Payment initialized`);
     console.log(`   Authorization URL: ${authUrl}\n`);

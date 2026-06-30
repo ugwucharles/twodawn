@@ -40,7 +40,7 @@ function calculateQuote(event, quantity, selectedTicketType = null) {
   // Fees (never add fees for free events)
   let feesKobo = 0;
   if (unitPrice > 0 && event.pass_fees_to_buyer) {
-    const perTicketFeeKobo = Math.round(unitPrice * 0.07 * 100) + 5000; // 7% + ₦50
+    const perTicketFeeKobo = Math.round(unitPrice * 0.10 * 100) + 10000; // 10% + NGN 100
     feesKobo = Math.max(0, perTicketFeeKobo * quantity);
   }
   
@@ -71,7 +71,7 @@ async function initializePaystackPayment(order, callbackUrl) {
   }
   
   // Use environment variable if set, otherwise fallback to hardcoded Vercel URL
-  const finalCallbackUrl = callbackUrl || 'https://twodawn-frontend.vercel.app/paystack/callback';
+  const finalCallbackUrl = callbackUrl || 'https://api.twodawn.com.ng/paystack/callback';
   
   const response = await fetch('https://api.paystack.co/transaction/initialize', {
     method: 'POST',

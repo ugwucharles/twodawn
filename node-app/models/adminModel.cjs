@@ -387,44 +387,66 @@ async function getAllTransactions(limit = 50, offset = 0, status = null) {
 
 // System health
 async function getSystemHealth() {
+  const results = {};
+
+  // 1. Database – run a real SELECT to confirm connectivity
   try {
-    // Test database connection
-    await query('SELECT 1');
-    const dbStatus = 'healthy';
-
-    // Check recent errors (if error_logs table exists)
-    let recentErrors = 0;
-    try {
-      const errorRows = await query(`
-        SELECT COUNT(*) as count FROM error_logs
-        WHERE created_at >= datetime('now', '-1 hour')
-      `);
-      recentErrors = Number(errorRows[0]?.count || 0);
-    } catch (e) {
-      // error_logs table might not exist
-    }
-
-    let emailStatus = 'healthy';
-    if (process.env.MAIL_MAILER === 'smtp' && (!process.env.MAIL_HOST || !process.env.MAIL_USERNAME)) {
-      emailStatus = 'unhealthy';
-    }
-
-    return {
-      database: dbStatus,
-      api: 'healthy',
-      payment_gateway: 'healthy',
-      email_service: emailStatus,
-      recent_errors: recentErrors,
-    };
-  } catch (error) {
-    return {
-      database: 'unhealthy',
-      api: 'unhealthy',
-      payment_gateway: 'unknown',
-      email_service: 'unknown',
-      recent_errors: 0,
-    };
+    await query('SELECT COUNT(*) as n FROM users');
+    results.database = 'healthy';
+  } catch (e) {
+    results.database = 'unhealthy';
   }
+
+  // 2. API – if we reached here the process is alive
+  results.api = 'healthy';
+
+  // 3. Payment Gateway – hit Paystack's public status / ping endpoint
+  try {
+    const https = require('https');
+    await new Promise((resolve, reject) => {
+      const req = https.get(
+        'https://api.paystack.co/bank',
+        { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY || ''}`, 'Content-Type': 'application/json' } },
+        (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 500) resolve();
+          else reject(new Error(`HTTP ${res.statusCode}`));
+          res.resume();
+        }
+      );
+      req.on('error', reject);
+      req.setTimeout(5000, () => { req.destroy(); reject(new Error('timeout')); });
+    });
+    results.payment_gateway = 'healthy';
+  } catch (e) {
+    results.payment_gateway = 'unhealthy';
+  }
+
+  // 4. Email Service – verify required SMTP env vars are set
+  const mailConfigured =
+    process.env.MAIL_HOST &&
+    process.env.MAIL_USERNAME &&
+    process.env.MAIL_PASSWORD;
+  results.email_service = mailConfigured ? 'healthy' : 'unhealthy';
+
+  // 5. Recent errors
+  let recentErrors = 0;
+  try {
+    const errorRows = await query(`
+      SELECT COUNT(*) as count FROM error_logs
+      WHERE created_at >= datetime('now', '-1 hour')
+    `);
+    recentErrors = Number(errorRows[0]?.count || 0);
+  } catch (e) {
+    // error_logs table might not exist
+  }
+
+  return {
+    database: results.database,
+    api: results.api,
+    payment_gateway: results.payment_gateway,
+    email_service: results.email_service,
+    recent_errors: recentErrors,
+  };
 }
 
 module.exports = {

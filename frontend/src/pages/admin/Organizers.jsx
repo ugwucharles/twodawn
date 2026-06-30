@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { Users, Plus, Edit2, Trash2, Shield, Search } from 'lucide-react';
 
 function AdminOrganizers() {
@@ -25,7 +25,7 @@ function AdminOrganizers() {
 
   const fetchOrganizers = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/ucc/organizers`);
+      const response = await api.get('/ucc/organizers');
       setOrganizers(response.data.organizers || []);
       setLoading(false);
     } catch (err) {
@@ -37,7 +37,7 @@ function AdminOrganizers() {
   const handleDeleteOrganizer = async (organizerId) => {
     if (!window.confirm('Are you sure you want to delete this organizer? This will delete their account.')) return;
     try {
-      const res = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/ucc/organizers/${organizerId}`);
+      const res = await api.delete(`/ucc/organizers/${organizerId}`);
       if (res.data.ok) {
         setOrganizers(organizers.filter(o => o.id !== organizerId));
       }
@@ -79,14 +79,14 @@ function AdminOrganizers() {
           email: formData.email,
           username: formData.username,
         };
-        const res = await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/ucc/organizers/${editingOrganizer.id}`, payload);
+        const res = await api.patch(`/ucc/organizers/${editingOrganizer.id}`, payload);
         if (res.data.ok) {
           fetchOrganizers();
           setModalOpen(false);
         }
       } else {
         // Create Mode
-        const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/ucc/organizers`, formData);
+        const res = await api.post('/ucc/organizers', formData);
         if (res.data.ok) {
           fetchOrganizers();
           setModalOpen(false);

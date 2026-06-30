@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { Database, Activity, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 function AdminHealth() {
@@ -12,7 +12,7 @@ function AdminHealth() {
 
   const fetchHealth = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/ucc/health`);
+      const response = await api.get('/ucc/health');
       setHealth(response.data.health);
       setLoading(false);
     } catch (err) {
@@ -49,52 +49,52 @@ function AdminHealth() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Database */}
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-400">Database</p>
-              <p className={`text-lg font-semibold mt-1 ${getStatusColor(health?.database)}`}>
-                {health?.database || 'Unknown'}
-              </p>
-            </div>
+          <div className="flex items-center justify-between mb-3">
             <Database className="w-8 h-8 text-gray-500" />
+            {getStatusIcon(health?.database)}
           </div>
+          <p className="text-sm text-gray-400">Database</p>
+          <p className={`text-lg font-semibold mt-1 capitalize ${getStatusColor(health?.database)}`}>
+            {health?.database || 'Unknown'}
+          </p>
         </div>
 
+        {/* API */}
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-400">API</p>
-              <p className={`text-lg font-semibold mt-1 ${getStatusColor(health?.api)}`}>
-                {health?.api || 'Unknown'}
-              </p>
-            </div>
+          <div className="flex items-center justify-between mb-3">
             <Activity className="w-8 h-8 text-gray-500" />
+            {getStatusIcon(health?.api)}
           </div>
+          <p className="text-sm text-gray-400">API</p>
+          <p className={`text-lg font-semibold mt-1 capitalize ${getStatusColor(health?.api)}`}>
+            {health?.api || 'Unknown'}
+          </p>
         </div>
 
+        {/* Payment Gateway */}
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-400">Payment Gateway</p>
-              <p className={`text-lg font-semibold mt-1 ${getStatusColor(health?.payment_gateway)}`}>
-                {health?.payment_gateway || 'Unknown'}
-              </p>
-            </div>
+          <div className="flex items-center justify-between mb-3">
             <CheckCircle className="w-8 h-8 text-gray-500" />
+            {getStatusIcon(health?.payment_gateway)}
           </div>
+          <p className="text-sm text-gray-400">Payment Gateway</p>
+          <p className={`text-lg font-semibold mt-1 capitalize ${getStatusColor(health?.payment_gateway)}`}>
+            {health?.payment_gateway || 'Unknown'}
+          </p>
         </div>
 
+        {/* Email Service */}
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-400">Email Service</p>
-              <p className={`text-lg font-semibold mt-1 ${getStatusColor(health?.email_service)}`}>
-                {health?.email_service || 'Unknown'}
-              </p>
-            </div>
+          <div className="flex items-center justify-between mb-3">
             <AlertCircle className="w-8 h-8 text-gray-500" />
+            {getStatusIcon(health?.email_service)}
           </div>
+          <p className="text-sm text-gray-400">Email Service</p>
+          <p className={`text-lg font-semibold mt-1 capitalize ${getStatusColor(health?.email_service)}`}>
+            {health?.email_service || 'Unknown'}
+          </p>
         </div>
       </div>
 
