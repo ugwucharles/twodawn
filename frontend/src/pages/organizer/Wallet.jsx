@@ -1,17 +1,21 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
-import { Wallet as WalletIcon } from 'lucide-react';
+import { Wallet as WalletIcon, Loader2 } from 'lucide-react';
 
 function OrganizerWallet() {
   const [wallet, setWallet] = useState({ balance: 0, available_for_withdrawal: 0 });
   const [withdrawals, setWithdrawals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [withdrawalForm, setWithdrawalForm] = useState({ amount: '', bank_name: '', account_number: '', account_name: '' });
+  const [banks, setBanks] = useState([]);
+  const [withdrawalForm, setWithdrawalForm] = useState({ amount: '', bank_name: '', bank_code: '', account_number: '', account_name: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [resolvingAccount, setResolvingAccount] = useState(false);
+  const [resolveError, setResolveError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     fetchWalletData();
+    fetchBankList();
   }, []);
 
   const fetchWalletData = async () => {
@@ -26,13 +30,72 @@ function OrganizerWallet() {
     }
   };
 
+  const fetchBankList = async () => {
+    try {
+      const response = await api.get('/organizer/bank/list');
+      setBanks(response.data.banks || []);
+    } catch (err) {
+      console.error('Failed to load bank list', err);
+    }
+  };
+
+  const resolveAccount = async (accountNum, bankCode) => {
+    if (!accountNum || accountNum.length !== 10 || !bankCode) return;
+    setResolvingAccount(true);
+    setResolveError('');
+    try {
+      const response = await api.get(`/organizer/bank/resolve?account_number=${accountNum}&bank_code=${bankCode}`);
+      if (response.data.ok) {
+        setWithdrawalForm(prev => ({
+          ...prev,
+          account_name: response.data.account_name
+        }));
+      } else {
+        setResolveError('Could not verify account name');
+        setWithdrawalForm(prev => ({ ...prev, account_name: '' }));
+      }
+    } catch (err) {
+      console.error('Failed to resolve bank account', err);
+      setResolveError(err.response?.data?.message || 'Could not verify account name');
+      setWithdrawalForm(prev => ({ ...prev, account_name: '' }));
+    } finally {
+      setResolvingAccount(false);
+    }
+  };
+
+  const handleBankChange = (e) => {
+    const code = e.target.value;
+    const selectedBank = banks.find(b => b.code === code);
+    const bankName = selectedBank ? selectedBank.name : '';
+    setWithdrawalForm(prev => {
+      const updated = { ...prev, bank_code: code, bank_name: bankName, account_name: '' };
+      resolveAccount(prev.account_number, code);
+      return updated;
+    });
+  };
+
+  const handleAccountNumberChange = (e) => {
+    const val = e.target.value.replace(/\D/g, '').substring(0, 10);
+    setWithdrawalForm(prev => {
+      const updated = { ...prev, account_number: val, account_name: '' };
+      if (val.length === 10) {
+        resolveAccount(val, prev.bank_code);
+      }
+      return updated;
+    });
+  };
+
   const handleWithdrawalSubmit = async (e) => {
     e.preventDefault();
+    if (!withdrawalForm.account_name) {
+      alert('Please resolve and verify your account details first.');
+      return;
+    }
     setSubmitting(true);
     try {
       await api.post('/organizer/wallet/withdraw', withdrawalForm);
       setSuccessMessage('Withdrawal request submitted successfully!');
-      setWithdrawalForm({ amount: '', bank_name: '', account_number: '', account_name: '' });
+      setWithdrawalForm({ amount: '', bank_name: '', bank_code: '', account_number: '', account_name: '' });
       fetchWalletData();
       setTimeout(() => setSuccessMessage(''), 5000);
     } catch (err) {
@@ -115,40 +178,61 @@ function OrganizerWallet() {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Bank Name</label>
-                <input
-                  type="text"
-                  value={withdrawalForm.bank_name}
-                  onChange={(e) => setWithdrawalForm({ ...withdrawalForm, bank_name: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
-                  placeholder="e.g. GTBank"
+                <label className="block text-sm font-bold text-gray-700 mb-1">Select Bank</label>
+                <select
+                  value={withdrawalForm.bank_code}
+                  onChange={handleBankChange}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm bg-white"
                   disabled={wallet.available_for_withdrawal < 100}
                   required
-                />
+                >
+                  <option value="">-- Choose Bank --</option>
+                  {banks.map((b) => (
+                    <option key={b.code} value={b.code}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Account Number</label>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Account Number (10 Digits)</label>
                 <input
                   type="text"
+                  pattern="[0-9]{10}"
                   value={withdrawalForm.account_number}
-                  onChange={(e) => setWithdrawalForm({ ...withdrawalForm, account_number: e.target.value })}
+                  onChange={handleAccountNumberChange}
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
                   placeholder="e.g. 0123456789"
-                  disabled={wallet.available_for_withdrawal < 100}
+                  disabled={wallet.available_for_withdrawal < 100 || !withdrawalForm.bank_code}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Account Name</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-bold text-gray-700">Account Name</label>
+                  {resolvingAccount && (
+                    <span className="flex items-center text-xs text-blue-600 font-medium">
+                      <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                      Resolving...
+                    </span>
+                  )}
+                </div>
                 <input
                   type="text"
                   value={withdrawalForm.account_name}
-                  onChange={(e) => setWithdrawalForm({ ...withdrawalForm, account_name: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
-                  placeholder="e.g. John Doe"
-                  disabled={wallet.available_for_withdrawal < 100}
+                  className={`w-full px-4 py-2.5 rounded-xl border transition-all text-sm font-semibold bg-gray-50 text-gray-700 cursor-not-allowed ${
+                    resolveError ? 'border-red-200 focus:border-red-500' : 'border-gray-200'
+                  }`}
+                  placeholder={resolvingAccount ? "Verifying..." : "Auto-resolved from bank details"}
+                  disabled
                   required
                 />
+                {resolveError && (
+                  <p className="text-xs text-red-500 mt-1 font-semibold">{resolveError}</p>
+                )}
+                {withdrawalForm.account_name && !resolvingAccount && (
+                  <p className="text-xs text-green-600 mt-1 font-semibold">✓ Verified Account Name</p>
+                )}
               </div>
             </div>
           </div>

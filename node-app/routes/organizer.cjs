@@ -261,6 +261,69 @@ function createOrganizerRouter() {
     }
   });
 
+  // GET /organizer/bank/list - fetch NGN banks
+  router.get('/bank/list', async (req, res) => {
+    try {
+      if (!req.auth || !req.auth.isAuthenticated) {
+        return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
+      }
+
+      const response = await fetch('https://api.paystack.co/bank?currency=NGN', {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY || ''}`
+        }
+      });
+      const data = await response.json();
+      if (!data.status) {
+        return res.status(400).json({ ok: false, message: data.message || 'Failed to fetch banks' });
+      }
+
+      // Return simplified list
+      const banks = data.data.map(b => ({
+        name: b.name,
+        code: b.code
+      }));
+      return res.json({ ok: true, banks });
+    } catch (error) {
+      console.error('Fetch banks error:', error);
+      return res.status(500).json({ ok: false, message: 'Failed to retrieve banks' });
+    }
+  });
+
+  // GET /organizer/bank/resolve - resolve bank account name
+  router.get('/bank/resolve', async (req, res) => {
+    try {
+      if (!req.auth || !req.auth.isAuthenticated) {
+        return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
+      }
+
+      const { account_number, bank_code } = req.query;
+      if (!account_number || !bank_code) {
+        return res.status(400).json({ ok: false, message: 'Account number and bank code are required' });
+      }
+
+      const url = `https://api.paystack.co/bank/resolve?account_number=${account_number}&bank_code=${bank_code}`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY || ''}`
+        }
+      });
+      const data = await response.json();
+      if (!data.status) {
+        return res.status(400).json({ ok: false, message: data.message || 'Could not resolve account name' });
+      }
+
+      return res.json({
+        ok: true,
+        account_name: data.data.account_name,
+        account_number: data.data.account_number
+      });
+    } catch (error) {
+      console.error('Resolve bank error:', error);
+      return res.status(500).json({ ok: false, message: 'Failed to resolve account' });
+    }
+  });
+
   // GET /organizer/settings - settings data
   router.get('/settings', async (req, res) => {
     try {
