@@ -407,6 +407,59 @@ function createAdminRouter() {
     }
   });
 
+  // GET /admin/withdrawals - list all withdrawal requests
+  router.get('/withdrawals', async (req, res) => {
+    try {
+      const { query } = require('../db/client.cjs');
+      const withdrawals = await query(`
+        SELECT w.*, u.name as organizer_name, u.email as organizer_email
+        FROM withdrawals w
+        LEFT JOIN users u ON w.user_id = u.id
+        ORDER BY w.created_at DESC
+      `);
+      return res.json({ ok: true, withdrawals });
+    } catch (error) {
+      console.error('Get withdrawals error:', error);
+      return res.status(500).json({ ok: false, error: 'Failed to fetch withdrawals' });
+    }
+  });
+
+  // PATCH /admin/withdrawals/:id/approve - approve withdrawal
+  router.patch('/withdrawals/:id/approve', async (req, res) => {
+    try {
+      const withdrawalId = parseInt(req.params.id, 10);
+      const { query } = require('../db/client.cjs');
+      const now = new Date().toISOString();
+      await query(`
+        UPDATE withdrawals
+        SET status = 'approved', updated_at = ?
+        WHERE id = ?
+      `, [now, withdrawalId]);
+      return res.json({ ok: true, message: 'Withdrawal approved successfully' });
+    } catch (error) {
+      console.error('Approve withdrawal error:', error);
+      return res.status(500).json({ ok: false, error: 'Failed to approve withdrawal' });
+    }
+  });
+
+  // PATCH /admin/withdrawals/:id/reject - reject withdrawal
+  router.patch('/withdrawals/:id/reject', async (req, res) => {
+    try {
+      const withdrawalId = parseInt(req.params.id, 10);
+      const { query } = require('../db/client.cjs');
+      const now = new Date().toISOString();
+      await query(`
+        UPDATE withdrawals
+        SET status = 'rejected', updated_at = ?
+        WHERE id = ?
+      `, [now, withdrawalId]);
+      return res.json({ ok: true, message: 'Withdrawal rejected successfully' });
+    } catch (error) {
+      console.error('Reject withdrawal error:', error);
+      return res.status(500).json({ ok: false, error: 'Failed to reject withdrawal' });
+    }
+  });
+
   return router;
 }
 

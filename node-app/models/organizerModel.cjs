@@ -50,7 +50,25 @@ async function getOrganizerStats(userId) {
     }
   }
 
-  const walletBalance = Math.max(0, (totalRevenue - twoDawnFee) / 100); // Convert back to naira
+  // Get withdrawals sum
+  let approvedWithdrawals = 0;
+  let pendingWithdrawals = 0;
+  try {
+    const wRows = await query(`
+      SELECT 
+        COALESCE(SUM(CASE WHEN status = 'approved' THEN amount ELSE 0 END), 0) as approved,
+        COALESCE(SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END), 0) as pending
+      FROM withdrawals
+      WHERE user_id = ?
+    `, [id]);
+    approvedWithdrawals = Number(wRows[0]?.approved || 0);
+    pendingWithdrawals = Number(wRows[0]?.pending || 0);
+  } catch (err) {
+    console.error('Failed to fetch withdrawals sum:', err);
+  }
+
+  const walletBalance = Math.max(0, ((totalRevenue - twoDawnFee) / 100) - approvedWithdrawals);
+  const availableForWithdrawal = Math.max(0, walletBalance - pendingWithdrawals);
 
   // Revenue Statistics (Monthly for the current year)
   const revenueStats = [];
@@ -87,6 +105,7 @@ async function getOrganizerStats(userId) {
     total_tickets_sold: totalTicketsSold,
     total_revenue: totalRevenue,
     wallet_balance: walletBalance,
+    available_for_withdrawal: availableForWithdrawal,
     revenue_stats: revenueStats,
     total_capacity: totalCapacity,
     left_tickets: leftTickets,

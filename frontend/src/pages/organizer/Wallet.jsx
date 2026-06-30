@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { Wallet as WalletIcon } from 'lucide-react';
 
 function OrganizerWallet() {
   const [wallet, setWallet] = useState({ balance: 0, available_for_withdrawal: 0 });
   const [withdrawals, setWithdrawals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [withdrawalForm, setWithdrawalForm] = useState({ amount: '', bank_details: '' });
+  const [withdrawalForm, setWithdrawalForm] = useState({ amount: '', bank_name: '', account_number: '', account_name: '' });
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -16,7 +16,7 @@ function OrganizerWallet() {
 
   const fetchWalletData = async () => {
     try {
-      const response = await axios.get('/organizer/wallet');
+      const response = await api.get('/organizer/wallet');
       setWallet(response.data.wallet || { balance: 0, available_for_withdrawal: 0 });
       setWithdrawals(response.data.withdrawals || []);
       setLoading(false);
@@ -30,9 +30,9 @@ function OrganizerWallet() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await axios.post('/organizer/wallet/withdraw', withdrawalForm);
+      await api.post('/organizer/wallet/withdraw', withdrawalForm);
       setSuccessMessage('Withdrawal request submitted successfully!');
-      setWithdrawalForm({ amount: '', bank_details: '' });
+      setWithdrawalForm({ amount: '', bank_name: '', account_number: '', account_name: '' });
       fetchWalletData();
       setTimeout(() => setSuccessMessage(''), 5000);
     } catch (err) {
@@ -108,20 +108,48 @@ function OrganizerWallet() {
                 className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                 placeholder="Enter amount"
                 disabled={wallet.available_for_withdrawal < 100}
+                required
               />
               <p className="text-xs text-gray-500 mt-1">Maximum: ₦{wallet.available_for_withdrawal.toFixed(2)}</p>
             </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Bank Details</label>
-              <textarea
-                value={withdrawalForm.bank_details}
-                onChange={(e) => setWithdrawalForm({ ...withdrawalForm, bank_details: e.target.value })}
-                rows="3"
-                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-                placeholder="Account Name, Account Number, Bank Name"
-                disabled={wallet.available_for_withdrawal < 100}
-                required
-              />
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Bank Name</label>
+                <input
+                  type="text"
+                  value={withdrawalForm.bank_name}
+                  onChange={(e) => setWithdrawalForm({ ...withdrawalForm, bank_name: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
+                  placeholder="e.g. GTBank"
+                  disabled={wallet.available_for_withdrawal < 100}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Account Number</label>
+                <input
+                  type="text"
+                  value={withdrawalForm.account_number}
+                  onChange={(e) => setWithdrawalForm({ ...withdrawalForm, account_number: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
+                  placeholder="e.g. 0123456789"
+                  disabled={wallet.available_for_withdrawal < 100}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Account Name</label>
+                <input
+                  type="text"
+                  value={withdrawalForm.account_name}
+                  onChange={(e) => setWithdrawalForm({ ...withdrawalForm, account_name: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
+                  placeholder="e.g. John Doe"
+                  disabled={wallet.available_for_withdrawal < 100}
+                  required
+                />
+              </div>
             </div>
           </div>
           <button

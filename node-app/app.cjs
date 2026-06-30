@@ -7,6 +7,7 @@ const { ensureUsersSchema } = require('./db/ensureUsersSchema.cjs');
 const { ensureOrdersSchema } = require('./db/ensureOrdersSchema.cjs');
 const { ensureEventsSchema } = require('./db/ensureEventsSchema.cjs');
 const { ensureActivityLogsSchema } = require('./db/ensureActivityLogsSchema.cjs');
+const { ensureWithdrawalsSchema } = require('./db/ensureWithdrawalsSchema.cjs');
 
 async function initializeSchemas() {
   try {
@@ -35,6 +36,13 @@ async function initializeSchemas() {
     console.log('✅ Activity logs schema ensured');
   } catch (error) {
     console.error('Failed to ensure activity logs schema:', error.message);
+  }
+
+  try {
+    await ensureWithdrawalsSchema();
+    console.log('✅ Withdrawals schema ensured');
+  } catch (error) {
+    console.error('Failed to ensure withdrawals schema:', error.message);
   }
 }
 

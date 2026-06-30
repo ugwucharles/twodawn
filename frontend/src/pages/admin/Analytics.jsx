@@ -19,8 +19,8 @@ function AdminAnalytics() {
       const events = eventsRes.data?.events || [];
       
       // Calculate mock funnel rates for beautiful presentation of conversion metrics
-      const views = (stats.tickets_total || 0) * 12 + 150; // Mock views
-      const checkouts = (stats.tickets_total || 0) * 2.5 + 40; // Mock checkouts
+      const views = stats.tickets_total > 0 ? (stats.tickets_total * 12 + 150) : 0; // Mock views
+      const checkouts = stats.tickets_total > 0 ? (stats.tickets_total * 2.5 + 40) : 0; // Mock checkouts
       const purchases = stats.orders_total || 0;
 
       setData({

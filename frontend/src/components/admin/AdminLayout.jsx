@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Menu, X, Activity, Users, Calendar, DollarSign, BarChart3, Database, Globe } from 'lucide-react';
+import { LogOut, Menu, X, Activity, Users, Calendar, DollarSign, BarChart3, Database, Globe, Landmark } from 'lucide-react';
 
 const sidebarItems = [
   { name: 'Dashboard', path: '/ucc/dashboard', icon: BarChart3 },
@@ -8,6 +8,7 @@ const sidebarItems = [
   { name: 'Events', path: '/ucc/events', icon: Calendar },
   { name: 'Organizers', path: '/ucc/organizers', icon: Users },
   { name: 'Transactions', path: '/ucc/transactions', icon: DollarSign },
+  { name: 'Withdrawals', path: '/ucc/withdrawals', icon: Landmark },
   { name: 'Analytics', path: '/ucc/analytics', icon: BarChart3 },
   { name: 'System Health', path: '/ucc/health', icon: Database },
 ];

@@ -13,6 +13,7 @@ import AdminActivity from './pages/admin/Activity'
 import AdminEvents from './pages/admin/Events'
 import AdminOrganizers from './pages/admin/Organizers'
 import AdminTransactions from './pages/admin/Transactions'
+import AdminWithdrawals from './pages/admin/Withdrawals'
 import AdminAnalytics from './pages/admin/Analytics'
 import AdminHealth from './pages/admin/Health'
 import AdminLogin from './pages/admin/Login'
@@ -78,6 +79,7 @@ function App() {
           <Route path="events" element={<AdminEvents />} />
           <Route path="organizers" element={<AdminOrganizers />} />
           <Route path="transactions" element={<AdminTransactions />} />
+          <Route path="withdrawals" element={<AdminWithdrawals />} />
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="health" element={<AdminHealth />} />
         </Route>

@@ -189,14 +189,22 @@ function createOrganizerRouter() {
         return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
       }
 
-      // Get wallet balance from organizer stats
-      const stats = await getDashboardData(req.auth.user.id);
+      const userId = req.auth.user.id;
+      const { getOrganizerStats } = require('../models/organizerModel.cjs');
+      const stats = await getOrganizerStats(userId);
+      const withdrawals = await query(`
+        SELECT * FROM withdrawals
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+      `, [userId]);
       
       return res.json({
         ok: true,
-        balance: stats.wallet_balance || 0,
-        available_for_withdrawal: stats.wallet_balance || 0,
-        withdrawals: []
+        wallet: {
+          balance: stats.wallet_balance || 0,
+          available_for_withdrawal: stats.available_for_withdrawal || 0
+        },
+        withdrawals: withdrawals || []
       });
     } catch (error) {
       console.error('Wallet error:', error);
@@ -211,13 +219,38 @@ function createOrganizerRouter() {
         return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
       }
 
-      const { amount, bank_name, account_number, account_name } = req.body;
+      const userId = req.auth.user.id;
+      let { amount, bank_name, account_number, account_name, bank_details } = req.body;
+
+      if (bank_details && (!bank_name || !account_number || !account_name)) {
+        const parts = bank_details.split(',').map(p => p.trim());
+        account_name = parts[0] || '';
+        account_number = parts[1] || '';
+        bank_name = parts[2] || '';
+      }
 
       if (!amount || !bank_name || !account_number || !account_name) {
         return res.status(400).json({ ok: false, error: 'Missing required fields' });
       }
 
-      // For now, just return success (implement actual withdrawal logic later)
+      const amountNumber = parseFloat(amount);
+      if (isNaN(amountNumber) || amountNumber < 100) {
+        return res.status(400).json({ ok: false, error: 'validation', message: 'Amount must be at least ₦100' });
+      }
+
+      const { getOrganizerStats } = require('../models/organizerModel.cjs');
+      const stats = await getOrganizerStats(userId);
+
+      if (amountNumber > stats.available_for_withdrawal) {
+        return res.status(400).json({ ok: false, error: 'insufficient_funds', message: 'Insufficient funds available for withdrawal' });
+      }
+
+      const now = new Date().toISOString();
+      await query(`
+        INSERT INTO withdrawals (user_id, amount, bank_name, account_number, account_name, status, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)
+      `, [userId, amountNumber, bank_name, account_number, account_name, now, now]);
+
       return res.json({
         ok: true,
         message: 'Withdrawal request submitted successfully'
