@@ -15,6 +15,7 @@ const ORDERS_TABLE_SQL = `
     ticket_code TEXT,
     status TEXT DEFAULT 'pending',
     created_ip TEXT,
+    referral_source TEXT,
     created_at TEXT,
     updated_at TEXT,
     last_checkin_at TEXT
@@ -34,6 +35,7 @@ const COLUMN_MIGRATIONS = [
   { column: 'ticket_code', sql: 'ALTER TABLE orders ADD COLUMN ticket_code TEXT' },
   { column: 'status', sql: "ALTER TABLE orders ADD COLUMN status TEXT DEFAULT 'pending'" },
   { column: 'created_ip', sql: 'ALTER TABLE orders ADD COLUMN created_ip TEXT' },
+  { column: 'referral_source', sql: 'ALTER TABLE orders ADD COLUMN referral_source TEXT' },
   { column: 'created_at', sql: 'ALTER TABLE orders ADD COLUMN created_at TEXT' },
   { column: 'updated_at', sql: 'ALTER TABLE orders ADD COLUMN updated_at TEXT' },
   { column: 'last_checkin_at', sql: 'ALTER TABLE orders ADD COLUMN last_checkin_at TEXT' },

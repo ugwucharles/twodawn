@@ -16,6 +16,7 @@ const ORDER_SELECT = `
   ticket_code,
   status,
   created_ip,
+  referral_source,
   created_at,
   updated_at,
   last_checkin_at

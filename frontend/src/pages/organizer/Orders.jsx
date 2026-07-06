@@ -43,6 +43,7 @@ function Orders() {
                   <th className="px-8 py-5">Order ID</th>
                   <th className="px-8 py-5">Event</th>
                   <th className="px-8 py-5">Customer</th>
+                  <th className="px-8 py-5">Referral</th>
                   <th className="px-8 py-5">Tickets</th>
                   <th className="px-8 py-5">Amount</th>
                   <th className="px-8 py-5">Date</th>
@@ -57,6 +58,15 @@ function Orders() {
                     <td className="px-8 py-6 text-sm font-semibold text-gray-500">
                       <div className="font-bold text-gray-900">{order.buyer_name || 'Unknown'}</div>
                       <div className="text-xs text-gray-400 font-medium">{order.buyer_email || ''}</div>
+                    </td>
+                    <td className="px-8 py-6 text-sm font-semibold text-gray-500">
+                      {order.referral_source ? (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700">
+                          {order.referral_source}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-xs">—</span>
+                      )}
                     </td>
                     <td className="px-8 py-6 text-sm font-black text-gray-900">{order.quantity}</td>
                     <td className="px-8 py-6 text-sm font-black text-gray-900">₦{((order.amount || 0) / 100).toFixed(2)}</td>

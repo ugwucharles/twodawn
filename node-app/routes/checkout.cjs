@@ -152,6 +152,7 @@ function createCheckoutRouter() {
       const buyer_phone = body.buyer_phone;
       const quantity = body.quantity;
       const ticket_type = body.ticket_type;
+      const referral_source = body.referral_source;
       
       if (!buyer_name || !buyer_email || !quantity) {
         if (isJsonRequest(req)) {
@@ -215,6 +216,7 @@ function createCheckoutRouter() {
         amount: finalAmount,
         paystack_reference: reference,
         created_ip: req.ip || req.connection.remoteAddress,
+        referral_source: referral_source || null,
       });
 
       // If zero cost, finalize immediately

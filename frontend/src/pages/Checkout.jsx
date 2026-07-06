@@ -72,6 +72,7 @@ function Checkout() {
         buyer_phone: buyerPhone.trim(),
         quantity,
         ticket_type: ticketType,
+        referral_source: localStorage.getItem('event_11_referrer') || null,
       }
 
       const response = await createOrder(id, orderData)
