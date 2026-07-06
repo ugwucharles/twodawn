@@ -50,6 +50,7 @@ function formatEventForApi(event) {
     state: event.state,
     image_path: event.image_path,
     description: event.description,
+    must_know: event.must_know,
     capacity: event.capacity,
     ticket_types: event.ticket_types,
     organizer_username: event.organizer_username || null,
