@@ -17,6 +17,8 @@ function EditEvent() {
     price: '',
     capacity: '',
     pass_fees_to_buyer: false,
+    custom_slug: '',
+    use_custom_slug: false,
     image: null
   });
   const [errors, setErrors] = useState([]);
@@ -83,6 +85,8 @@ function EditEvent() {
         price: event.price || '',
         capacity: event.capacity || '',
         pass_fees_to_buyer: event.pass_fees_to_buyer || false,
+        custom_slug: event.custom_slug || '',
+        use_custom_slug: event.use_custom_slug || false,
         image: null
       });
       setCurrentImage(event.image_url || null);
@@ -314,6 +318,45 @@ function EditEvent() {
               </div>
             </label>
           </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-8 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-purple-200 space-y-6">
+          <h2 className="text-base font-bold text-gray-900 pb-2 border-b border-gray-100">Custom URL</h2>
+
+          <div className="pt-4 border-t border-gray-100">
+            <label className="inline-flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.use_custom_slug}
+                onChange={(e) => setFormData({ ...formData, use_custom_slug: e.target.checked })}
+                className="mt-1 w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
+              />
+              <div>
+                <span className="block text-sm font-semibold text-gray-700">Use custom URL slug</span>
+                <span className="block text-xs text-gray-500 mt-1">Enable this to use a custom URL instead of the default event ID URL</span>
+              </div>
+            </label>
+          </div>
+
+          {formData.use_custom_slug && (
+            <div>
+              <label htmlFor="custom_slug" className="block text-sm font-semibold text-gray-700 mb-2">Custom Slug</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                  <span className="text-gray-500 text-sm font-medium">twodawn.com.ng/event/</span>
+                </div>
+                <input
+                  id="custom_slug"
+                  type="text"
+                  value={formData.custom_slug}
+                  onChange={(e) => setFormData({ ...formData, custom_slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/(^-|-$)/g, '') })}
+                  className="block w-full rounded-xl border border-gray-200 bg-white text-gray-900 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 pl-44 pr-5 py-3.5 text-sm shadow-sm transition-all"
+                  placeholder="your-custom-slug"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-2">URL will be: twodawn.com.ng/event/{formData.custom_slug || 'your-custom-slug'}</p>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-5 pt-6">

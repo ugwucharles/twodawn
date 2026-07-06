@@ -659,13 +659,13 @@ function createOrganizerRouter() {
         return res.status(403).json({ ok: false, error: 'You do not have permission to update this event' });
       }
 
-      const { title, description, must_know, venue, state, starts_at, ends_at, price, capacity, pass_fees_to_buyer } = req.body;
+      const { title, description, must_know, venue, state, starts_at, ends_at, price, capacity, pass_fees_to_buyer, custom_slug, use_custom_slug } = req.body;
 
       await query(`
         UPDATE events 
         SET title = ?, description = ?, must_know = ?, venue = ?, state = ?,
             starts_at = ?, ends_at = ?, price = ?, capacity = ?, pass_fees_to_buyer = ?,
-            updated_at = datetime('now')
+            custom_slug = ?, use_custom_slug = ?, updated_at = datetime('now')
         WHERE id = ?
       `, [
         title || event.title,
@@ -678,6 +678,8 @@ function createOrganizerRouter() {
         price !== undefined ? price : event.price,
         capacity !== undefined ? capacity : event.capacity,
         pass_fees_to_buyer !== undefined ? (pass_fees_to_buyer ? 1 : 0) : event.pass_fees_to_buyer,
+        custom_slug || event.custom_slug,
+        use_custom_slug !== undefined ? (use_custom_slug ? 1 : 0) : event.use_custom_slug,
         eventId
       ]);
 
