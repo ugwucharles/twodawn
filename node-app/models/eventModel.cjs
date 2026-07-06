@@ -21,7 +21,7 @@ const EVENT_SELECT = `
   gallery,
   mood,
   use_custom_slug,
-  slug,
+  slug as custom_slug,
   whatsapp_group_url,
   ticket_types,
   created_at,

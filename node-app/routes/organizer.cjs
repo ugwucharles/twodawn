@@ -643,7 +643,11 @@ function createOrganizerRouter() {
   // PATCH /organizer/events/:id - update event
   router.patch('/events/:id', async (req, res) => {
     try {
+      console.log('PATCH event: Request received for ID:', req.params.id);
+      console.log('PATCH event: Auth status:', req.auth ? 'present' : 'missing', 'isAuthenticated:', req.auth?.isAuthenticated);
+      
       if (!req.auth || !req.auth.isAuthenticated) {
+        console.log('PATCH event: Unauthenticated request');
         return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
       }
 
@@ -660,6 +664,7 @@ function createOrganizerRouter() {
       }
 
       const { title, description, must_know, venue, state, starts_at, ends_at, price, capacity, pass_fees_to_buyer, custom_slug, use_custom_slug } = req.body;
+      console.log('PATCH event: Update data received:', { title, custom_slug, use_custom_slug });
 
       await query(`
         UPDATE events 
