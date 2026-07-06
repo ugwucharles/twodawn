@@ -3,6 +3,17 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/event/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|twitterbot|linkedinbot|whatsapp).*"
+        }
+      ],
+      "destination": "https://api.twodawn.com.ng/event/:slug"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
