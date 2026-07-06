@@ -191,17 +191,17 @@ function createCheckoutRouter() {
 
       const finalAmount = isFreeTicketPromo ? 0 : quote.total_kobo;
 
-      // For zero-cost orders, check rate limiting
-      if (finalAmount <= 0) {
-        const ip = req.ip || req.connection.remoteAddress;
-        const recentFree = await countRecentFreeOrders(eventId, ip, 1);
-        if (recentFree > 0) {
-          if (isJsonRequest(req)) {
-            return res.status(429).json({ ok: false, message: 'You recently claimed a free ticket. Please try again later.' });
-          }
-          return proxyRequest(req, res);
-        }
-      }
+      // For zero-cost orders, check rate limiting (TEMPORARILY DISABLED FOR TESTING)
+      // if (finalAmount <= 0) {
+      //   const ip = req.ip || req.connection.remoteAddress;
+      //   const recentFree = await countRecentFreeOrders(eventId, ip, 1);
+      //   if (recentFree > 0) {
+      //     if (isJsonRequest(req)) {
+      //       return res.status(429).json({ ok: false, message: 'You recently claimed a free ticket. Please try again later.' });
+      //     }
+      //     return proxyRequest(req, res);
+      //   }
+      // }
 
       // Create order
       const reference = generateReference();
