@@ -63,6 +63,7 @@ function App() {
         <Route path="/events" element={<Events />} />
         <Route path="/events/recent" element={<Events recent={true} />} />
         <Route path="/find-tickets" element={<FindTickets />} />
+        <Route path="/event/:slug" element={<EventDetail />} />
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/events/:id/checkout" element={<Checkout />} />
         <Route path="/orders/:reference" element={<OrderConfirmation />} />

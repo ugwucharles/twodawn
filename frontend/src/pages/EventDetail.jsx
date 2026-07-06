@@ -1,30 +1,60 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getEventById } from '../services/events'
+import { getEventById, getEventBySlug } from '../services/events'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { getEventImage } from '../utils/image'
 import { formatPrice } from '../utils/price'
 
 function EventDetail() {
-  const { id } = useParams()
+  const { id, slug } = useParams()
   const [event, setEvent] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [showReferralModal, setShowReferralModal] = useState(false)
+  const [referrerInput, setReferrerInput] = useState('')
+  const [referrerError, setReferrerError] = useState('')
 
   useEffect(() => {
     fetchEvent()
-  }, [id])
+  }, [id, slug])
 
   const fetchEvent = async () => {
     try {
-      const response = await getEventById(id)
+      let response
+      if (slug) {
+        response = await getEventBySlug(slug)
+      } else {
+        response = await getEventById(id)
+      }
       setEvent(response.event)
       setLoading(false)
     } catch (err) {
       setError('Failed to load event')
       setLoading(false)
     }
+  }
+
+  const handleGetTicketsClick = (e) => {
+    // For event ID 11 (free event), show referral modal
+    if (event.id === 11) {
+      e.preventDefault()
+      setShowReferralModal(true)
+      setReferrerInput('')
+      setReferrerError('')
+    }
+  }
+
+  const handleReferralSubmit = () => {
+    if (referrerInput.trim().length < 5) {
+      setReferrerError('Please enter at least 5 characters')
+      return
+    }
+    // Store referrer and proceed to checkout
+    localStorage.setItem('event_11_referrer', referrerInput.trim())
+    setShowReferralModal(false)
+    // Navigate to checkout
+    window.location.href = `/events/${event.id}/checkout`
   }
 
   const formatDate = (dateStr) => {
@@ -312,6 +342,7 @@ function EventDetail() {
                 ) : (
                   <Link
                     to={`/events/${event.id}/checkout`}
+                    onClick={handleGetTicketsClick}
                     className="block w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white py-4 rounded-2xl text-lg font-extrabold text-center shadow-lg shadow-purple-200 hover:shadow-purple-300 transition-all duration-200 active:scale-95"
                   >
                     Get Tickets
@@ -335,6 +366,40 @@ function EventDetail() {
           </div>
         </div>
       </main>
+
+      {/* Referral Modal for Event ID 11 */}
+      {showReferralModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Who gave you access to this event?</h3>
+            <p className="text-sm text-gray-500 mb-4">Please enter the name or identifier of the person who shared this event link with you.</p>
+            <input
+              type="text"
+              value={referrerInput}
+              onChange={(e) => setReferrerInput(e.target.value)}
+              placeholder="Enter name (min 5 characters)"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#8b5cf6] focus:ring-2 focus:ring-[#8b5cf6]/20 outline-none transition-all"
+            />
+            {referrerError && (
+              <p className="text-red-500 text-sm mt-2">{referrerError}</p>
+            )}
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowReferralModal(false)}
+                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReferralSubmit}
+                className="flex-1 px-4 py-3 rounded-xl bg-[#8b5cf6] text-white font-semibold hover:bg-[#7c3aed] transition-colors"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
