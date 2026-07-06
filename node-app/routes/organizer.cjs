@@ -646,11 +646,10 @@ function createOrganizerRouter() {
       console.log('PATCH event: Request received for ID:', req.params.id);
       console.log('PATCH event: Auth status:', req.auth ? 'present' : 'missing', 'isAuthenticated:', req.auth?.isAuthenticated);
       
-      // TEMPORARY: Skip auth for testing
-      // if (!req.auth || !req.auth.isAuthenticated) {
-      //   console.log('PATCH event: Unauthenticated request');
-      //   return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
-      // }
+      if (!req.auth || !req.auth.isAuthenticated) {
+        console.log('PATCH event: Unauthenticated request');
+        return res.status(401).json({ ok: false, error: 'unauthenticated', message: 'Authentication required.' });
+      }
 
       const eventId = parseInt(req.params.id, 10);
       const event = await findEventById(eventId);
@@ -659,10 +658,10 @@ function createOrganizerRouter() {
         return res.status(404).json({ ok: false, error: 'Event not found' });
       }
 
-      // TEMPORARY: Skip ownership check for testing
-      // if (event.user_id !== req.auth.user.id) {
-      //   return res.status(403).json({ ok: false, error: 'You do not have permission to update this event' });
-      // }
+      // Check if user owns this event
+      if (event.user_id !== req.auth.user.id) {
+        return res.status(403).json({ ok: false, error: 'You do not have permission to update this event' });
+      }
 
       const { title, description, must_know, venue, state, starts_at, ends_at, price, capacity, pass_fees_to_buyer, custom_slug, use_custom_slug } = req.body;
       console.log('PATCH event: Update data received:', { title, custom_slug, use_custom_slug });
