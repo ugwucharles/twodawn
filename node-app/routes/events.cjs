@@ -116,6 +116,43 @@ function createEventsRouter() {
         return res.json({ ok: true, event });
       }
 
+      // Check if this is a social media crawler
+      const userAgent = req.headers['user-agent'] || '';
+      const isSocialCrawler = /facebookexternalhit|twitterbot|linkedinbot|whatsapp/i.test(userAgent);
+      
+      if (isSocialCrawler) {
+        // Return HTML with proper meta tags for social sharing
+        const eventImage = event.image_url || 'https://twodawn.com.ng/logo.svg';
+        const eventDescription = event.description || event.must_know || `Join ${event.title} on 2DAWN`;
+        
+        const html = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${event.title} | 2DAWN Events</title>
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="${event.title}" />
+    <meta property="og:description" content="${eventDescription}" />
+    <meta property="og:image" content="${eventImage}" />
+    <meta property="og:url" content="${process.env.APP_URL || 'https://twodawn.com.ng'}/event/${req.params.slug}" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${event.title}" />
+    <meta name="twitter:description" content="${eventDescription}" />
+    <meta name="twitter:image" content="${eventImage}" />
+  </head>
+  <body>
+    <script>window.location.href = "/event/${req.params.slug}";</script>
+  </body>
+</html>`;
+        
+        return res.send(html);
+      }
+
       // Proxy to Laravel for HTML
       return proxyRequest(req, res);
     } catch (error) {
