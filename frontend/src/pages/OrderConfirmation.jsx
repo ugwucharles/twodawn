@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getOrder } from '../services/checkout'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import QRCode from 'qrcode.react'
 
 function OrderConfirmation() {
   const { reference } = useParams()
@@ -93,6 +94,10 @@ function OrderConfirmation() {
                     <span className="font-medium">{order.paystack_reference}</span>
                   </div>
                   <div className="flex justify-between">
+                    <span className="text-gray-600">Ticket Code:</span>
+                    <span className="font-medium">{order.ticket_code}</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-gray-600">Quantity:</span>
                     <span className="font-medium">{order.quantity}</span>
                   </div>
@@ -108,6 +113,23 @@ function OrderConfirmation() {
                   </div>
                 </div>
               </div>
+
+              {order.status === 'paid' && (
+                <div className="bg-gray-50 rounded-lg p-6 mt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Your Ticket QR Code</h3>
+                  <div className="flex justify-center">
+                    <QRCode
+                      value={order.ticket_code || order.paystack_reference}
+                      size={200}
+                      level="H"
+                      includeMargin={true}
+                    />
+                  </div>
+                  <p className="text-center text-sm text-gray-500 mt-4">
+                    Show this QR code at the event entrance for check-in
+                  </p>
+                </div>
+              )}
 
               <div className="mt-8 text-center">
                 <button

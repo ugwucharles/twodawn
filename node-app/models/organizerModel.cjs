@@ -173,7 +173,10 @@ async function getOrganizerOrders(userId, page = {}) {
     LIMIT ? OFFSET ?
   `, [id, limit, offset]);
 
-  return rows;
+  return rows.map(row => ({
+    ...row,
+    referral_source: row.referral_source || null
+  }));
 }
 
 module.exports = {
