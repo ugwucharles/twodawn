@@ -1,13 +1,7 @@
 const https = require('https');
 
-// Update event 11 with custom slug and must_know
+// Check event 11 details from organizer endpoint
 const EVENT_ID = 11;
-
-const updateData = {
-  custom_slug: 'afterdarkhouseparty',
-  use_custom_slug: true,
-  must_know: 'This tickets is only for GUEST…please leave a comment on who gave you access to this event link before purchasing the ticket, to gain entrance at the venue…😃'
-};
 
 function makeRequest(method, path, data) {
   return new Promise((resolve, reject) => {
@@ -56,25 +50,27 @@ function makeRequest(method, path, data) {
   });
 }
 
-async function updateEventSlug() {
+async function checkEvent() {
   try {
-    console.log('🔄 Updating event 11 custom slug...');
-    console.log('📝 Update data:', JSON.stringify(updateData, null, 2));
+    console.log('🔍 Checking event 11 from organizer endpoint...');
     
-    const response = await makeRequest('PATCH', `/organizer/events/${EVENT_ID}`, updateData);
+    const response = await makeRequest('GET', `/organizer/events/${EVENT_ID}`);
     
     console.log('📊 Response status:', response.statusCode);
-    console.log('📦 Response data:', JSON.stringify(response.data, null, 2));
+    console.log('📦 Event data:', JSON.stringify(response.data, null, 2));
     
     if (response.statusCode === 200 && response.data.ok) {
-      console.log('✅ Event updated successfully!');
-      console.log('🔗 New URL: https://twodawn.com.ng/event/afterdarkhouseparty');
+      const event = response.data.event;
+      console.log('✅ Event found!');
+      console.log('📅 Title:', event.title);
+      console.log('📝 Must Know:', event.must_know || 'NOT SET');
+      console.log('📝 Description:', event.description || 'NOT SET');
     } else {
-      console.log('❌ Update failed');
+      console.log('❌ Event not found');
     }
   } catch (error) {
     console.error('❌ Error:', error.message);
   }
 }
 
-updateEventSlug();
+checkEvent();

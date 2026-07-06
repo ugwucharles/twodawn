@@ -1,23 +1,29 @@
 const { query } = require('../db/client.cjs');
 
-async function updateEventSlug() {
+async function checkEventData() {
   try {
-    console.log('🔄 Updating event 11 custom slug...');
+    console.log('� Checking event 11 data...');
     
-    await query(`
-      UPDATE events 
-      SET slug = 'afterdarkhouseparty', 
-          use_custom_slug = 1,
-          updated_at = datetime('now')
-      WHERE id = 11
-    `);
-    
-    console.log('✅ Event 11 updated successfully');
-    console.log('🔗 New URL: https://twodawn.com.ng/event/afterdarkhouseparty');
-    
-    // Verify the update
-    const event = await query('SELECT id, title, slug, use_custom_slug FROM events WHERE id = 11');
+    const event = await query('SELECT id, title, must_know, slug, use_custom_slug FROM events WHERE id = 11');
     console.log('📦 Event data:', event[0]);
+    
+    if (event[0] && !event[0].must_know) {
+      console.log('❌ must_know is missing from database');
+      console.log('💡 Adding must_know data...');
+      
+      await query(`
+        UPDATE events 
+        SET must_know = 'This tickets is only for GUEST…please leave a comment on who gave you access to this event link before purchasing the ticket, to gain entrance at the venue…😃',
+            updated_at = datetime('now')
+        WHERE id = 11
+      `);
+      
+      console.log('✅ must_know added to event 11');
+      
+      // Verify
+      const updated = await query('SELECT id, title, must_know FROM events WHERE id = 11');
+      console.log('📦 Updated event data:', updated[0]);
+    }
     
     process.exit(0);
   } catch (error) {
@@ -26,4 +32,4 @@ async function updateEventSlug() {
   }
 }
 
-updateEventSlug();
+checkEventData();
