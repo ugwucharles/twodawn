@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getOrder } from '../services/checkout'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import QRCode from 'qrcode.react'
+import { QRCodeSVG } from 'qrcode.react'
 
 function OrderConfirmation() {
   const { reference } = useParams()
@@ -118,7 +118,7 @@ function OrderConfirmation() {
                 <div className="bg-gray-50 rounded-lg p-6 mt-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Your Ticket QR Code</h3>
                   <div className="flex justify-center">
-                    <QRCode
+                    <QRCodeSVG
                       value={order.ticket_code || order.paystack_reference}
                       size={200}
                       level="H"
