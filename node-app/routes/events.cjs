@@ -131,6 +131,12 @@ function createEventsRouter() {
   router.get('/events/:id', async (req, res) => {
     try {
       const eventId = parseInt(req.params.id, 10);
+      
+      // Redirect event 11 to custom slug
+      if (eventId === 11) {
+        return res.redirect(301, '/event/afterdarkhouseparty');
+      }
+      
       const event = await getEventById(eventId);
 
       if (!event) {
