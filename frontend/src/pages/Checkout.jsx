@@ -25,6 +25,16 @@ function Checkout() {
   }, [id])
 
   useEffect(() => {
+    if (event && event.id === 11) {
+      const referrer = localStorage.getItem('event_11_referrer')
+      if (!referrer) {
+        // Redirect to event detail page to show referral popup
+        navigate(`/events/${event.id}`)
+      }
+    }
+  }, [event, navigate])
+
+  useEffect(() => {
     if (event) {
       fetchQuote()
     }
