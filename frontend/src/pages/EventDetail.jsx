@@ -352,6 +352,16 @@ function EventDetail() {
               </div>
 
               {/* Description / Must Know */}
+              {event.must_know && (
+                <div className="bg-purple-50 border border-purple-200 rounded-2xl shadow-sm p-5">
+                  <h2 className="text-sm font-bold uppercase tracking-widest text-purple-700 mb-3">MUST KNOW!</h2>
+                  <div
+                    className="text-gray-700 text-sm leading-relaxed prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: event.must_know }}
+                  />
+                </div>
+              )}
+
               {event.description && (
                 <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-5">
                   <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-3">About this Event</h2>
