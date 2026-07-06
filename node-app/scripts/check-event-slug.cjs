@@ -1,7 +1,7 @@
 const https = require('https');
 
 // Check event 11 details including slug
-const EVENT_ID = 11;
+const SLUG = 'afterdarkhouseparty';
 
 function makeRequest(method, path, data) {
   return new Promise((resolve, reject) => {
@@ -52,30 +52,23 @@ function makeRequest(method, path, data) {
 
 async function checkEvent() {
   try {
-    console.log('🔍 Checking event 11 details...');
+    console.log('🔍 Checking custom slug:', SLUG);
     
-    const response = await makeRequest('GET', `/api/v1/events/${EVENT_ID}`);
+    const response = await makeRequest('GET', `/event/${SLUG}`);
     
     console.log('📊 Response status:', response.statusCode);
     console.log('📦 Event data:', JSON.stringify(response.data, null, 2));
     
     if (response.statusCode === 200 && response.data.ok) {
       const event = response.data.event;
-      console.log('✅ Event found!');
+      console.log('✅ Custom slug works!');
       console.log('📅 Title:', event.title);
       console.log('🔗 Slug:', event.slug || 'NOT SET');
       console.log('🎯 Use Custom Slug:', event.use_custom_slug);
-      console.log('🌐 URL:', event.url);
-      
-      if (event.use_custom_slug && event.slug) {
-        console.log('✅ Custom slug is configured');
-        console.log('🔗 Expected URL:', `https://twodawn.com.ng/event/${event.slug}`);
-      } else {
-        console.log('❌ Custom slug is NOT configured');
-        console.log('💡 To enable custom URL, set use_custom_slug=1 and slug="your-slug"');
-      }
+      console.log('🌐 URL:', `https://twodawn.com.ng/event/${SLUG}`);
+      console.log('📝 Must Know:', event.must_know || 'NOT SET');
     } else {
-      console.log('❌ Event not found');
+      console.log('❌ Custom slug not working');
     }
   } catch (error) {
     console.error('❌ Error:', error.message);

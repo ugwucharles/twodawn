@@ -28,6 +28,13 @@ function EventDetail() {
         response = await getEventById(id)
       }
       setEvent(response.event)
+      
+      // Redirect to custom slug if event has one and we're using the ID URL
+      if (response.event && response.event.use_custom_slug && response.event.slug && id && !slug) {
+        window.location.href = `/event/${response.event.slug}`
+        return
+      }
+      
       setLoading(false)
     } catch (err) {
       setError('Failed to load event')
