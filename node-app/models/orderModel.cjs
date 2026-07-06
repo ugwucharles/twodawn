@@ -114,6 +114,7 @@ async function createOrder(orderData) {
     amount,
     paystack_reference,
     created_ip,
+    referral_source,
   } = orderData;
 
   const ticket_code = orderData.ticket_code || ('TC-' + crypto.randomBytes(3).toString('hex').toUpperCase());
@@ -121,9 +122,9 @@ async function createOrder(orderData) {
   const rows = await query(
     `INSERT INTO orders (
       event_id, ticket_type, buyer_name, buyer_email, buyer_phone,
-      coupon_code, quantity, amount, paystack_reference, ticket_code, status, created_ip,
+      coupon_code, quantity, amount, paystack_reference, ticket_code, status, created_ip, referral_source,
       created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, datetime('now'), datetime('now'))`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, datetime('now'), datetime('now'))`,
     [
       event_id,
       ticket_type || null,
@@ -136,6 +137,7 @@ async function createOrder(orderData) {
       paystack_reference,
       ticket_code,
       created_ip || null,
+      referral_source || null,
     ]
   );
 
