@@ -29,6 +29,11 @@ function EventDetail() {
       }
       setEvent(response.event)
       
+      // Update meta tags for social sharing
+      if (response.event) {
+        updateMetaTags(response.event)
+      }
+      
       // Redirect to custom slug if event has one and we're using the ID URL
       if (response.event && response.event.use_custom_slug && response.event.slug && id && !slug) {
         window.location.href = `/event/${response.event.slug}`
@@ -40,6 +45,47 @@ function EventDetail() {
       setError('Failed to load event')
       setLoading(false)
     }
+  }
+
+  const updateMetaTags = (event) => {
+    const eventImage = getEventImage(event)
+    
+    // Update title
+    document.title = `${event.title} | 2DAWN Events`
+    
+    // Update or create meta tags
+    const metaTags = [
+      { name: 'description', content: event.description || event.must_know || `Join ${event.title} on 2DAWN` },
+      { property: 'og:title', content: event.title },
+      { property: 'og:description', content: event.description || event.must_know || `Join ${event.title} on 2DAWN` },
+      { property: 'og:image', content: eventImage || 'https://twodawn.com.ng/logo.svg' },
+      { property: 'og:url', content: window.location.href },
+      { property: 'og:type', content: 'website' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: event.title },
+      { name: 'twitter:description', content: event.description || event.must_know || `Join ${event.title} on 2DAWN` },
+      { name: 'twitter:image', content: eventImage || 'https://twodawn.com.ng/logo.svg' },
+    ]
+    
+    metaTags.forEach(tag => {
+      if (tag.property) {
+        let element = document.querySelector(`meta[property="${tag.property}"]`)
+        if (!element) {
+          element = document.createElement('meta')
+          element.setAttribute('property', tag.property)
+          document.head.appendChild(element)
+        }
+        element.setAttribute('content', tag.content)
+      } else if (tag.name) {
+        let element = document.querySelector(`meta[name="${tag.name}"]`)
+        if (!element) {
+          element = document.createElement('meta')
+          element.setAttribute('name', tag.name)
+          document.head.appendChild(element)
+        }
+        element.setAttribute('content', tag.content)
+      }
+    })
   }
 
   const handleGetTicketsClick = (e) => {
