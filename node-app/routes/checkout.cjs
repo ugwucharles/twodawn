@@ -1,6 +1,6 @@
 const express = require('express');
 const { findEventById } = require('../models/eventModel.cjs');
-const { createOrder, findOrderByReference } = require('../models/orderModel.cjs');
+const { createOrder, findOrderByReference, hasPurchasedByIp } = require('../models/orderModel.cjs');
 const { countRecentFreeOrders, sumPaidQuantityForEvent } = require('../models/orderModel.cjs');
 const {
   generateReference,
@@ -51,6 +51,11 @@ function createCheckoutRouter() {
 
       if (quantity < 1) {
         return res.status(400).json({ ok: false, message: 'Invalid quantity' });
+      }
+
+      // Limit quantity to 1 for event 11 (After Dark event)
+      if (eventId === 11 && quantity > 1) {
+        return res.status(400).json({ ok: false, message: 'Only 1 ticket can be purchased for this event' });
       }
 
       const quote = calculateQuote(event, quantity, selectedTicketType);
@@ -169,6 +174,14 @@ function createCheckoutRouter() {
         return proxyRequest(req, res);
       }
 
+      // Limit quantity to 1 for event 11 (After Dark event)
+      if (eventId === 11 && orderQuantity > 1) {
+        if (isJsonRequest(req)) {
+          return res.status(400).json({ ok: false, message: 'Only 1 ticket can be purchased for this event' });
+        }
+        return proxyRequest(req, res);
+      }
+
       // Prevent oversell
       if (event.capacity !== null && orderQuantity > event.capacity) {
         if (isJsonRequest(req)) {
@@ -198,6 +211,18 @@ function createCheckoutRouter() {
         if (recentFree > 0) {
           if (isJsonRequest(req)) {
             return res.status(429).json({ ok: false, message: 'You recently claimed a free ticket. Please try again later.' });
+          }
+          return proxyRequest(req, res);
+        }
+      }
+
+      // Check IP-based purchase limit for event 11 (After Dark event)
+      if (eventId === 11) {
+        const ip = req.ip || req.connection.remoteAddress;
+        const hasPurchased = await hasPurchasedByIp(eventId, ip);
+        if (hasPurchased) {
+          if (isJsonRequest(req)) {
+            return res.status(429).json({ ok: false, message: 'You have already purchased a ticket for this event. Only 1 ticket per person allowed.' });
           }
           return proxyRequest(req, res);
         }

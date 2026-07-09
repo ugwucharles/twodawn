@@ -46,6 +46,21 @@ function normalizePage({ limit = 20, offset = 0 } = {}) {
   };
 }
 
+async function hasPurchasedByIp(eventId, ipAddress) {
+  try {
+    const result = await query(`
+      SELECT COUNT(*) as count
+      FROM orders
+      WHERE event_id = ? AND created_ip = ? AND status IN ('paid', 'used')
+    `, [eventId, ipAddress]);
+    
+    return result[0] && result[0].count > 0;
+  } catch (error) {
+    console.error('Error checking IP purchase:', error);
+    return false;
+  }
+}
+
 async function findOrderById(orderId) {
   const id = asPositiveInt(orderId);
   if (!id) return null;
@@ -206,4 +221,5 @@ module.exports = {
   decrementEventCapacity,
   incrementCouponUses,
   countRecentFreeOrders,
+  hasPurchasedByIp,
 };
