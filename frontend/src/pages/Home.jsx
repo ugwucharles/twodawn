@@ -629,7 +629,7 @@ function Home() {
             <div className="text-center mb-12">
               <Link
                 to="/register"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transition-all"
+                className="inline-flex items-center gap-2 bg-purple-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-purple-700 transition-all"
               >
                 Start Selling Tickets
               </Link>

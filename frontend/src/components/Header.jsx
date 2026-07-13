@@ -62,6 +62,7 @@ function Header() {
         <nav className="hidden lg:flex items-center text-[15px] font-light tracking-wide text-zinc-300">
           <Link to="/events" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors font-light">Discover events</Link>
           <Link to="/find-tickets" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors font-light">Find my tickets</Link>
+          <Link to="/#pricing" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors font-light">Pricing</Link>
           {!isAuthenticated && (
             <Link to="/organizer/login" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors font-light">Create event</Link>
           )}
@@ -167,6 +168,13 @@ function Header() {
                   onClick={() => setIsOpen(false)}
                 >
                   Find my tickets
+                </Link>
+                <Link
+                  to="/#pricing"
+                  className="block px-4 py-3 text-sm font-light tracking-wide text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Pricing
                 </Link>
 
                 {!isAuthenticated ? (
