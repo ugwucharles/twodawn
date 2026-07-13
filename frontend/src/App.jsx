@@ -8,7 +8,6 @@ import FindTickets from './pages/FindTickets'
 import Checkout from './pages/Checkout'
 import OrderConfirmation from './pages/OrderConfirmation'
 import PaymentSuccess from './pages/PaymentSuccess'
-import Pricing from './pages/Pricing'
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminActivity from './pages/admin/Activity'
 import AdminEvents from './pages/admin/Events'
@@ -73,7 +72,6 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/organizer/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/pricing" element={<Pricing />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/ucc/login" element={<AdminLogin />} />
         <Route path="/ucc" element={<AdminLayout />}>

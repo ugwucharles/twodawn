@@ -138,7 +138,7 @@ function Login() {
               </Link>
             </p>
             <p className="text-gray-500 text-sm mt-2">
-              <Link to="/pricing" className="text-gray-400 hover:text-[#8b5cf6] font-medium">
+              <Link to="/#pricing" className="text-gray-400 hover:text-[#8b5cf6] font-medium">
                 View pricing
               </Link>
             </p>
