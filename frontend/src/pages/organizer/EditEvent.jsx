@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from '../services/api';
+import axios from '../../services/api';
 import { ArrowLeft } from 'lucide-react';
 
 function EditEvent() {
