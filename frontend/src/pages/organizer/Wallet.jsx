@@ -151,12 +151,6 @@ function OrganizerWallet() {
       <div className="bg-white rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-purple-200 mb-10">
         <h2 className="text-xl font-black text-gray-900 mb-6">Request Withdrawal</h2>
         
-        {wallet.available_for_withdrawal < 100 && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 mb-6">
-            <p className="text-sm font-semibold text-yellow-800">Minimum withdrawal amount is ₦100. You need more ended events to withdraw.</p>
-          </div>
-        )}
-
         <form onSubmit={handleWithdrawalSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -165,12 +159,11 @@ function OrganizerWallet() {
                 type="number"
                 value={withdrawalForm.amount}
                 onChange={(e) => setWithdrawalForm({ ...withdrawalForm, amount: e.target.value })}
-                min="100"
+                min="0.01"
                 max={wallet.available_for_withdrawal}
                 step="0.01"
                 className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                 placeholder="Enter amount"
-                disabled={wallet.available_for_withdrawal < 100}
                 required
               />
               <p className="text-xs text-gray-500 mt-1">Maximum: ₦{wallet.available_for_withdrawal.toFixed(2)}</p>
@@ -183,7 +176,6 @@ function OrganizerWallet() {
                   value={withdrawalForm.bank_code}
                   onChange={handleBankChange}
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm bg-white"
-                  disabled={wallet.available_for_withdrawal < 100}
                   required
                 >
                   <option value="">-- Choose Bank --</option>
@@ -203,7 +195,7 @@ function OrganizerWallet() {
                   onChange={handleAccountNumberChange}
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
                   placeholder="e.g. 0123456789"
-                  disabled={wallet.available_for_withdrawal < 100 || !withdrawalForm.bank_code}
+                  disabled={!withdrawalForm.bank_code}
                   required
                 />
               </div>
@@ -238,7 +230,7 @@ function OrganizerWallet() {
           </div>
           <button
             type="submit"
-            disabled={submitting || wallet.available_for_withdrawal < 100}
+            disabled={submitting}
             className="mt-6 px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? 'Submitting...' : 'Submit Withdrawal Request'}

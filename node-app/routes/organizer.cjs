@@ -245,8 +245,8 @@ function createOrganizerRouter() {
       }
 
       const amountNumber = parseFloat(amount);
-      if (isNaN(amountNumber) || amountNumber < 100) {
-        return res.status(400).json({ ok: false, error: 'validation', message: 'Amount must be at least ₦100' });
+      if (isNaN(amountNumber) || amountNumber <= 0) {
+        return res.status(400).json({ ok: false, error: 'validation', message: 'Amount must be greater than 0' });
       }
 
       const { getOrganizerStats } = require('../models/organizerModel.cjs');
