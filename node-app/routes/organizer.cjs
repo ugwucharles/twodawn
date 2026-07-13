@@ -679,6 +679,12 @@ function createOrganizerRouter() {
       
       console.log('PATCH event: Update data received:', { title, custom_slug, use_custom_slug, must_know });
 
+      // Handle slug update - if custom_slug is provided, use it; otherwise keep existing slug
+      let newSlug = event.slug;
+      if (custom_slug && custom_slug.trim()) {
+        newSlug = custom_slug.trim();
+      }
+
       await query(`
         UPDATE events 
         SET title = ?, description = ?, must_know = ?, venue = ?, state = ?,
@@ -696,7 +702,7 @@ function createOrganizerRouter() {
         price !== undefined && price !== '' ? price : event.price,
         capacity !== undefined && capacity !== '' ? capacity : event.capacity,
         pass_fees_to_buyer !== undefined ? (pass_fees_to_buyer ? 1 : 0) : event.pass_fees_to_buyer,
-        custom_slug && custom_slug.trim() ? custom_slug : event.slug,
+        newSlug,
         use_custom_slug !== undefined ? (use_custom_slug ? 1 : 0) : event.use_custom_slug,
         eventId
       ]);
