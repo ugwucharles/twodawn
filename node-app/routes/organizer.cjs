@@ -679,18 +679,22 @@ function createOrganizerRouter() {
         return res.status(403).json({ ok: false, error: 'You do not have permission to update this event' });
       }
 
-      // Handle uploaded files
+      // Handle uploaded files - only update if files were actually uploaded
       let imagePath = event.image_path;
       if (req.files && req.files.image && req.files.image[0]) {
         imagePath = req.files.image[0].path;
       }
 
-      // Handle gallery uploads
+      // Handle gallery uploads - only update if files were actually uploaded
       let galleryImages = [];
       if (event.gallery) {
         try {
           galleryImages = typeof event.gallery === 'string' ? JSON.parse(event.gallery) : event.gallery;
+          if (!Array.isArray(galleryImages)) {
+            galleryImages = [];
+          }
         } catch (e) {
+          console.error('Error parsing existing gallery:', e);
           galleryImages = [];
         }
       }
@@ -700,8 +704,17 @@ function createOrganizerRouter() {
         galleryImages = [...galleryImages, ...newGalleryImages];
       }
 
+      // Parse body fields - handle both string and direct values
       const { title, description, must_know, venue, state, starts_at, ends_at, price, capacity, pass_fees_to_buyer, custom_slug, use_custom_slug } = req.body;
-      console.log('PATCH event: Update data received:', { title, custom_slug, use_custom_slug, must_know, gallery: galleryImages });
+      
+      console.log('PATCH event: Update data received:', { 
+        title, 
+        custom_slug, 
+        use_custom_slug, 
+        must_know, 
+        gallery: galleryImages,
+        imagePath 
+      });
 
       await query(`
         UPDATE events 
