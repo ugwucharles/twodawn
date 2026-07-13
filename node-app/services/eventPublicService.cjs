@@ -49,6 +49,7 @@ function formatEventForApi(event) {
     mood: event.mood,
     state: event.state,
     image_path: event.image_path,
+    gallery: event.gallery,
     description: event.description,
     must_know: event.must_know,
     capacity: event.capacity,

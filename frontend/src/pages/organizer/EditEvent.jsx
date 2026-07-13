@@ -104,23 +104,37 @@ function EditEvent() {
     setErrors([]);
 
     try {
-      // Send only text fields as JSON
-      const data = {
-        title: formData.title,
-        description: formData.description,
-        must_know: formData.must_know,
-        venue: formData.venue,
-        state: formData.state,
-        starts_at: formData.starts_at,
-        ends_at: formData.ends_at,
-        price: formData.price,
-        capacity: formData.capacity,
-        pass_fees_to_buyer: formData.pass_fees_to_buyer,
-        custom_slug: formData.custom_slug,
-        use_custom_slug: formData.use_custom_slug
-      };
+      const data = new FormData();
+      
+      // Add text fields
+      data.append('title', formData.title);
+      data.append('description', formData.description);
+      data.append('must_know', formData.must_know);
+      data.append('venue', formData.venue);
+      data.append('state', formData.state);
+      data.append('starts_at', formData.starts_at);
+      data.append('ends_at', formData.ends_at);
+      data.append('price', formData.price);
+      data.append('capacity', formData.capacity);
+      data.append('pass_fees_to_buyer', formData.pass_fees_to_buyer);
+      data.append('custom_slug', formData.custom_slug);
+      data.append('use_custom_slug', formData.use_custom_slug);
+      
+      // Add main image if provided
+      if (formData.image) {
+        data.append('image', formData.image);
+      }
+      
+      // Add gallery images if provided
+      if (formData.gallery && formData.gallery.length > 0) {
+        formData.gallery.forEach((file) => {
+          data.append('gallery', file);
+        });
+      }
 
-      await axios.patch(`/organizer/events/${id}`, data);
+      await axios.patch(`/organizer/events/${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       navigate(`/organizer/events/${id}`);
     } catch (err) {
       console.error('Failed to update event', err);
