@@ -32,6 +32,17 @@ const uploadStorage = new CloudinaryStorage({
 
 const upload = multer({ storage: uploadStorage });
 
+// Configure upload storage for gallery images using Cloudinary
+const galleryStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'events/gallery',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+  },
+});
+
+const galleryUpload = multer({ storage: galleryStorage });
+
 // Configure upload storage for profile pictures using Cloudinary
 const profilePicStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -641,7 +652,10 @@ function createOrganizerRouter() {
   });
 
   // PATCH /organizer/events/:id - update event
-  router.patch('/events/:id', async (req, res) => {
+  router.patch('/events/:id', upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'gallery', maxCount: 10 }
+  ]), async (req, res) => {
     try {
       console.log('PATCH event: Request received for ID:', req.params.id);
       console.log('PATCH event: Auth status:', req.auth ? 'present' : 'missing', 'isAuthenticated:', req.auth?.isAuthenticated);
@@ -663,14 +677,35 @@ function createOrganizerRouter() {
         return res.status(403).json({ ok: false, error: 'You do not have permission to update this event' });
       }
 
+      // Handle uploaded files
+      let imagePath = event.image_path;
+      if (req.files && req.files.image && req.files.image[0]) {
+        imagePath = req.files.image[0].path;
+      }
+
+      // Handle gallery uploads
+      let galleryImages = [];
+      if (event.gallery) {
+        try {
+          galleryImages = typeof event.gallery === 'string' ? JSON.parse(event.gallery) : event.gallery;
+        } catch (e) {
+          galleryImages = [];
+        }
+      }
+      
+      if (req.files && req.files.gallery && req.files.gallery.length > 0) {
+        const newGalleryImages = req.files.gallery.map(file => file.path);
+        galleryImages = [...galleryImages, ...newGalleryImages];
+      }
+
       const { title, description, must_know, venue, state, starts_at, ends_at, price, capacity, pass_fees_to_buyer, custom_slug, use_custom_slug } = req.body;
-      console.log('PATCH event: Update data received:', { title, custom_slug, use_custom_slug, must_know });
+      console.log('PATCH event: Update data received:', { title, custom_slug, use_custom_slug, must_know, gallery: galleryImages });
 
       await query(`
         UPDATE events 
         SET title = ?, description = ?, must_know = ?, venue = ?, state = ?,
             starts_at = ?, ends_at = ?, price = ?, capacity = ?, pass_fees_to_buyer = ?,
-            slug = ?, use_custom_slug = ?, updated_at = datetime('now')
+            slug = ?, use_custom_slug = ?, image_path = ?, gallery = ?, updated_at = datetime('now')
         WHERE id = ?
       `, [
         title || event.title,
@@ -685,6 +720,8 @@ function createOrganizerRouter() {
         pass_fees_to_buyer !== undefined ? (pass_fees_to_buyer ? 1 : 0) : event.pass_fees_to_buyer,
         custom_slug || event.slug,
         use_custom_slug !== undefined ? (use_custom_slug ? 1 : 0) : event.use_custom_slug,
+        imagePath,
+        JSON.stringify(galleryImages),
         eventId
       ]);
 

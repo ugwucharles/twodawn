@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { getEventById, getEventBySlug } from '../services/events'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import ImageCarousel from '../components/ImageCarousel'
 import { getEventImage } from '../utils/image'
 import { formatPrice } from '../utils/price'
 
@@ -181,6 +182,22 @@ function EventDetail() {
   const isSoldOut = event.capacity !== null && event.capacity <= 0
   const isEnded = event.ends_at ? new Date(event.ends_at) < new Date() : false
   const hasTicketTypes = event.ticket_types && event.ticket_types.length > 0
+  
+  // Prepare images for carousel
+  const carouselImages = []
+  if (eventImage) {
+    carouselImages.push(eventImage)
+  }
+  if (event.gallery) {
+    try {
+      const gallery = typeof event.gallery === 'string' ? JSON.parse(event.gallery) : event.gallery
+      if (Array.isArray(gallery)) {
+        carouselImages.push(...gallery)
+      }
+    } catch (e) {
+      console.error('Error parsing gallery:', e)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -205,12 +222,8 @@ function EventDetail() {
             <div className="lg:col-span-2">
               <div className="sticky top-8">
                 <div className="relative rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-purple-100 to-purple-50 aspect-[3/4]">
-                  {eventImage ? (
-                    <img
-                      src={eventImage}
-                      alt={event.title}
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
+                  {carouselImages.length > 0 ? (
+                    <ImageCarousel images={carouselImages} autoRotate={true} interval={5000} />
                   ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-[#8b5cf6]/10 to-purple-100">
                       <div className="w-16 h-16 rounded-full bg-[#8b5cf6]/20 flex items-center justify-center">

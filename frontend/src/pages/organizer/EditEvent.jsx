@@ -19,7 +19,8 @@ function EditEvent() {
     pass_fees_to_buyer: false,
     custom_slug: '',
     use_custom_slug: false,
-    image: null
+    image: null,
+    gallery: []
   });
   const [errors, setErrors] = useState([]);
   const [submitting, setSubmitting] = useState(false);
@@ -104,10 +105,17 @@ function EditEvent() {
 
     try {
       const data = new FormData();
+      
+      // Handle regular fields
       Object.keys(formData).forEach(key => {
         if (key === 'image' && formData[key]) {
           data.append(key, formData[key]);
-        } else if (key !== 'image') {
+        } else if (key === 'gallery' && formData[key] && formData[key].length > 0) {
+          // Handle multiple gallery files
+          formData[key].forEach((file, index) => {
+            data.append(`gallery[${index}]`, file);
+          });
+        } else if (key !== 'image' && key !== 'gallery') {
           data.append(key, formData[key]);
         }
       });
@@ -205,12 +213,11 @@ function EditEvent() {
           </div>
 
           <div>
-            <label htmlFor="state" className="block text-sm font-semibold text-gray-700 mb-2">State *</label>
+            <label htmlFor="state" className="block text-sm font-semibold text-gray-700 mb-2">State</label>
             <select
               id="state"
               value={formData.state}
               onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-              required
               className="block w-full rounded-xl border border-gray-200 bg-white text-gray-900 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 px-5 py-3.5 text-sm shadow-sm transition-all"
             >
               <option value="">Select State</option>
@@ -221,13 +228,12 @@ function EditEvent() {
           </div>
 
           <div>
-            <label htmlFor="venue" className="block text-sm font-semibold text-gray-700 mb-2">Venue / Location *</label>
+            <label htmlFor="venue" className="block text-sm font-semibold text-gray-700 mb-2">Venue / Location</label>
             <input
               id="venue"
               type="text"
               value={formData.venue}
               onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-              required
               className="block w-full rounded-xl border border-gray-200 bg-white text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 px-5 py-3.5 text-sm shadow-sm transition-all"
               placeholder="e.g. Eko Hotel, Victoria Island"
             />
@@ -235,19 +241,39 @@ function EditEvent() {
         </div>
 
         <div className="bg-white rounded-2xl p-8 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-purple-200 space-y-6">
-          <h2 className="text-base font-bold text-gray-900 pb-2 border-b border-gray-100">Event Flyer</h2>
+          <h2 className="text-base font-bold text-gray-900 pb-2 border-b border-gray-100">Event Flyers (Multiple)</h2>
+          <p className="text-xs text-gray-500">Upload multiple flyers. They will auto-rotate every 5 seconds on the event page.</p>
+          
           {currentImage && (
             <div className="mb-4">
+              <p className="text-sm font-medium text-gray-700 mb-2">Current Main Flyer:</p>
               <img src={currentImage} alt="Current flyer" className="max-w-full h-auto rounded-lg" />
             </div>
           )}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
-            className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-          />
-          <p className="text-xs text-gray-500 mt-1">Upload a new flyer to replace the existing one</p>
+          
+          <div>
+            <label htmlFor="image" className="block text-sm font-semibold text-gray-700 mb-2">Main Flyer</label>
+            <input
+              id="image"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
+              className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="gallery" className="block text-sm font-semibold text-gray-700 mb-2">Additional Flyers (Optional)</label>
+            <input
+              id="gallery"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => setFormData({ ...formData, gallery: Array.from(e.target.files) })}
+              className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+            />
+            <p className="text-xs text-gray-500 mt-1">Select multiple images to add to the gallery</p>
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl p-8 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-purple-200 space-y-6">
@@ -255,13 +281,12 @@ function EditEvent() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="starts_at" className="block text-sm font-semibold text-gray-700 mb-2">Event Date & Time *</label>
+              <label htmlFor="starts_at" className="block text-sm font-semibold text-gray-700 mb-2">Event Date & Time</label>
               <input
                 id="starts_at"
                 type="datetime-local"
                 value={formData.starts_at}
                 onChange={(e) => setFormData({ ...formData, starts_at: e.target.value })}
-                required
                 className="block w-full rounded-xl border border-gray-200 bg-white text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 px-5 py-3.5 text-sm shadow-sm transition-all"
               />
             </div>
