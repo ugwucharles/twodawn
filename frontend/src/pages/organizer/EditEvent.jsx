@@ -104,25 +104,23 @@ function EditEvent() {
     setErrors([]);
 
     try {
-      const data = new FormData();
-      
-      // Handle regular fields
-      Object.keys(formData).forEach(key => {
-        if (key === 'image' && formData[key]) {
-          data.append(key, formData[key]);
-        } else if (key === 'gallery' && formData[key] && formData[key].length > 0) {
-          // Handle multiple gallery files
-          formData[key].forEach((file, index) => {
-            data.append(`gallery[${index}]`, file);
-          });
-        } else if (key !== 'image' && key !== 'gallery') {
-          data.append(key, formData[key]);
-        }
-      });
+      // Send only text fields as JSON
+      const data = {
+        title: formData.title,
+        description: formData.description,
+        must_know: formData.must_know,
+        venue: formData.venue,
+        state: formData.state,
+        starts_at: formData.starts_at,
+        ends_at: formData.ends_at,
+        price: formData.price,
+        capacity: formData.capacity,
+        pass_fees_to_buyer: formData.pass_fees_to_buyer,
+        custom_slug: formData.custom_slug,
+        use_custom_slug: formData.use_custom_slug
+      };
 
-      await axios.patch(`/organizer/events/${id}`, data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await axios.patch(`/organizer/events/${id}`, data);
       navigate(`/organizer/events/${id}`);
     } catch (err) {
       console.error('Failed to update event', err);
