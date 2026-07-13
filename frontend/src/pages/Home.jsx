@@ -533,109 +533,155 @@ function Home() {
         </section>
 
         {/* Pricing Section */}
-        <section id="pricing" className="py-16 bg-gradient-to-br from-purple-50 via-white to-blue-50">
+        <section id="pricing" className="py-20 bg-white">
           <div className="max-w-6xl mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-                Simple, Transparent Pricing
+            <div className="text-center mb-16">
+              <span className="inline-block px-4 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold mb-4">
+                Simple Pricing
+              </span>
+              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+                One Fee. No Surprises.
               </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Focus on creating amazing events. We handle the rest with a simple fee structure.
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                10% + ₦100 per ticket. That's it. No monthly fees, no hidden costs.
               </p>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-2xl border border-purple-100 overflow-hidden max-w-3xl mx-auto">
-              <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-6 text-white">
-                <h3 className="text-2xl font-bold">Platform Fee</h3>
-                <p className="text-purple-100 mt-1">Per ticket sold</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+              {/* Fee Card */}
+              <div className="md:col-span-2 bg-gradient-to-br from-purple-600 to-blue-600 rounded-3xl p-8 text-white shadow-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold">Platform Fee</h3>
+                  <span className="px-3 py-1 bg-white/20 rounded-full text-sm">Per Ticket</span>
+                </div>
+                
+                <div className="mb-8">
+                  <div className="text-6xl font-bold mb-2">10% + ₦100</div>
+                  <p className="text-purple-100 text-lg">of ticket price</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-3 border-b border-white/20">
+                    <span className="text-purple-100">₦1,000 ticket</span>
+                    <span className="font-bold">₦200 fee</span>
+                  </div>
+                  <div className="flex items-center justify-between py-3 border-b border-white/20">
+                    <span className="text-purple-100">₦5,000 ticket</span>
+                    <span className="font-bold">₦600 fee</span>
+                  </div>
+                  <div className="flex items-center justify-between py-3">
+                    <span className="text-purple-100">₦10,000 ticket</span>
+                    <span className="font-bold">₦1,100 fee</span>
+                  </div>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-white/20">
+                  <p className="text-purple-100 text-sm mb-4">Choose how to handle the fee:</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white/10 rounded-xl p-3 text-center">
+                      <div className="font-semibold text-sm">Pass to Buyer</div>
+                      <div className="text-xs text-purple-100 mt-1">Added to ticket price</div>
+                    </div>
+                    <div className="bg-white/10 rounded-xl p-3 text-center">
+                      <div className="font-semibold text-sm">Pay from Earnings</div>
+                      <div className="text-xs text-purple-100 mt-1">Deducted from payout</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              
-              <div className="p-8">
-                <div className="text-center mb-8">
-                  <div className="text-5xl font-bold text-gray-900 mb-2">
-                    10% + ₦100
-                  </div>
-                  <p className="text-gray-600">of ticket price</p>
-                </div>
 
-                <div className="bg-purple-50 rounded-2xl p-6 mb-8">
-                  <h4 className="font-semibold text-gray-900 mb-4">Fee Examples</h4>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center py-2 border-b border-purple-200">
-                      <span className="text-gray-700">₦1,000 ticket</span>
-                      <span className="font-semibold text-gray-900">₦200 fee</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-purple-200">
-                      <span className="text-gray-700">₦5,000 ticket</span>
-                      <span className="font-semibold text-gray-900">₦600 fee</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-gray-700">₦10,000 ticket</span>
-                      <span className="font-semibold text-gray-900">₦1,100 fee</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                  <div className="bg-gray-50 rounded-xl p-4 text-center">
-                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {/* Features Card */}
+              <div className="bg-gray-50 rounded-3xl p-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">What's Included</h3>
+                
+                <div className="space-y-5">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                     </div>
-                    <h5 className="font-semibold text-gray-900 text-sm">Instant Setup</h5>
-                    <p className="text-xs text-gray-600 mt-1">Create events in minutes</p>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Instant Setup</h4>
+                      <p className="text-sm text-gray-600 mt-1">Create events in minutes</p>
+                    </div>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4 text-center">
-                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                       </svg>
                     </div>
-                    <h5 className="font-semibold text-gray-900 text-sm">Secure Payments</h5>
-                    <p className="text-xs text-gray-600 mt-1">Protected transactions</p>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Secure Payments</h4>
+                      <p className="text-sm text-gray-600 mt-1">Protected transactions</p>
+                    </div>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4 text-center">
-                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                       </svg>
                     </div>
-                    <h5 className="font-semibold text-gray-900 text-sm">24/7 Support</h5>
-                    <p className="text-xs text-gray-600 mt-1">Always here to help</p>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">24/7 Support</h4>
+                      <p className="text-sm text-gray-600 mt-1">Always here to help</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Fast Payouts</h4>
+                      <p className="text-sm text-gray-600 mt-1">Withdraw anytime</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Free Events</h4>
+                      <p className="text-sm text-gray-600 mt-1">No fee for free tickets</p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="text-center">
+                <div className="mt-8 pt-6 border-t border-gray-200">
                   <Link
                     to="/register"
-                    className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transition-all"
+                    className="block w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all text-center"
                   >
                     Start Selling Tickets
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
                   </Link>
-                  <p className="text-sm text-gray-500 mt-3">No hidden fees. No monthly costs.</p>
                 </div>
               </div>
             </div>
 
             {/* FAQ */}
-            <div className="max-w-3xl mx-auto mt-12">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">Frequently Asked Questions</h3>
+            <div className="max-w-3xl mx-auto">
+              <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Common Questions</h3>
               <div className="space-y-4">
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="bg-gray-50 rounded-2xl p-6">
                   <h4 className="font-semibold text-gray-900 mb-2">Is there a monthly fee?</h4>
-                  <p className="text-gray-600 text-sm">No! You only pay when you sell tickets. No monthly subscription or hidden costs.</p>
+                  <p className="text-gray-600">No! You only pay when you sell tickets. No monthly subscription or hidden costs.</p>
                 </div>
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="bg-gray-50 rounded-2xl p-6">
                   <h4 className="font-semibold text-gray-900 mb-2">When do I get paid?</h4>
-                  <p className="text-gray-600 text-sm">Payouts are processed automatically after your event ends. You can withdraw your earnings anytime.</p>
+                  <p className="text-gray-600">Payouts are processed automatically after your event ends. You can withdraw your earnings anytime.</p>
                 </div>
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="bg-gray-50 rounded-2xl p-6">
                   <h4 className="font-semibold text-gray-900 mb-2">Can I offer free tickets?</h4>
-                  <p className="text-gray-600 text-sm">Yes! Free events have no platform fee. You only pay when selling paid tickets.</p>
+                  <p className="text-gray-600">Yes! Free events have no platform fee. You only pay when selling paid tickets.</p>
                 </div>
               </div>
             </div>
