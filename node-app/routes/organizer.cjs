@@ -731,7 +731,9 @@ function createOrganizerRouter() {
       });
     } catch (error) {
       console.error('Update event error:', error);
-      return res.status(500).json({ ok: false, error: 'Failed to update event' });
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
+      return res.status(500).json({ ok: false, error: 'Failed to update event', details: error.message });
     }
   });
 
