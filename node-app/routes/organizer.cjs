@@ -659,6 +659,8 @@ function createOrganizerRouter() {
     try {
       console.log('PATCH event: Request received for ID:', req.params.id);
       console.log('PATCH event: Auth status:', req.auth ? 'present' : 'missing', 'isAuthenticated:', req.auth?.isAuthenticated);
+      console.log('PATCH event: Files received:', req.files);
+      console.log('PATCH event: Body received:', req.body);
       
       if (!req.auth || !req.auth.isAuthenticated) {
         console.log('PATCH event: Unauthenticated request');
