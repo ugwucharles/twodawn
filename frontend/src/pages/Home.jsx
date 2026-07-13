@@ -300,11 +300,16 @@ function Home() {
               ) : (
                 <Link
                   to="/organizer/login"
-                  className="flex items-center rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-black hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 overflow-hidden group h-32"
+                  className="flex items-center rounded-2xl bg-white border-2 border-dashed border-purple-300 hover:border-purple-400 hover:shadow-lg transition-all duration-300 overflow-hidden group h-32"
                 >
                   <div className="flex-1 p-6 flex flex-col justify-center items-center text-center">
-                    <h3 className="text-lg font-bold text-white mb-1">Create Your Event Now</h3>
-                    <p className="text-xs text-white/80">Start selling tickets for your unforgettable experiences</p>
+                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <h3 className="text-base font-bold text-gray-900 mb-1">Create Your Event</h3>
+                    <p className="text-xs text-gray-500">Start selling tickets today</p>
                   </div>
                 </Link>
               )}
@@ -519,11 +524,16 @@ function Home() {
               ) : (
                 <Link
                   to="/organizer/login"
-                  className="flex items-center rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-black hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 overflow-hidden group h-32"
+                  className="flex items-center rounded-2xl bg-white border-2 border-dashed border-purple-300 hover:border-purple-400 hover:shadow-lg transition-all duration-300 overflow-hidden group h-32"
                 >
                   <div className="flex-1 p-6 flex flex-col justify-center items-center text-center">
-                    <h3 className="text-lg font-bold text-white mb-1">Create Your Event Now</h3>
-                    <p className="text-xs text-white/80">Start selling tickets for your unforgettable experiences</p>
+                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <h3 className="text-base font-bold text-gray-900 mb-1">Create Your Event</h3>
+                    <p className="text-xs text-gray-500">Start selling tickets today</p>
                   </div>
                 </Link>
               )}

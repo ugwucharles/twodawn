@@ -59,7 +59,7 @@ function Header() {
         </div>
 
         {/* Center: Desktop Navigation */}
-        <nav className="hidden lg:flex items-center text-[15px] font-light tracking-wide text-zinc-300">
+        <nav className="hidden lg:flex items-center justify-center text-[15px] font-light tracking-wide text-zinc-300">
           <Link to="/events" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors font-light">Discover events</Link>
           <Link to="/find-tickets" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors font-light">Find my tickets</Link>
           <Link to="/#pricing" className="px-3.5 py-2 hover:text-[#7c3aed] transition-colors font-light">Pricing</Link>
