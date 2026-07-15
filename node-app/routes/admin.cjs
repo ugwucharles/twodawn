@@ -22,6 +22,10 @@ const {
 const { proxyRequest } = require('../services/proxyRequest.cjs');
 const { isJsonRequest } = require('../lib/authHttp.cjs');
 const { attachSessionUser, requireAdmin } = require('../services/sessionAuth.cjs');
+const { sendTicketEmail } = require('../services/emailService.cjs');
+const { findOrderByReference } = require('../models/orderModel.cjs');
+const { findEventById } = require('../models/eventModel.cjs');
+const { query } = require('../db/client.cjs');
 
 function createAdminRouter() {
   const router = express.Router();
@@ -457,6 +461,75 @@ function createAdminRouter() {
     } catch (error) {
       console.error('Reject withdrawal error:', error);
       return res.status(500).json({ ok: false, error: 'Failed to reject withdrawal' });
+    }
+  });
+
+  // POST /admin/orders/:reference/resend-email - resend ticket email for a specific order
+  router.post('/orders/:reference/resend-email', async (req, res) => {
+    try {
+      const order = await findOrderByReference(req.params.reference);
+      if (!order) return res.status(404).json({ ok: false, error: 'Order not found' });
+      if (!order.buyer_email) return res.status(400).json({ ok: false, error: 'Order has no buyer email' });
+      if (order.status !== 'paid' && order.status !== 'confirmed' && order.status !== 'used') {
+        return res.status(400).json({ ok: false, error: `Cannot resend for order with status: ${order.status}` });
+      }
+
+      const event = await findEventById(order.event_id);
+      if (!event) return res.status(404).json({ ok: false, error: 'Event not found' });
+
+      const result = await sendTicketEmail(order, event);
+      if (result.success) {
+        console.log(`✉️ Admin resent ticket email to ${order.buyer_email} for order ${order.paystack_reference}`);
+        return res.json({ ok: true, message: `Ticket email sent to ${order.buyer_email}`, messageId: result.messageId });
+      } else {
+        return res.status(500).json({ ok: false, error: result.error || 'Failed to send email' });
+      }
+    } catch (error) {
+      console.error('Resend email error:', error);
+      return res.status(500).json({ ok: false, error: error.message });
+    }
+  });
+
+  // POST /admin/events/:id/resend-all-emails - resend ticket emails for ALL paid orders for an event
+  router.post('/events/:id/resend-all-emails', async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id, 10);
+      const event = await findEventById(eventId);
+      if (!event) return res.status(404).json({ ok: false, error: 'Event not found' });
+
+      const orders = await query(
+        `SELECT * FROM orders WHERE event_id = ? AND status IN ('paid','confirmed','used') AND buyer_email IS NOT NULL`,
+        [eventId]
+      );
+
+      if (!orders || orders.length === 0) {
+        return res.json({ ok: true, message: 'No paid orders found for this event', sent: 0, failed: 0 });
+      }
+
+      let sent = 0;
+      let failed = 0;
+      const errors = [];
+
+      for (const order of orders) {
+        try {
+          const result = await sendTicketEmail(order, event);
+          if (result.success) {
+            sent++;
+            console.log(`✉️ Resent to ${order.buyer_email}`);
+          } else {
+            failed++;
+            errors.push({ email: order.buyer_email, error: result.error });
+          }
+        } catch (e) {
+          failed++;
+          errors.push({ email: order.buyer_email, error: e.message });
+        }
+      }
+
+      return res.json({ ok: true, message: `Sent ${sent} emails, ${failed} failed`, sent, failed, errors });
+    } catch (error) {
+      console.error('Resend all emails error:', error);
+      return res.status(500).json({ ok: false, error: error.message });
     }
   });
 

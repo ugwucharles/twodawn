@@ -14,23 +14,28 @@ function escapeHtml(value) {
 let transporter = null;
 
 function getTransporter() {
-  if (!transporter) {
-    const encryption = String(process.env.MAIL_ENCRYPTION || '').toLowerCase();
-    transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST || 'smtp.mailtrap.io',
-      port: parseInt(process.env.MAIL_PORT || '2525', 10),
-      secure: encryption === 'ssl',
-      requireTLS: encryption === 'tls',
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
-      auth: {
-        user: process.env.MAIL_USERNAME,
-        pass: process.env.MAIL_PASSWORD,
-      },
-    });
-  }
-  return transporter;
+  // In serverless environments, always create a fresh transporter
+  // Cached connections go stale between invocations
+  const encryption = String(process.env.MAIL_ENCRYPTION || '').toLowerCase();
+  const port = parseInt(process.env.MAIL_PORT || '465', 10);
+  const isSSL = encryption === 'ssl' || port === 465;
+  const t = nodemailer.createTransport({
+    host: process.env.MAIL_HOST || 'smtp.mailtrap.io',
+    port,
+    secure: isSSL,
+    requireTLS: encryption === 'tls',
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
+    auth: {
+      user: process.env.MAIL_USERNAME,
+      pass: process.env.MAIL_PASSWORD,
+    },
+    tls: {
+      rejectUnauthorized: false, // Some hosting providers use self-signed certs
+    },
+  });
+  return t;
 }
 
 function logEmailToFile({ to, subject, html }) {

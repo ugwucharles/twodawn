@@ -1,10 +1,9 @@
 const https = require('https');
 
-// Update event 11 slug via API
+// Check event 11 details including slug
 const EVENT_ID = 11;
-const SLUG = 'afterdarkhouseparty';
 
-function makeRequest(method, path, data, token) {
+function makeRequest(method, path, data) {
   return new Promise((resolve, reject) => {
     const postData = data ? JSON.stringify(data) : null;
     
@@ -18,10 +17,6 @@ function makeRequest(method, path, data, token) {
         'Accept': 'application/json',
       }
     };
-
-    if (token) {
-      options.headers['Authorization'] = `Bearer ${token}`;
-    }
 
     if (postData) {
       options.headers['Content-Length'] = Buffer.byteLength(postData);
@@ -55,25 +50,28 @@ function makeRequest(method, path, data, token) {
   });
 }
 
-async function updateEventSlug() {
+async function checkEvent() {
   try {
-    console.log('🔍 Updating event 11 slug to:', SLUG);
-    console.log('⚠️  This requires authentication token');
-    console.log('💡 Please provide your auth token or update via organizer dashboard');
+    console.log('🔍 Checking event ID:', EVENT_ID);
     
-    // For now, let's just inform the user
-    console.log('\n❌ Database credentials expired');
-    console.log('💡 Please update the slug via the organizer dashboard:');
-    console.log('   1. Go to https://twodawn.com.ng/organizer/events/11/edit');
-    console.log('   2. Enable "Use custom URL slug"');
-    console.log('   3. Set custom slug to: afterdarkhouseparty');
-    console.log('   4. Save the event');
+    const response = await makeRequest('GET', `/api/v1/events/${EVENT_ID}`);
     
-    process.exit(0);
+    console.log('📊 Response status:', response.statusCode);
+    console.log('📦 Event data:', JSON.stringify(response.data, null, 2));
+    
+    if (response.statusCode === 200 && response.data.ok) {
+      const event = response.data.event;
+      console.log('✅ Event found!');
+      console.log('📅 Title:', event.title);
+      console.log('🔗 Slug:', event.slug || 'NOT SET');
+      console.log('🎯 Use Custom Slug:', event.use_custom_slug);
+      console.log('🌐 URL:', event.url);
+    } else {
+      console.log('❌ Event not found');
+    }
   } catch (error) {
     console.error('❌ Error:', error.message);
-    process.exit(1);
   }
 }
 
-updateEventSlug();
+checkEvent();

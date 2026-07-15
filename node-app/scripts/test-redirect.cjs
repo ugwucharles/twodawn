@@ -10,7 +10,8 @@ function testRedirect(url) {
       path: urlObj.pathname + urlObj.search,
       method: 'GET',
       headers: {
-        'User-Agent': 'Mozilla/5.0'
+        'User-Agent': 'Mozilla/5.0',
+        'Accept': 'application/json'
       }
     };
 
@@ -32,15 +33,15 @@ function testRedirect(url) {
 
 async function testRedirects() {
   try {
-    console.log('🧪 Testing redirect from /events/11 to custom slug...');
+    console.log('🧪 Testing redirect from /events/11 to custom slug (API)...');
     
-    const response = await testRedirect('https://twodawn.com.ng/events/11');
+    const response = await testRedirect('https://api.twodawn.com.ng/events/11');
     
     console.log('📊 Status Code:', response.statusCode);
     console.log('🔗 Location Header:', response.location || 'No redirect');
     
     if (response.statusCode === 200) {
-      console.log('❌ No redirect - page loads normally');
+      console.log('❌ No redirect - API returns 200');
     } else if (response.statusCode >= 300 && response.statusCode < 400) {
       console.log('✅ Redirect detected!');
       console.log('🎯 Redirects to:', response.location);

@@ -126,8 +126,15 @@ async function finalizePayment(reference) {
     return { success: false, error: 'Order not found' };
   }
 
-  // Idempotency: if already paid, return success
-  if (order.status === 'paid') {
+  // Idempotency: if already paid, still try to send email in case it failed before
+  // (serverless functions can be killed mid-flight before email sends)
+  if (order.status === 'paid' || order.status === 'confirmed') {
+    try {
+      const event = await findEventById(order.event_id);
+      if (event && order.buyer_email) {
+        queueTicketEmail(order, event);
+      }
+    } catch (_) { /* non-fatal */ }
     return { success: true, order };
   }
 
@@ -135,12 +142,21 @@ async function finalizePayment(reference) {
     const transaction = await verifyPaystackTransaction(reference);
 
     const status = transaction.status;
-    const amount = transaction.amount;
+    const paidAmount = transaction.amount; // in kobo
     const currency = transaction.currency;
 
-    if (status !== 'success' || amount !== order.amount || currency !== 'NGN') {
+    // Only verify status and currency — don't block on amount mismatch
+    // (Paystack may charge slightly different due to rounding, or order.amount may be 0 for promo orders)
+    if (status !== 'success' || currency !== 'NGN') {
       await updateOrderStatusByReference(reference, 'failed');
-      return { success: false, error: 'Payment verification failed' };
+      return { success: false, error: `Payment verification failed: status=${status}, currency=${currency}` };
+    }
+
+    // If order.amount is set but paid amount is significantly less, that's fraud
+    if (order.amount > 0 && paidAmount < order.amount * 0.99) {
+      console.error(`⚠️ Amount mismatch: expected ${order.amount} kobo, got ${paidAmount} kobo for ${reference}`);
+      await updateOrderStatusByReference(reference, 'failed');
+      return { success: false, error: 'Payment amount mismatch' };
     }
 
     // Safely mark paid and reduce capacity without overselling
@@ -152,14 +168,20 @@ async function finalizePayment(reference) {
 
     const updatedOrder = await updateOrderStatusByReference(reference, 'paid');
 
-    // Send ticket email
-    const event = await findEventById(order.event_id);
-    if (event) {
-      queueTicketEmail(updatedOrder, event);
+    // Send ticket email — wrap in try/catch so a mail failure never blocks payment confirmation
+    try {
+      const event = await findEventById(order.event_id);
+      if (event && updatedOrder.buyer_email) {
+        await queueTicketEmail(updatedOrder, event);
+        console.log(`✉️ Ticket email queued for ${updatedOrder.buyer_email} (${reference})`);
+      }
+    } catch (mailError) {
+      console.error(`⚠️ Failed to queue ticket email for ${reference}:`, mailError.message);
     }
 
     return { success: true, order: updatedOrder };
   } catch (error) {
+    console.error(`❌ finalizePayment error for ${reference}:`, error.message);
     await updateOrderStatusByReference(reference, 'failed');
     return { success: false, error: error.message };
   }
