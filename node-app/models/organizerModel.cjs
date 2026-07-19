@@ -12,8 +12,13 @@ async function getOrganizerStats(userId) {
 
   const rows = await query(`
     SELECT 
-      (SELECT COUNT(*) FROM events WHERE user_id = ? AND deleted_at IS NULL) as total_events,
-      (SELECT COUNT(*) FROM events WHERE user_id = ? AND starts_at > datetime('now') AND deleted_at IS NULL) as upcoming_events
+      (SELECT COUNT(*) FROM events WHERE user_id = ? AND (deleted_at IS NULL OR deleted_at = '')) as total_events,
+      (SELECT COUNT(*) FROM events WHERE user_id = ? 
+        AND (
+          (ends_at IS NOT NULL AND ends_at != '' AND ends_at > datetime('now', '+1 hours'))
+          OR (ends_at IS NULL AND starts_at > datetime('now', '+1 hours'))
+        )
+        AND (deleted_at IS NULL OR deleted_at = '')) as upcoming_events
   `, [id, id]);
 
   const totalEvents = Number(rows[0]?.total_events || 0);
