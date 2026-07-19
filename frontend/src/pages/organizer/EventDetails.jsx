@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { ArrowLeft, ExternalLink, Edit, AlertTriangle, Download, Printer } from 'lucide-react';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
 function EventDetails() {
@@ -253,20 +253,12 @@ function EventDetails() {
           </div>
           <div className="flex gap-3">
             <button
-              onClick={exportAttendees}
-              disabled={orders.length === 0}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl px-4 py-2 shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Download className="w-4 h-4" />
-              Export CSV
-            </button>
-            <button
               onClick={printPDF}
               disabled={orders.length === 0}
               className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-xl px-4 py-2 shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Printer className="w-4 h-4" />
-              Print / Save PDF
+              <Download className="w-4 h-4" />
+              Download PDF
             </button>
           </div>
         </div>
