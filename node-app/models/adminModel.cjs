@@ -46,6 +46,8 @@ async function getAdminStats() {
       (SELECT COALESCE(SUM(quantity), 0) FROM orders WHERE status IN ('paid', 'used') AND date(created_at) = date('now')) as tickets_today,
       (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE status IN ('paid', 'used')) as revenue_total,
       (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE status IN ('paid', 'used') AND date(created_at) = date('now')) as revenue_today,
+      (SELECT COALESCE(SUM(CASE WHEN amount > 0 THEN (amount * 0.10) + (10000 * quantity) ELSE 0 END), 0) FROM orders WHERE status IN ('paid', 'used')) as twodawn_earnings_total,
+      (SELECT COALESCE(SUM(CASE WHEN amount > 0 THEN (amount * 0.10) + (10000 * quantity) ELSE 0 END), 0) FROM orders WHERE status IN ('paid', 'used') AND date(created_at) = date('now')) as twodawn_earnings_today,
       (SELECT COUNT(*) FROM orders WHERE status = 'failed') as payments_failed
   `);
 
@@ -61,6 +63,8 @@ async function getAdminStats() {
     tickets_today: Number(rows[0]?.tickets_today || 0),
     revenue_total: Number(rows[0]?.revenue_total || 0),
     revenue_today: Number(rows[0]?.revenue_today || 0),
+    twodawn_earnings_total: Number(rows[0]?.twodawn_earnings_total || 0),
+    twodawn_earnings_today: Number(rows[0]?.twodawn_earnings_today || 0),
     payments_failed: Number(rows[0]?.payments_failed || 0),
   };
 }

@@ -78,7 +78,7 @@ function AdminAnalytics() {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex items-center space-x-4">
           <div className="p-3 bg-purple-500/10 text-purple-400 rounded-lg">
             <TrendingUp className="w-6 h-6" />
@@ -86,16 +86,6 @@ function AdminAnalytics() {
           <div>
             <p className="text-sm text-gray-400">Average Order Value</p>
             <p className="text-2xl font-bold text-white mt-1">{formatCurrency(avgOrderValue)}</p>
-          </div>
-        </div>
-
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex items-center space-x-4">
-          <div className="p-3 bg-blue-500/10 text-blue-400 rounded-lg">
-            <Ticket className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-400">Tickets per Order</p>
-            <p className="text-2xl font-bold text-white mt-1">{avgTicketsPerOrder} tickets</p>
           </div>
         </div>
 
@@ -110,9 +100,9 @@ function AdminAnalytics() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Sales Funnel Visualizer */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 lg:col-span-2">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-white mb-6">Customer Purchase Journey</h2>
           <div className="space-y-6">
             {funnelItems.map((item, idx) => {
@@ -136,25 +126,6 @@ function AdminAnalytics() {
             })}
           </div>
         </div>
-
-        {/* Ticket Type Distribution */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-white mb-6">Ticket Type Breakdown</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-gray-800/40 rounded-lg">
-              <span className="text-sm text-gray-300">Regular Tickets</span>
-              <span className="text-sm font-semibold text-white">100%</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-800/40 rounded-lg opacity-50">
-              <span className="text-sm text-gray-400">Early Bird</span>
-              <span className="text-sm font-semibold text-gray-400">0%</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-800/40 rounded-lg opacity-50">
-              <span className="text-sm text-gray-400">VIP / Tables</span>
-              <span className="text-sm font-semibold text-gray-400">0%</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Top Events Table */}
@@ -167,6 +138,7 @@ function AdminAnalytics() {
                 <th className="py-3 px-4">Event Title</th>
                 <th className="py-3 px-4">Venue</th>
                 <th className="py-3 px-4">Capacity</th>
+                <th className="py-3 px-4">Tickets Sold</th>
                 <th className="py-3 px-4 font-semibold text-white">Gross Revenue</th>
               </tr>
             </thead>
@@ -177,12 +149,13 @@ function AdminAnalytics() {
                     <td className="py-3 px-4 text-white font-medium">{event.title}</td>
                     <td className="py-3 px-4">{event.venue || 'TBD'}</td>
                     <td className="py-3 px-4">{event.capacity || 'Unlimited'}</td>
-                    <td className="py-3 px-4 text-purple-400 font-semibold">{formatCurrency(event.price * (data.stats.tickets_total || 0))}</td>
+                    <td className="py-3 px-4 text-gray-200">{event.tickets_sold || 0}</td>
+                    <td className="py-3 px-4 text-purple-400 font-semibold">{formatCurrency(event.revenue || 0)}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" className="text-center py-6 text-gray-500">No events registered yet</td>
+                  <td colSpan="5" className="text-center py-6 text-gray-500">No events registered yet</td>
                 </tr>
               )}
             </tbody>

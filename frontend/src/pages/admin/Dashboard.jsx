@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import { DollarSign, Ticket, Calendar, Users, Activity, AlertCircle } from 'lucide-react';
+import { DollarSign, Ticket, Calendar, Users, Activity, AlertCircle, Landmark } from 'lucide-react';
 
 function CustomAreaChart({ labels = [], data = [], color = 'purple', type = 'number' }) {
   if (!labels.length || !data.length) {
@@ -176,28 +176,34 @@ function AdminDashboard() {
       color: 'green',
     },
     {
+      title: '2DAWN Platform Earnings',
+      value: formatCurrency(stats?.stats?.twodawn_earnings_total || 0),
+      icon: Landmark,
+      color: 'purple',
+    },
+    {
       title: 'Revenue Today',
       value: formatCurrency(stats?.stats?.revenue_today || 0),
       icon: DollarSign,
-      color: 'purple',
+      color: 'blue',
+    },
+    {
+      title: '2DAWN Earnings Today',
+      value: formatCurrency(stats?.stats?.twodawn_earnings_today || 0),
+      icon: Landmark,
+      color: 'cyan',
+    },
+    {
+      title: 'Total Tickets Sold',
+      value: stats?.stats?.tickets_total || 0,
+      icon: Ticket,
+      color: 'orange',
     },
     {
       title: 'Tickets Today',
       value: stats?.stats?.tickets_today || 0,
       icon: Ticket,
       color: 'blue',
-    },
-    {
-      title: 'Total Tickets Sold',
-      value: stats?.stats?.tickets_total || 0,
-      icon: Ticket,
-      color: 'cyan',
-    },
-    {
-      title: 'Active Events',
-      value: stats?.stats?.events_active || 0,
-      icon: Calendar,
-      color: 'orange',
     },
     {
       title: 'Total Organizers',
@@ -358,14 +364,7 @@ function AdminDashboard() {
       {/* Quick Actions */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
         <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link
-            to="/ucc/events"
-            className="flex items-center space-x-3 p-4 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            <Calendar className="w-5 h-5 text-purple-400" />
-            <span className="text-sm text-gray-300">Manage Events</span>
-          </Link>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
             to="/ucc/organizers"
             className="flex items-center space-x-3 p-4 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors"

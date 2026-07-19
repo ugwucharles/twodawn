@@ -5,7 +5,6 @@ import { LogOut, Menu, X, Activity, Users, Calendar, DollarSign, BarChart3, Data
 const sidebarItems = [
   { name: 'Dashboard', path: '/ucc/dashboard', icon: BarChart3 },
   { name: 'Live Activity', path: '/ucc/activity', icon: Activity },
-  { name: 'Events', path: '/ucc/events', icon: Calendar },
   { name: 'Organizers', path: '/ucc/organizers', icon: Users },
   { name: 'Transactions', path: '/ucc/transactions', icon: DollarSign },
   { name: 'Withdrawals', path: '/ucc/withdrawals', icon: Landmark },
