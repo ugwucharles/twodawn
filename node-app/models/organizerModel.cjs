@@ -45,14 +45,15 @@ async function getOrganizerStats(userId) {
   let twoDawnFee = 0;
   if (totalEvents > 0) {
     const orderRows = await query(`
-      SELECT amount FROM orders 
+      SELECT amount, quantity FROM orders 
       WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND deleted_at IS NULL) AND status IN ('paid', 'used')
     `, [id]);
 
     for (const row of orderRows) {
       const amt = Number(row.amount);
+      const qty = Number(row.quantity) || 1;
       if (amt > 0) {
-        const fee = (amt * 0.10) + 10000; // 10% + NGN 100 (in kobo)
+        const fee = (amt * 0.10) + (10000 * qty); // 10% + NGN 100 per ticket (in kobo)
         twoDawnFee += fee;
       }
     }
