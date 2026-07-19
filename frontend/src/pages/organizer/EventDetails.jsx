@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { ArrowLeft, ExternalLink, Edit, AlertTriangle, Download, Printer } from 'lucide-react';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 function EventDetails() {
   const { id } = useParams();
@@ -65,80 +67,60 @@ function EventDetails() {
       return;
     }
 
-    const printWindow = window.open('', '_blank');
-    const escapeHtml = (v) => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const tableRows = orders.map((order, idx) => `
-      <tr>
-        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 13px;">${idx + 1}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 13px; font-weight: bold;">${escapeHtml(order.buyer_name || 'Unknown')}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 13px;">${escapeHtml(order.buyer_email || 'Unknown')}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 13px; text-align: center;">${order.quantity || 0}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 13px; text-align: right; font-weight: bold;">₦${(order.amount / 100).toFixed(2)}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 13px;">${new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
-      </tr>
-    `).join('');
+    const doc = new jsPDF();
 
-    const html = `
-      <html>
-        <head>
-          <title>Attendee List - ${escapeHtml(event?.title || 'Event')}</title>
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; margin: 40px; color: #111; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .header h1 { margin: 0; color: #7c3aed; font-size: 26px; }
-            .header p { margin: 5px 0 0; color: #4b5563; font-size: 14px; font-weight: 500; }
-            .meta { margin-bottom: 25px; padding: 15px; background: #f9fafb; border-radius: 12px; border: 1px solid #f3f4f6; display: flex; justify-content: space-between; }
-            .meta div { font-size: 13px; line-height: 1.5; color: #374151; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th { background: #f3f4f6; text-align: left; padding: 12px 10px; border-bottom: 2px solid #e5e7eb; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #4b5563; font-weight: 700; }
-            @media print {
-              body { margin: 0; }
-              .meta { background: #fff !important; border: 1px solid #ccc; }
-              th { background: #f0f0f0 !important; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>🎫 Attendee List</h1>
-            <p>${escapeHtml(event?.title || 'Event')}</p>
-          </div>
-          <div class="meta">
-            <div>
-              <strong>Venue:</strong> ${escapeHtml(event?.venue || 'TBD')}<br>
-              <strong>Date:</strong> ${new Date(event?.starts_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
-            </div>
-            <div style="text-align: right;">
-              <strong>Total Orders:</strong> ${orders.length}<br>
-              <strong>Total Tickets:</strong> ${orders.reduce((sum, o) => sum + (o.quantity || 0), 0)}
-            </div>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 5%;">#</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th style="text-align: center; width: 10%;">Qty</th>
-                <th style="text-align: right; width: 15%;">Paid</th>
-                <th style="width: 20%;">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${tableRows}
-            </tbody>
-          </table>
-          <script>
-            window.onload = function() {
-              window.print();
-            };
-          </script>
-        </body>
-      </html>
-    `;
+    // Title Section
+    doc.setFontSize(20);
+    doc.setTextColor(124, 58, 237); // Purple color
+    doc.text('Attendee List', 14, 20);
 
-    printWindow.document.write(html);
-    printWindow.document.close();
+    // Event Info Section
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Event: ${event?.title || 'Event'}`, 14, 28);
+    doc.text(`Venue: ${event?.venue || 'TBD'}`, 14, 34);
+    doc.text(`Date: ${new Date(event?.starts_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}`, 14, 40);
+
+    // Summary Counts
+    const totalTickets = orders.reduce((sum, o) => sum + (o.quantity || 0), 0);
+    doc.text(`Total Orders: ${orders.length}  |  Total Tickets Sold: ${totalTickets}`, 14, 48);
+
+    // Table Data formatting
+    const columns = [
+      { title: '#', dataKey: 'index' },
+      { title: 'Name', dataKey: 'name' },
+      { title: 'Email', dataKey: 'email' },
+      { title: 'Qty', dataKey: 'qty' },
+      { title: 'Paid', dataKey: 'paid' },
+      { title: 'Date', dataKey: 'date' }
+    ];
+
+    const data = orders.map((order, idx) => ({
+      index: idx + 1,
+      name: order.buyer_name || 'Unknown',
+      email: order.buyer_email || 'Unknown',
+      qty: order.quantity || 0,
+      paid: `NGN ${(order.amount / 100).toFixed(2)}`,
+      date: new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    }));
+
+    // Generate Table
+    doc.autoTable({
+      columns: columns,
+      body: data,
+      startY: 55,
+      theme: 'striped',
+      headStyles: { fillColor: [124, 58, 237], textColor: [255, 255, 255], fontStyle: 'bold' },
+      bodyStyles: { textColor: [17, 24, 39] },
+      columnStyles: {
+        index: { width: 10 },
+        qty: { halign: 'center', width: 15 },
+        paid: { halign: 'right', width: 35 }
+      }
+    });
+
+    // Save/Download PDF file directly
+    doc.save(`attendees-${event?.title || 'event'}-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   if (loading) {
