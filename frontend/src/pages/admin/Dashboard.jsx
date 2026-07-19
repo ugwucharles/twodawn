@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import { DollarSign, Ticket, Calendar, Users, Activity, AlertCircle, Landmark } from 'lucide-react';
+import { DollarSign, Ticket, Users, Database, AlertCircle, Landmark } from 'lucide-react';
 
 function CustomAreaChart({ labels = [], data = [], color = 'purple', type = 'number' }) {
   if (!labels.length || !data.length) {
@@ -303,61 +303,31 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Recent Activity & Upcoming Events */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-white">Live Activity</h2>
-            <Link to="/ucc/activity" className="text-sm text-purple-400 hover:text-purple-300">
-              View all
-            </Link>
-          </div>
-          <div className="space-y-4">
-            {stats?.activity?.length > 0 ? (
-              stats.activity.slice(0, 5).map((activity, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 bg-gray-800/50 rounded-lg">
-                  <div className="w-2 h-2 mt-2 rounded-full bg-purple-500"></div>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-300">{activity.action}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(activity.created_at).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-gray-500 text-center py-4">No recent activity</p>
-            )}
-          </div>
+      {/* Upcoming Events */}
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-semibold text-white">Upcoming Events</h2>
+          <Link to="/ucc/events" className="text-sm text-purple-400 hover:text-purple-300">
+            View all
+          </Link>
         </div>
-
-        {/* Upcoming Events */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-white">Upcoming Events</h2>
-            <Link to="/ucc/events" className="text-sm text-purple-400 hover:text-purple-300">
-              View all
-            </Link>
-          </div>
-          <div className="space-y-4">
-            {stats?.upcoming?.length > 0 ? (
-              stats.upcoming.map((event, index) => (
-                <Link
-                  key={index}
-                  to={`/ucc/events/${event.id}`}
-                  className="block p-3 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors"
-                >
-                  <p className="text-sm font-medium text-white">{event.title}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {new Date(event.starts_at).toLocaleDateString()} • {event.venue}
-                  </p>
-                </Link>
-              ))
-            ) : (
-              <p className="text-sm text-gray-500 text-center py-4">No upcoming events</p>
-            )}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {stats?.upcoming?.length > 0 ? (
+            stats.upcoming.map((event, index) => (
+              <Link
+                key={index}
+                to={`/ucc/events/${event.id}`}
+                className="block p-4 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors border border-gray-700/50"
+              >
+                <p className="text-sm font-medium text-white">{event.title}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {new Date(event.starts_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' })} • {event.venue}
+                </p>
+              </Link>
+            ))
+          ) : (
+            <p className="text-sm text-gray-500 col-span-full text-center py-4">No upcoming events</p>
+          )}
         </div>
       </div>
 
@@ -383,7 +353,7 @@ function AdminDashboard() {
             to="/ucc/health"
             className="flex items-center space-x-3 p-4 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors"
           >
-            <Activity className="w-5 h-5 text-orange-400" />
+            <Database className="w-5 h-5 text-orange-400" />
             <span className="text-sm text-gray-300">System Health</span>
           </Link>
         </div>

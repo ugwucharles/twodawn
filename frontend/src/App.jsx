@@ -9,7 +9,6 @@ import Checkout from './pages/Checkout'
 import OrderConfirmation from './pages/OrderConfirmation'
 import PaymentSuccess from './pages/PaymentSuccess'
 import AdminDashboard from './pages/admin/Dashboard'
-import AdminActivity from './pages/admin/Activity'
 import AdminEvents from './pages/admin/Events'
 import AdminOrganizers from './pages/admin/Organizers'
 import AdminTransactions from './pages/admin/Transactions'
@@ -77,7 +76,6 @@ function App() {
         <Route path="/ucc" element={<AdminLayout />}>
           <Route index element={<Navigate to="/ucc/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="activity" element={<AdminActivity />} />
           <Route path="events" element={<AdminEvents />} />
           <Route path="organizers" element={<AdminOrganizers />} />
           <Route path="transactions" element={<AdminTransactions />} />

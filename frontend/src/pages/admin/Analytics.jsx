@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
-import { BarChart3, TrendingUp, DollarSign, Ticket, ShoppingBag, Eye } from 'lucide-react';
+import { BarChart3, TrendingUp, DollarSign, Ticket, ShoppingBag } from 'lucide-react';
 
 function AdminAnalytics() {
   const [data, setData] = useState(null);
@@ -17,20 +17,10 @@ function AdminAnalytics() {
       
       const stats = dashboardRes.data?.stats || {};
       const events = eventsRes.data?.events || [];
-      
-      // Calculate mock funnel rates for beautiful presentation of conversion metrics
-      const views = stats.tickets_total > 0 ? (stats.tickets_total * 12 + 150) : 0; // Mock views
-      const checkouts = stats.tickets_total > 0 ? (stats.tickets_total * 2.5 + 40) : 0; // Mock checkouts
-      const purchases = stats.orders_total || 0;
 
       setData({
         stats,
         events,
-        funnel: {
-          views,
-          checkouts,
-          purchases,
-        }
       });
       setLoading(false);
     } catch (err) {
@@ -59,14 +49,13 @@ function AdminAnalytics() {
     ? (data.stats.tickets_total / data.stats.orders_total).toFixed(1) 
     : 0;
 
-  const checkoutCompletionRate = data.funnel.checkouts > 0 
-    ? ((data.funnel.purchases / data.funnel.checkouts) * 100).toFixed(1) 
+  const successRate = data.stats.orders_total > 0
+    ? ((data.stats.tickets_total / data.stats.orders_total) * 100).toFixed(1)
     : 0;
 
   const funnelItems = [
-    { name: 'Event Page Views', count: data.funnel.views, percentage: 100, icon: Eye, color: 'bg-blue-500' },
-    { name: 'Initiated Checkouts', count: Math.round(data.funnel.checkouts), percentage: Math.round((data.funnel.checkouts / data.funnel.views) * 100), icon: ShoppingBag, color: 'bg-yellow-500' },
-    { name: 'Successful Purchases', count: data.funnel.purchases, percentage: Math.round((data.funnel.purchases / data.funnel.views) * 100), icon: DollarSign, color: 'bg-green-500' },
+    { name: 'Orders Submitted', count: data.stats.orders_total || 0, percentage: 100, icon: ShoppingBag, color: 'bg-blue-500' },
+    { name: 'Successful Payments', count: data.stats.tickets_total > 0 ? data.stats.orders_total : 0, percentage: data.stats.orders_total > 0 ? 100 : 0, icon: DollarSign, color: 'bg-green-500' },
   ];
 
   return (
@@ -94,8 +83,8 @@ function AdminAnalytics() {
             <ShoppingBag className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm text-gray-400">Checkout Success Rate</p>
-            <p className="text-2xl font-bold text-white mt-1">{checkoutCompletionRate}%</p>
+            <p className="text-sm text-gray-400">Avg Tickets per Order</p>
+            <p className="text-2xl font-bold text-white mt-1">{avgTicketsPerOrder}</p>
           </div>
         </div>
       </div>
