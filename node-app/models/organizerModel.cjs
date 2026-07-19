@@ -45,8 +45,11 @@ async function getOrganizerStats(userId) {
     `, [id]);
 
     for (const row of orderRows) {
-      const fee = (Number(row.amount) * 0.10) + 10000; // 10% + NGN 100 (in kobo)
-      twoDawnFee += fee;
+      const amt = Number(row.amount);
+      if (amt > 0) {
+        const fee = (amt * 0.10) + 10000; // 10% + NGN 100 (in kobo)
+        twoDawnFee += fee;
+      }
     }
   }
 
@@ -106,6 +109,7 @@ async function getOrganizerStats(userId) {
     total_revenue: totalRevenue,
     wallet_balance: walletBalance,
     available_for_withdrawal: availableForWithdrawal,
+    pending_withdrawals: pendingWithdrawals,
     revenue_stats: revenueStats,
     total_capacity: totalCapacity,
     left_tickets: leftTickets,

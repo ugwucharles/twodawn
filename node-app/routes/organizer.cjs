@@ -213,7 +213,8 @@ function createOrganizerRouter() {
         ok: true,
         wallet: {
           balance: stats.wallet_balance || 0,
-          available_for_withdrawal: stats.available_for_withdrawal || 0
+          available_for_withdrawal: stats.available_for_withdrawal || 0,
+          pending_withdrawals: stats.pending_withdrawals || 0
         },
         withdrawals: withdrawals || []
       });

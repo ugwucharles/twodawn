@@ -95,7 +95,8 @@ function OrganizerDashboard() {
         </div>
 
         {/* Wallet Balance */}
-        <div className="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-purple-200 flex flex-col justify-between min-h-[140px]">
+        {/* Wallet Balance */}
+        <Link to="/organizer/wallet" className="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-purple-200 flex flex-col justify-between min-h-[140px] hover:shadow-md transition-shadow cursor-pointer">
           <div>
             <p className="text-sm font-medium text-gray-500 mb-2">Wallet Balance</p>
             <div className="flex items-baseline gap-1">
@@ -108,7 +109,7 @@ function OrganizerDashboard() {
               Available
             </span>
           </div>
-        </div>
+        </Link>
 
         {/* Gross Revenue */}
         <div className="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-purple-200 flex flex-col justify-between min-h-[140px]">
@@ -126,34 +127,48 @@ function OrganizerDashboard() {
           <h2 className="text-xl font-bold text-gray-900 mb-2">Ticket Analytics</h2>
           <p className="text-sm text-gray-500 font-medium mb-8">Overall sales performance</p>
 
-          <div className="flex-1 flex flex-col items-center justify-center relative">
-            <div className="relative h-56 w-56 mx-auto">
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sold</span>
-                <span className="text-3xl font-bold text-gray-900">
-                  {totalTicketsSold > 0 ? Math.round((totalTicketsSold / (totalTicketsSold + 100)) * 100) : 0}%
-                </span>
-              </div>
-            </div>
-          </div>
+          {(() => {
+            const totalCapacity = stats?.stats?.total_capacity || 0;
+            const leftTickets = stats?.stats?.left_tickets || 0;
+            const percentSold = totalCapacity > 0 ? Math.round((totalTicketsSold / totalCapacity) * 100) : 100;
+            return (
+              <>
+                <div className="flex-1 flex flex-col items-center justify-center relative">
+                  <div className="relative h-56 w-56 mx-auto flex items-center justify-center rounded-full" style={{
+                    background: `conic-gradient(#7c3aed ${percentSold}%, #f3f4f6 ${percentSold}%)`
+                  }}>
+                    <div className="absolute inset-4 bg-white rounded-full flex flex-col items-center justify-center pointer-events-none">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sold</span>
+                      <span className="text-3xl font-bold text-gray-900">
+                        {totalCapacity > 0 ? `${percentSold}%` : totalTicketsSold}
+                      </span>
+                      {totalCapacity === 0 && <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider mt-1">Total</span>}
+                    </div>
+                  </div>
+                </div>
 
-          <div className="grid grid-cols-2 gap-4 mt-8">
-            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-              <span className="text-xs font-semibold text-gray-500 block mb-1">Sold</span>
-              <span className="text-lg font-bold text-gray-900">{totalTicketsSold}</span>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-              <span className="text-xs font-semibold text-gray-500 block mb-1">Left</span>
-              <span className="text-lg font-bold text-gray-900">100</span>
-            </div>
-          </div>
+                <div className="grid grid-cols-2 gap-4 mt-8">
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <span className="text-xs font-semibold text-gray-500 block mb-1">Sold</span>
+                    <span className="text-lg font-bold text-gray-900">{totalTicketsSold}</span>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <span className="text-xs font-semibold text-gray-500 block mb-1">Left</span>
+                    <span className="text-lg font-bold text-gray-900">
+                      {totalCapacity > 0 ? leftTickets : 'Unlimited'}
+                    </span>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </div>
       </div>
 
       {/* Recent Activity Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Events Summary */}
-        <div className="lg:col-span-5 bg-white rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-purple-200 animate-slide-up flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-white rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-purple-200 animate-slide-up flex flex-col">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-xl font-bold text-gray-900">Your Events</h2>
             <Link to="/organizer/events/create" className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-200 hover:scale-105 transition-transform">
@@ -162,8 +177,8 @@ function OrganizerDashboard() {
           </div>
 
           <div className="space-y-4">
-            {events.filter(e => e.is_published).length > 0 ? (
-              events.filter(e => e.is_published).slice(0, 4).map((event) => (
+            {events.length > 0 ? (
+              events.slice(0, 4).map((event) => (
                 <div key={event.id} className="flex items-center p-4 bg-white rounded-xl border border-gray-100/50 hover:bg-gray-50/50 transition-all duration-300">
                   <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex flex-col items-center justify-center font-bold text-gray-900 shrink-0">
                     {event.starts_at ? (
@@ -184,7 +199,11 @@ function OrganizerDashboard() {
                         {event.orders_count || 0} Sold
                       </span>
                       <div className="w-1.5 h-1.5 bg-gray-300 rounded-full"></div>
-                      <span className="text-xs font-semibold text-green-600">Active</span>
+                      {event.is_published ? (
+                        <span className="text-xs font-semibold text-green-600">Active</span>
+                      ) : (
+                        <span className="text-xs font-semibold text-gray-400">Draft</span>
+                      )}
                     </div>
                   </div>
                   <Link to={`/organizer/events/${event.id}`} className="p-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all duration-300">
@@ -195,7 +214,7 @@ function OrganizerDashboard() {
             ) : (
               <div className="py-12 flex flex-col items-center justify-center grayscale opacity-50">
                 <Calendar className="w-12 h-12 text-black mb-2" />
-                <p className="text-xs font-bold text-black uppercase tracking-widest">No published events yet</p>
+                <p className="text-xs font-bold text-black uppercase tracking-widest">No events yet</p>
               </div>
             )}
           </div>

@@ -125,25 +125,41 @@ function OrganizerWallet() {
       )}
 
       {/* Wallet Balance Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         {/* Current Balance */}
-        <div className="bg-white rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-purple-200">
-          <p className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-2">Current Balance</p>
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-black text-gray-900">₦</span>
-            <p className="text-5xl font-black text-gray-900">{wallet.balance.toFixed(2)}</p>
+        <div className="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-purple-200 flex flex-col justify-between">
+          <div>
+            <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Current Balance</p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black text-gray-900">₦</span>
+              <p className="text-4xl font-black text-gray-900">{wallet.balance.toFixed(2)}</p>
+            </div>
           </div>
-          <p className="text-xs text-gray-600 mt-2 font-medium">After 2DAWN fees</p>
+          <p className="text-xs text-gray-400 mt-4 font-medium">After 2DAWN fees</p>
+        </div>
+
+        {/* Pending Withdrawals */}
+        <div className="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-purple-200 flex flex-col justify-between">
+          <div>
+            <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Pending Withdrawals</p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black text-yellow-600">₦</span>
+              <p className="text-4xl font-black text-yellow-600">{(wallet.pending_withdrawals || 0).toFixed(2)}</p>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 mt-4 font-medium">Awaiting approval</p>
         </div>
 
         {/* Available for Withdrawal */}
-        <div className="bg-white rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-purple-200">
-          <p className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-2">Available for Withdrawal</p>
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-black text-gray-900">₦</span>
-            <p className="text-5xl font-black text-gray-900">{wallet.available_for_withdrawal.toFixed(2)}</p>
+        <div className="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-purple-200 flex flex-col justify-between">
+          <div>
+            <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Available for Withdrawal</p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black text-emerald-600">₦</span>
+              <p className="text-4xl font-black text-emerald-600">{wallet.available_for_withdrawal.toFixed(2)}</p>
+            </div>
           </div>
-          <p className="text-xs text-gray-600 mt-2 font-medium">From ended events only</p>
+          <p className="text-xs text-gray-400 mt-4 font-medium">Net of pending requests</p>
         </div>
       </div>
 
