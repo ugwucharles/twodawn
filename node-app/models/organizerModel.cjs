@@ -15,8 +15,8 @@ async function getOrganizerStats(userId) {
       (SELECT COUNT(*) FROM events WHERE user_id = ? AND (deleted_at IS NULL OR deleted_at = '')) as total_events,
       (SELECT COUNT(*) FROM events WHERE user_id = ? 
         AND (
-          (ends_at IS NOT NULL AND ends_at != '' AND ends_at > datetime('now', '+1 hours'))
-          OR (ends_at IS NULL AND starts_at > datetime('now', '+1 hours'))
+          (ends_at IS NOT NULL AND ends_at != '' AND datetime(ends_at) > datetime('now', '+1 hours'))
+          OR ((ends_at IS NULL OR ends_at = '') AND starts_at IS NOT NULL AND datetime(starts_at) > datetime('now', '+1 hours'))
         )
         AND (deleted_at IS NULL OR deleted_at = '')) as upcoming_events
   `, [id, id]);
@@ -33,7 +33,7 @@ async function getOrganizerStats(userId) {
         COALESCE(SUM(quantity), 0) as tickets_sold,
         COALESCE(SUM(amount), 0) as revenue
       FROM orders 
-      WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND deleted_at IS NULL) AND status IN ('paid', 'used')
+      WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND (deleted_at IS NULL OR deleted_at = '')) AND status IN ('paid', 'used')
     `, [id]);
 
     totalTicketsSold = Number(orderRows[0]?.tickets_sold || 0);
@@ -46,7 +46,7 @@ async function getOrganizerStats(userId) {
   if (totalEvents > 0) {
     const orderRows = await query(`
       SELECT amount, quantity FROM orders 
-      WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND deleted_at IS NULL) AND status IN ('paid', 'used')
+      WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND (deleted_at IS NULL OR deleted_at = '')) AND status IN ('paid', 'used')
     `, [id]);
 
     for (const row of orderRows) {
@@ -88,7 +88,7 @@ async function getOrganizerStats(userId) {
       const monthRows = await query(`
         SELECT COALESCE(SUM(amount), 0) as revenue
         FROM orders 
-        WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND deleted_at IS NULL) 
+        WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND (deleted_at IS NULL OR deleted_at = '')) 
           AND status IN ('paid', 'used')
           AND strftime('%Y', created_at) = strftime('%Y', 'now')
           AND strftime('%m', created_at) = ?
@@ -102,7 +102,7 @@ async function getOrganizerStats(userId) {
   const capacityRows = await query(`
     SELECT COALESCE(SUM(capacity), 0) as total_capacity
     FROM events 
-    WHERE user_id = ?
+    WHERE user_id = ? AND (deleted_at IS NULL OR deleted_at = '')
   `, [id]);
 
   const totalCapacity = Number(capacityRows[0]?.total_capacity || 0);

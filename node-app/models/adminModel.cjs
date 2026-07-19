@@ -30,17 +30,22 @@ async function getActivityLogs(limit = 50, offset = 0) {
 async function getAdminStats() {
   const rows = await query(`
     SELECT
-      (SELECT COUNT(*) FROM events) as events_total,
-      (SELECT COUNT(*) FROM events WHERE is_published = 1) as events_published,
-      (SELECT COUNT(*) FROM events WHERE is_published = 1 AND (ends_at IS NULL OR ends_at >= datetime('now'))) as events_active,
+      (SELECT COUNT(*) FROM events WHERE (deleted_at IS NULL OR deleted_at = '')) as events_total,
+      (SELECT COUNT(*) FROM events WHERE is_published = 1 AND (deleted_at IS NULL OR deleted_at = '')) as events_published,
+      (SELECT COUNT(*) FROM events WHERE is_published = 1 AND (deleted_at IS NULL OR deleted_at = '')
+        AND (
+          (ends_at IS NOT NULL AND ends_at != '' AND datetime(ends_at) >= datetime('now', '+1 hours'))
+          OR ((ends_at IS NULL OR ends_at = '') AND starts_at IS NOT NULL AND datetime(starts_at) >= datetime('now', '+1 hours'))
+        )
+      ) as events_active,
       (SELECT COUNT(*) FROM users) as users_total,
       (SELECT COUNT(*) FROM users WHERE is_organizer = 1) as organizers_total,
-      (SELECT COUNT(*) FROM orders) as orders_total,
-      (SELECT COUNT(*) FROM orders WHERE date(created_at) = date('now')) as orders_today,
-      (SELECT COALESCE(SUM(quantity), 0) FROM orders WHERE status = 'paid') as tickets_total,
-      (SELECT COALESCE(SUM(quantity), 0) FROM orders WHERE status = 'paid' AND date(created_at) = date('now')) as tickets_today,
-      (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE status = 'paid') as revenue_total,
-      (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE status = 'paid' AND date(created_at) = date('now')) as revenue_today,
+      (SELECT COUNT(*) FROM orders WHERE status IN ('paid', 'used')) as orders_total,
+      (SELECT COUNT(*) FROM orders WHERE status IN ('paid', 'used') AND date(created_at) = date('now')) as orders_today,
+      (SELECT COALESCE(SUM(quantity), 0) FROM orders WHERE status IN ('paid', 'used')) as tickets_total,
+      (SELECT COALESCE(SUM(quantity), 0) FROM orders WHERE status IN ('paid', 'used') AND date(created_at) = date('now')) as tickets_today,
+      (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE status IN ('paid', 'used')) as revenue_total,
+      (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE status IN ('paid', 'used') AND date(created_at) = date('now')) as revenue_today,
       (SELECT COUNT(*) FROM orders WHERE status = 'failed') as payments_failed
   `);
 
@@ -81,7 +86,7 @@ async function getChartData(days = 14) {
       COALESCE(SUM(quantity), 0) as tickets,
       COALESCE(SUM(amount), 0) as revenue
     FROM orders 
-    WHERE status = 'paid' AND DATE(created_at) >= DATE('now', '-' || ? || ' day')
+    WHERE status IN ('paid', 'used') AND DATE(created_at) >= DATE('now', '-' || ? || ' day')
     GROUP BY DATE(created_at)
   `, [String(days)]);
 
@@ -108,7 +113,11 @@ async function getUpcomingEvents(limit = 6) {
     SELECT id, title, starts_at, venue, is_published
     FROM events
     WHERE is_published = 1
-      AND (ends_at IS NULL OR ends_at >= datetime('now'))
+      AND (deleted_at IS NULL OR deleted_at = '')
+      AND (
+        (ends_at IS NOT NULL AND ends_at != '' AND datetime(ends_at) >= datetime('now', '+1 hours'))
+        OR ((ends_at IS NULL OR ends_at = '') AND starts_at IS NOT NULL AND datetime(starts_at) >= datetime('now', '+1 hours'))
+      )
     ORDER BY starts_at ASC
     LIMIT ?
   `, [limit]);
@@ -190,21 +199,27 @@ async function createHostToken(eventId, label = null) {
 
 // Event management
 async function getAllEvents(limit = 50, offset = 0, status = null) {
-  let whereClause = '';
+  let whereConditions = ["(e.deleted_at IS NULL OR e.deleted_at = '')"];
   let params = [];
 
   if (status === 'published') {
-    whereClause = 'WHERE is_published = 1';
+    whereConditions.push('e.is_published = 1');
   } else if (status === 'draft') {
-    whereClause = 'WHERE is_published = 0';
+    whereConditions.push('e.is_published = 0');
   } else if (status === 'active') {
-    whereClause = 'WHERE is_published = 1 AND (ends_at IS NULL OR ends_at >= datetime("now"))';
+    whereConditions.push('e.is_published = 1');
+    whereConditions.push(`(
+      (e.ends_at IS NOT NULL AND e.ends_at != '' AND datetime(e.ends_at) >= datetime('now', '+1 hours'))
+      OR ((e.ends_at IS NULL OR e.ends_at = '') AND e.starts_at IS NOT NULL AND datetime(e.starts_at) >= datetime('now', '+1 hours'))
+    )`);
   }
+
+  const whereClause = 'WHERE ' + whereConditions.join(' AND ');
 
   const rows = await query(`
     SELECT e.*, u.name as organizer_name, u.email as organizer_email,
-           (SELECT COUNT(*) FROM orders WHERE event_id = e.id AND status = 'paid') as tickets_sold,
-           (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE event_id = e.id AND status = 'paid') as revenue
+           (SELECT COALESCE(SUM(quantity), 0) FROM orders WHERE event_id = e.id AND status IN ('paid', 'used')) as tickets_sold,
+           (SELECT COALESCE(SUM(amount), 0) FROM orders WHERE event_id = e.id AND status IN ('paid', 'used')) as revenue
     FROM events e
     LEFT JOIN users u ON e.user_id = u.id
     ${whereClause}
