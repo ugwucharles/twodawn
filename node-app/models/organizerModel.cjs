@@ -28,7 +28,7 @@ async function getOrganizerStats(userId) {
         COALESCE(SUM(quantity), 0) as tickets_sold,
         COALESCE(SUM(amount), 0) as revenue
       FROM orders 
-      WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND deleted_at IS NULL) AND status = 'paid'
+      WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND deleted_at IS NULL) AND status IN ('paid', 'used')
     `, [id]);
 
     totalTicketsSold = Number(orderRows[0]?.tickets_sold || 0);
@@ -41,7 +41,7 @@ async function getOrganizerStats(userId) {
   if (totalEvents > 0) {
     const orderRows = await query(`
       SELECT amount FROM orders 
-      WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND deleted_at IS NULL) AND status = 'paid'
+      WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND deleted_at IS NULL) AND status IN ('paid', 'used')
     `, [id]);
 
     for (const row of orderRows) {
@@ -80,7 +80,7 @@ async function getOrganizerStats(userId) {
         SELECT COALESCE(SUM(amount), 0) as revenue
         FROM orders 
         WHERE event_id IN (SELECT id FROM events WHERE user_id = ? AND deleted_at IS NULL) 
-          AND status = 'paid'
+          AND status IN ('paid', 'used')
           AND strftime('%Y', created_at) = strftime('%Y', 'now')
           AND strftime('%m', created_at) = ?
       `, [id, monthStr]);
@@ -122,9 +122,9 @@ async function getOrganizerEvents(userId) {
              COALESCE(o.orders_count, 0) as orders_count
       FROM events e
       LEFT JOIN (
-        SELECT event_id, COUNT(*) as orders_count
+        SELECT event_id, COALESCE(SUM(quantity), 0) as orders_count
         FROM orders
-        WHERE status = 'paid'
+        WHERE status IN ('paid', 'used')
         GROUP BY event_id
       ) o ON o.event_id = e.id
       WHERE e.user_id = ? AND (e.deleted_at IS NULL OR e.deleted_at = '')
@@ -141,9 +141,9 @@ async function getOrganizerEvents(userId) {
                COALESCE(o.orders_count, 0) as orders_count
         FROM events e
         LEFT JOIN (
-          SELECT event_id, COUNT(*) as orders_count
+          SELECT event_id, COALESCE(SUM(quantity), 0) as orders_count
           FROM orders
-          WHERE status = 'paid'
+          WHERE status IN ('paid', 'used')
           GROUP BY event_id
         ) o ON o.event_id = e.id
         WHERE e.user_id = ?
