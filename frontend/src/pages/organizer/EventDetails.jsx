@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { ArrowLeft, ExternalLink, Edit, AlertTriangle, Download, Printer } from 'lucide-react';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 function EventDetails() {
   const { id } = useParams();
@@ -151,7 +151,7 @@ function EventDetails() {
     }));
 
     // Generate Table
-    doc.autoTable({
+    autoTable(doc, {
       columns: columns,
       body: data,
       startY: 65,
