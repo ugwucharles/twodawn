@@ -178,39 +178,48 @@ function OrganizerDashboard() {
 
           <div className="space-y-4">
             {events.length > 0 ? (
-              events.slice(0, 4).map((event) => (
-                <div key={event.id} className="flex items-center p-4 bg-white rounded-xl border border-gray-100/50 hover:bg-gray-50/50 transition-all duration-300">
-                  <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex flex-col items-center justify-center font-bold text-gray-900 shrink-0">
-                    {event.starts_at ? (
-                      <>
-                        <span className="text-base text-gray-900">{new Date(event.starts_at).getDate()}</span>
-                        <span className="text-[8px] uppercase tracking-tighter -mt-1 opacity-70 text-gray-500">
-                          {new Date(event.starts_at).toLocaleString('default', { month: 'short' })}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-[10px] text-gray-500">TBD</span>
-                    )}
-                  </div>
-                  <div className="flex-1 mx-4 min-w-0">
-                    <h3 className="font-bold text-gray-900 text-sm truncate">{event.title}</h3>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span className="text-xs font-semibold text-gray-500">
-                        {event.orders_count || 0} Sold
-                      </span>
-                      <div className="w-1.5 h-1.5 bg-gray-300 rounded-full"></div>
-                      {event.is_published ? (
-                        <span className="text-xs font-semibold text-green-600">Active</span>
+              events.slice(0, 4).map((event) => {
+                const isEnded = event.ends_at
+                  ? new Date(event.ends_at) < new Date()
+                  : event.starts_at
+                    ? new Date(event.starts_at) < new Date()
+                    : false;
+                return (
+                  <div key={event.id} className="flex items-center p-4 bg-white rounded-xl border border-gray-100/50 hover:bg-gray-50/50 transition-all duration-300">
+                    <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex flex-col items-center justify-center font-bold text-gray-900 shrink-0">
+                      {event.starts_at ? (
+                        <>
+                          <span className="text-base text-gray-900">{new Date(event.starts_at).getDate()}</span>
+                          <span className="text-[8px] uppercase tracking-tighter -mt-1 opacity-70 text-gray-500">
+                            {new Date(event.starts_at).toLocaleString('default', { month: 'short' })}
+                          </span>
+                        </>
                       ) : (
-                        <span className="text-xs font-semibold text-gray-400">Draft</span>
+                        <span className="text-[10px] text-gray-500">TBD</span>
                       )}
                     </div>
+                    <div className="flex-1 mx-4 min-w-0">
+                      <h3 className="font-bold text-gray-900 text-sm truncate">{event.title}</h3>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-xs font-semibold text-gray-500">
+                          {event.orders_count || 0} Sold
+                        </span>
+                        <div className="w-1.5 h-1.5 bg-gray-300 rounded-full"></div>
+                        {isEnded ? (
+                          <span className="text-xs font-semibold text-red-600">Ended</span>
+                        ) : event.is_published ? (
+                          <span className="text-xs font-semibold text-green-600">Active</span>
+                        ) : (
+                          <span className="text-xs font-semibold text-gray-400">Draft</span>
+                        )}
+                      </div>
+                    </div>
+                    <Link to={`/organizer/events/${event.id}`} className="p-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all duration-300">
+                      <ChevronRight className="w-4 h-4" />
+                    </Link>
                   </div>
-                  <Link to={`/organizer/events/${event.id}`} className="p-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all duration-300">
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="py-12 flex flex-col items-center justify-center grayscale opacity-50">
                 <Calendar className="w-12 h-12 text-black mb-2" />

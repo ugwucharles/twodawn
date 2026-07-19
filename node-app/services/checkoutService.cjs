@@ -8,7 +8,7 @@ const {
   countRecentFreeOrders,
   sumPaidQuantityForEvent,
 } = require('../models/orderModel.cjs');
-const { queueTicketEmail } = require('./emailService.cjs');
+const { sendTicketEmail } = require('./emailService.cjs');
 const crypto = require('crypto');
 
 function generateReference() {
@@ -132,7 +132,7 @@ async function finalizePayment(reference) {
     try {
       const event = await findEventById(order.event_id);
       if (event && order.buyer_email) {
-        queueTicketEmail(order, event);
+        await sendTicketEmail(order, event);
       }
     } catch (_) { /* non-fatal */ }
     return { success: true, order };
@@ -172,11 +172,11 @@ async function finalizePayment(reference) {
     try {
       const event = await findEventById(order.event_id);
       if (event && updatedOrder.buyer_email) {
-        await queueTicketEmail(updatedOrder, event);
-        console.log(`✉️ Ticket email queued for ${updatedOrder.buyer_email} (${reference})`);
+        await sendTicketEmail(updatedOrder, event);
+        console.log(`✉️ Ticket email sent for ${updatedOrder.buyer_email} (${reference})`);
       }
     } catch (mailError) {
-      console.error(`⚠️ Failed to queue ticket email for ${reference}:`, mailError.message);
+      console.error(`⚠️ Failed to send ticket email for ${reference}:`, mailError.message);
     }
 
     return { success: true, order: updatedOrder };
@@ -200,7 +200,12 @@ async function finalizeZeroCostOrder(order) {
     // Send ticket email for free orders
     const event = await findEventById(order.event_id);
     if (event) {
-      queueTicketEmail(updatedOrder, event);
+      try {
+        await sendTicketEmail(updatedOrder, event);
+        console.log(`✉️ Ticket email sent for free order ${updatedOrder.buyer_email} (${order.paystack_reference})`);
+      } catch (mailError) {
+        console.error(`⚠️ Failed to send ticket email for free order ${order.paystack_reference}:`, mailError.message);
+      }
     }
 
     return { success: true, order: updatedOrder };

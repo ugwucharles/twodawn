@@ -293,12 +293,22 @@ function EditEvent() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="starts_at" className="block text-sm font-semibold text-gray-700 mb-2">Event Date & Time</label>
+              <label htmlFor="starts_at" className="block text-sm font-semibold text-gray-700 mb-2">Event Start Date & Time</label>
               <input
                 id="starts_at"
                 type="datetime-local"
                 value={formData.starts_at}
                 onChange={(e) => setFormData({ ...formData, starts_at: e.target.value })}
+                className="block w-full rounded-xl border border-gray-200 bg-white text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 px-5 py-3.5 text-sm shadow-sm transition-all"
+              />
+            </div>
+            <div>
+              <label htmlFor="ends_at" className="block text-sm font-semibold text-gray-700 mb-2">Event End Date & Time</label>
+              <input
+                id="ends_at"
+                type="datetime-local"
+                value={formData.ends_at}
+                onChange={(e) => setFormData({ ...formData, ends_at: e.target.value })}
                 className="block w-full rounded-xl border border-gray-200 bg-white text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 px-5 py-3.5 text-sm shadow-sm transition-all"
               />
             </div>

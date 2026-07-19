@@ -70,8 +70,8 @@ async function getOrganizerStats(userId) {
     console.error('Failed to fetch withdrawals sum:', err);
   }
 
-  const walletBalance = Math.max(0, ((totalRevenue - twoDawnFee) / 100) - approvedWithdrawals);
-  const availableForWithdrawal = Math.max(0, walletBalance - pendingWithdrawals);
+  const walletBalance = Math.max(0, ((totalRevenue - twoDawnFee) / 100) - approvedWithdrawals - pendingWithdrawals);
+  const availableForWithdrawal = walletBalance;
 
   // Revenue Statistics (Monthly for the current year)
   const revenueStats = [];

@@ -89,6 +89,11 @@ function Events() {
           <div className="divide-y divide-gray-50">
             {events.map((event) => {
               const img = getEventImage(event)
+              const isEnded = event.ends_at
+                ? new Date(event.ends_at) < new Date()
+                : event.starts_at
+                  ? new Date(event.starts_at) < new Date()
+                  : false;
               return (
                 <div key={event.id} className="overflow-x-auto">
                   <div className="flex items-center gap-4 p-4 min-w-[600px] hover:bg-gray-50/60 transition-colors">
@@ -110,11 +115,13 @@ function Events() {
                       <div className="flex items-center gap-2 mb-0.5">
                         <h3 className="text-base font-bold text-gray-900 truncate">{event.title}</h3>
                         <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-                          event.is_published
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-500'
+                          isEnded
+                            ? 'bg-red-100 text-red-700'
+                            : event.is_published
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-gray-100 text-gray-500'
                         }`}>
-                          {event.is_published ? '● Live' : '○ Draft'}
+                          {isEnded ? '● Ended' : event.is_published ? '● Live' : '○ Draft'}
                         </span>
                       </div>
                       <p className="text-xs text-gray-400 truncate">
