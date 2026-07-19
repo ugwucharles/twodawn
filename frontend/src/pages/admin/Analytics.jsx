@@ -53,9 +53,12 @@ function AdminAnalytics() {
     ? ((data.stats.tickets_total / data.stats.orders_total) * 100).toFixed(1)
     : 0;
 
+  const totalAttempts = (data.stats.orders_total || 0) + (data.stats.payments_failed || 0);
+  const successPct = totalAttempts > 0 ? Math.round((data.stats.orders_total / totalAttempts) * 100) : 0;
+
   const funnelItems = [
-    { name: 'Orders Submitted', count: data.stats.orders_total || 0, percentage: 100, icon: ShoppingBag, color: 'bg-blue-500' },
-    { name: 'Successful Payments', count: data.stats.tickets_total > 0 ? data.stats.orders_total : 0, percentage: data.stats.orders_total > 0 ? 100 : 0, icon: DollarSign, color: 'bg-green-500' },
+    { name: 'Orders Attempted', count: totalAttempts, percentage: 100, icon: ShoppingBag, color: 'bg-blue-500' },
+    { name: 'Completed Payments', count: data.stats.orders_total || 0, percentage: successPct, icon: DollarSign, color: 'bg-green-500' },
   ];
 
   return (
