@@ -428,18 +428,102 @@ function createAdminRouter() {
     }
   });
 
+function getBankCodeFromName(bankName) {
+  const name = String(bankName || '').toLowerCase();
+  if (name.includes('opay') || name.includes('paycom')) return '999992';
+  if (name.includes('guaranty') || name.includes('gtb') || name.includes('gtbank')) return '058';
+  if (name.includes('access')) return '044';
+  if (name.includes('zenith')) return '057';
+  if (name.includes('united bank') || name.includes('uba')) return '033';
+  if (name.includes('sterling')) return '050';
+  if (name.includes('first bank') || name.includes('firstbank')) return '011';
+  if (name.includes('wema')) return '094';
+  if (name.includes('kuda')) return '50211';
+  if (name.includes('moniepoint')) return '50515';
+  if (name.includes('palmpay')) return '999991';
+  return null;
+}
+
   // PATCH /admin/withdrawals/:id/approve - approve withdrawal
   router.patch('/withdrawals/:id/approve', async (req, res) => {
     try {
       const withdrawalId = parseInt(req.params.id, 10);
       const { query } = require('../db/client.cjs');
+      
+      const withdrawals = await query(`SELECT * FROM withdrawals WHERE id = ? LIMIT 1`, [withdrawalId]);
+      const w = withdrawals[0];
+      if (!w) {
+        return res.status(404).json({ ok: false, error: 'Withdrawal request not found' });
+      }
+
+      if (w.status === 'approved') {
+        return res.status(400).json({ ok: false, error: 'Withdrawal already approved' });
+      }
+
+      let bankCode = w.bank_code;
+      if (!bankCode) {
+        bankCode = getBankCodeFromName(w.bank_name);
+      }
+      if (!bankCode) {
+        return res.status(400).json({ ok: false, error: 'Could not resolve bank code for bank: ' + w.bank_name });
+      }
+
+      const secret = process.env.PAYSTACK_SECRET_KEY;
+      if (!secret) {
+        return res.status(500).json({ ok: false, error: 'Paystack secret key is not configured' });
+      }
+
+      const recipientResponse = await fetch('https://api.paystack.co/transferrecipient', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${secret}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'nuban',
+          name: w.account_name,
+          account_number: w.account_number,
+          bank_code: bankCode,
+          currency: 'NGN'
+        })
+      });
+      const recipientData = await recipientResponse.json();
+
+      if (!recipientData.status) {
+        console.error('Paystack recipient creation failed:', recipientData);
+        return res.status(400).json({ ok: false, error: `Paystack Recipient failed: ${recipientData.message}` });
+      }
+
+      const recipientCode = recipientData.data.recipient_code;
+
+      const transferResponse = await fetch('https://api.paystack.co/transfer', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${secret}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          source: 'balance',
+          amount: Math.round(w.amount * 100),
+          recipient: recipientCode,
+          reason: `2DAWN Organizer Payout (#${w.id})`
+        })
+      });
+      const transferData = await transferResponse.json();
+
+      if (!transferData.status) {
+        console.error('Paystack Transfer failed:', transferData);
+        return res.status(400).json({ ok: false, error: `Paystack Transfer failed: ${transferData.message}` });
+      }
+
       const now = new Date().toISOString();
       await query(`
         UPDATE withdrawals
         SET status = 'approved', updated_at = ?
         WHERE id = ?
       `, [now, withdrawalId]);
-      return res.json({ ok: true, message: 'Withdrawal approved successfully' });
+
+      return res.json({ ok: true, message: 'Withdrawal approved and paid out via Paystack successfully!', data: transferData.data });
     } catch (error) {
       console.error('Approve withdrawal error:', error);
       return res.status(500).json({ ok: false, error: 'Failed to approve withdrawal' });

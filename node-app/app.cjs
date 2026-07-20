@@ -1,6 +1,7 @@
 require('./config/envLoader.cjs');
 const express = require('express');
 const { attachRequestContext } = require('./middleware/requestContext.cjs');
+const { errorHandler, notFoundHandler } = require('./middleware/errorHandler.cjs');
 const { registerRoutes } = require('./routes/index.cjs');
 const { createUpstreamProxy } = require('./services/upstreamProxy.cjs');
 const { ensureUsersSchema } = require('./db/ensureUsersSchema.cjs');
@@ -62,14 +63,25 @@ function createApp() {
 
   app.use((req, res, next) => {
     const origin = req.headers.origin;
-    if (origin) {
+    const allowedOrigins = [
+      'https://twodawn.com.ng',
+      'https://www.twodawn.com.ng',
+      'https://twodawn-frontend-real.vercel.app',
+      'https://twodawn-frontend.vercel.app',
+      'http://localhost:5173',
+      'http://localhost:3000'
+    ];
+    
+    if (origin && allowedOrigins.includes(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin);
-    } else {
+    } else if (!origin) {
       res.setHeader('Access-Control-Allow-Origin', '*');
     }
+    
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
+    
     if (req.method === 'OPTIONS') {
       return res.sendStatus(200);
     }
@@ -77,6 +89,10 @@ function createApp() {
   });
 
   registerRoutes(app);
+
+  // Error handling middleware (must be after routes)
+  app.use(notFoundHandler);
+  app.use(errorHandler);
 
   // Legacy Laravel proxy support has been removed. The app now runs entirely on the Node stack.
   // app.use(createUpstreamProxy());

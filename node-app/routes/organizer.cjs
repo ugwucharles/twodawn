@@ -232,7 +232,7 @@ function createOrganizerRouter() {
       }
 
       const userId = req.auth.user.id;
-      let { amount, bank_name, account_number, account_name, bank_details } = req.body;
+      let { amount, bank_name, account_number, account_name, bank_details, bank_code } = req.body;
 
       if (bank_details && (!bank_name || !account_number || !account_name)) {
         const parts = bank_details.split(',').map(p => p.trim());
@@ -259,9 +259,9 @@ function createOrganizerRouter() {
 
       const now = new Date().toISOString();
       await query(`
-        INSERT INTO withdrawals (user_id, amount, bank_name, account_number, account_name, status, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)
-      `, [userId, amountNumber, bank_name, account_number, account_name, now, now]);
+        INSERT INTO withdrawals (user_id, amount, bank_name, bank_code, account_number, account_name, status, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+      `, [userId, amountNumber, bank_name, bank_code || null, account_number, account_name, now, now]);
 
       return res.json({
         ok: true,
