@@ -103,6 +103,11 @@ function createEventsRouter() {
   // GET /event/:slug - event by slug
   router.get('/event/:slug', async (req, res) => {
     try {
+      // Redirect typo slug to correct slug
+      if (req.params.slug === 'chromeseeions') {
+        return res.redirect(301, '/event/chrome-sessions');
+      }
+      
       const event = await getEventBySlug(req.params.slug);
 
       if (!event) {
